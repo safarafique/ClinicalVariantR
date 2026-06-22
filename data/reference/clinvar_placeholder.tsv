@@ -1,0 +1,5 @@
+chrom	pos	ref	alt	clinical_significance	review_status
+chr22	23631806	A	G	Pathogenic	criteria provided
+chr22	23632600	C	T	Uncertain significance	no assertion criteria provided
+chr9	133738352	G	A	Likely pathogenic	criteria provided
+TEST	1	A	G	Pathogenic	criteria provided
