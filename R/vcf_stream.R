@@ -3,6 +3,11 @@ open_vcf_connection <- function(path) {
   if (grepl("\\.gz$", path, ignore.case = TRUE)) gzfile(path, "r") else file(path, "r")
 }
 
+#' GATK and many callers use FILTER="." for passing variants; VCF spec also allows PASS.
+vcf_filter_is_pass <- function(filter) {
+  is.na(filter) || filter %in% c("PASS", ".")
+}
+
 extract_info_field <- function(info_string, key) {
   if (is.na(info_string) || info_string == ".") {
     return(if (key %in% c("AF", "REVEL")) NA_real_ else NA_character_)
@@ -40,43 +45,37 @@ extract_gene_from_info <- function(info_string) {
   if (length(parts) >= 4) parts[4] else NA_character_
 }
 
-#' Parse one VCF data line into a variant row.
+#' Parse one VCF data line into a variant row (CSQ or ANN unified parser).
 parse_vcf_line <- function(line, header_cols) {
   fields <- strsplit(line, "\t", fixed = TRUE)[[1]]
-  if (length(fields) < 5) return(NULL)
+  if (length(fields) < 8) return(NULL)
 
-  col <- function(name, fallback) {
-    idx <- match(name, header_cols)
-    if (is.na(idx) || idx > length(fields)) fallback else fields[idx]
-  }
-
-  alt_raw <- col("ALT", ".")
-  alt <- strsplit(alt_raw, ",")[[1]][1]
-  info <- col("INFO", ".")
   chrom <- fields[1]
-  pos <- suppressWarnings(as.integer(fields[2]))
+  pos <- fields[2]
   ref <- fields[4]
+  alt_raw <- fields[5]
+  alt <- strsplit(alt_raw, ",")[[1]][1]
+  qual <- suppressWarnings(as.numeric(fields[6]))
+  filter <- if (length(fields) >= 7) fields[7] else "."
+  info <- if (length(fields) >= 8) fields[8] else "."
 
-  consequence <- extract_info_field(info, "CSQ")
-  if (!is.na(consequence) && grepl("\\|", consequence, fixed = TRUE)) {
-    consequence <- extract_vep_consequence(consequence)
+  row <- parse_variant_from_vcf_fields(chrom, pos, ref, alt, qual, filter, info)
+
+  if (length(fields) >= 9L && !is.null(header_cols) && length(header_cols) >= 9L) {
+    format_str <- fields[9]
+    sample_names <- header_cols[10:length(header_cols)]
+    sample_fields <- if (length(fields) >= 10L) fields[10:length(fields)] else character()
+    if (length(sample_names) > 0L && nzchar(format_str) && format_str != ".") {
+      gts <- parse_vcf_genotypes(format_str, sample_fields, sample_names)
+      row$sample_genotypes <- serialize_sample_genotypes(gts)
+    } else {
+      row$sample_genotypes <- "{}"
+    }
+  } else {
+    row$sample_genotypes <- "{}"
   }
 
-  data.frame(
-    variant_id = paste(chrom, pos, ref, alt, sep = ":"),
-    chrom = chrom,
-    pos = pos,
-    ref = ref,
-    alt = alt,
-    gene = extract_gene_from_info(info),
-    consequence = consequence,
-    AF = extract_info_field(info, "AF"),
-    REVEL = extract_info_field(info, "REVEL"),
-    ClinVar = NA_character_,
-    qual = suppressWarnings(as.numeric(col("QUAL", "."))),
-    filter = col("FILTER", "."),
-    stringsAsFactors = FALSE
-  )
+  row
 }
 
 #' Count all variant rows in a VCF (streaming, no memory load).
@@ -101,7 +100,7 @@ count_vcf_variants <- function(vcf_path, pass_only = FALSE, min_qual = 0) {
     if (pass_only || min_qual > 0) {
       row <- parse_vcf_line(line, header_cols)
       if (is.null(row)) next
-      if (pass_only && row$filter != "PASS") next
+      if (pass_only && !vcf_filter_is_pass(row$filter)) next
       if (min_qual > 0 && (is.na(row$qual) || row$qual < min_qual)) next
       pass_n <- pass_n + 1L
     }
@@ -166,7 +165,7 @@ stream_vcf_chunks <- function(
       skipped_total <- skipped_total + 1L
       next
     }
-    if (pass_only && row$filter != "PASS") {
+    if (pass_only && !vcf_filter_is_pass(row$filter)) {
       skipped_total <- skipped_total + 1L
       next
     }
@@ -216,15 +215,14 @@ bcftools_stream_chunks <- function(
   }
 
   query_fmt <- paste(
-    "%CHROM\\t%POS\\t%REF\\t%ALT\\t%QUAL\\t%FILTER\\t",
-    "%INFO/AF\\t%INFO/REVEL\\t%INFO/CSQ\\n",
+    "%CHROM\\t%POS\\t%REF\\t%ALT\\t%QUAL\\t%FILTER\\t%INFO\\n",
     sep = ""
   )
 
   bcftools_cmd <- Sys.which("bcftools")
   if (pass_only || min_qual > 0) {
     view_args <- c("view")
-    if (pass_only) view_args <- c(view_args, "-f", "PASS")
+    if (pass_only) view_args <- c(view_args, "-i", shQuote('FILTER="PASS" || FILTER="."'))
     if (min_qual > 0) view_args <- c(view_args, "-i", sprintf("QUAL>=%s", min_qual))
     view_args <- c(view_args, shQuote(vcf_path))
     query_args <- c("query", "-f", shQuote(query_fmt))
@@ -267,23 +265,16 @@ bcftools_stream_chunks <- function(
     if (kept_total >= max_variants) next
 
     parts <- strsplit(line, "\t")[[1]]
-    if (length(parts) < 9) next
+    if (length(parts) < 7) next
 
-    alt <- strsplit(parts[4], ",")[[1]][1]
-    csq <- if (parts[9] == ".") NA_character_ else extract_vep_consequence(parts[9])
-
-    row <- data.frame(
-      variant_id = paste(parts[1], parts[2], parts[3], alt, sep = ":"),
+    row <- parse_variant_from_vcf_fields(
       chrom = parts[1],
-      pos = as.integer(parts[2]),
+      pos = parts[2],
       ref = parts[3],
-      alt = alt,
-      gene = if (parts[9] == ".") NA_character_ else extract_gene_from_info(paste0("CSQ=", parts[9])),
-      consequence = csq,
-      AF = suppressWarnings(as.numeric(parts[7])),
-      REVEL = suppressWarnings(as.numeric(parts[8])),
-      ClinVar = NA_character_,
-      stringsAsFactors = FALSE
+      alt = strsplit(parts[4], ",")[[1]][1],
+      qual = suppressWarnings(as.numeric(parts[5])),
+      filter = parts[6],
+      info = if (length(parts) >= 7) parts[7] else "."
     )
 
     batch[[length(batch) + 1L]] <- row
@@ -310,10 +301,13 @@ analyze_complete_vcf <- function(
     use_bcftools = TRUE,
     refs = NULL,
     manual_inputs = list(),
+    manual_by_variant = list(),
     clinical_context = NULL,
     pedigree_context = NULL,
     session_id = NA_character_,
-    filter_pathogenic_only = FALSE,
+    profile_id = DEFAULT_PROFILE_ID,
+    write_audit = TRUE,
+    gene_filter = character(),
     progress_fn = NULL) {
 
   mode <- match.arg(mode)
@@ -322,32 +316,51 @@ analyze_complete_vcf <- function(
   }
   dir.create(dirname(output_csv), recursive = TRUE, showWarnings = FALSE)
 
+  run_metadata <- build_run_metadata(
+    vcf_path = vcf_path,
+    profile_id = profile_id,
+    session_id = session_id,
+    mode = mode
+  )
+  metadata_path <- sub("\\.csv$", ".metadata.json", output_csv)
+  write_run_metadata_json(run_metadata, metadata_path)
+
   first_write <- TRUE
   preview_rows <- list()
   preview_limit <- 1000L
   preview_count <- 0L
   classification_counts <- list()
+  rows_classified <- 0L
+  rows_gene_skipped <- 0L
+  gene_filter <- parse_gene_filter(gene_filter)
 
   process_chunk <- function(chunk_df, chunk_id) {
-    if (!is.null(refs)) {
-      chunk_df <- annotate_variants(chunk_df, refs)
+    if (length(gene_filter) > 0L) {
+      n_before <- nrow(chunk_df)
+      chunk_df <- filter_variants_by_genes(chunk_df, gene_filter)
+      rows_gene_skipped <<- rows_gene_skipped + (n_before - nrow(chunk_df))
+      if (nrow(chunk_df) == 0L) return(invisible(NULL))
     }
 
-    result <- run_pipeline(
+    if (!is.null(refs)) {
+      chunk_df <- dedupe_variants_by_key(annotate_variants(chunk_df, refs))
+    }
+
+    report <- run_acmg_pro_chunk(
       variants_df = chunk_df,
       mode = mode,
       manual_inputs = manual_inputs,
+      manual_by_variant = manual_by_variant,
       clinical_context = clinical_context,
       pedigree_context = pedigree_context,
-      session_id = session_id
+      refs = NULL,
+      session_id = session_id,
+      profile_id = profile_id,
+      run_metadata = run_metadata,
+      write_audit = write_audit
     )
-
-    report <- result$report
-    if (filter_pathogenic_only && nrow(report) > 0) {
-      report <- report[report$classification %in% c("Pathogenic", "Likely Pathogenic"), , drop = FALSE]
-    }
-
     if (nrow(report) > 0) {
+      rows_classified <<- rows_classified + nrow(report)
       for (cl in unique(report$classification)) {
         classification_counts[[cl]] <<- (classification_counts[[cl]] %||% 0L) + sum(report$classification == cl)
       }
@@ -357,9 +370,10 @@ analyze_complete_vcf <- function(
       )
       first_write <<- FALSE
 
-      if (preview_count < preview_limit) {
-        n_take <- min(nrow(report), preview_limit - preview_count)
-        preview_rows[[length(preview_rows) + 1L]] <<- report[seq_len(n_take), , drop = FALSE]
+      display_report <- report
+      if (nrow(display_report) > 0 && preview_count < preview_limit) {
+        n_take <- min(nrow(display_report), preview_limit - preview_count)
+        preview_rows[[length(preview_rows) + 1L]] <<- display_report[seq_len(n_take), , drop = FALSE]
         preview_count <<- preview_count + n_take
       }
     }
@@ -404,7 +418,11 @@ analyze_complete_vcf <- function(
     }
   )
 
-  engine <- if (isTRUE(use_bcftools) && bcftools_available()) "bcftools+stream" else "R-stream"
+  engine <- if (isTRUE(use_bcftools) && bcftools_available()) {
+    paste0("bcftools+stream+", ACMG_PRO_ENGINE)
+  } else {
+    paste0("R-stream+", ACMG_PRO_ENGINE)
+  }
   if (!is.null(attr(stats, "fallback"))) engine <- "R-stream (bcftools fallback)"
 
   preview_df <- if (length(preview_rows) > 0) {
@@ -417,11 +435,17 @@ analyze_complete_vcf <- function(
 
   list(
     output_csv = output_csv,
+    metadata_path = metadata_path,
+    run_metadata = run_metadata,
     preview = preview_df,
     stats = stats,
     classification_counts = classification_counts,
     engine = engine,
     rows_analyzed = stats$rows_analyzed,
-    rows_skipped = stats$rows_skipped
+    rows_skipped = stats$rows_skipped,
+    rows_classified = rows_classified,
+    rows_displayed = nrow(preview_df),
+    rows_gene_skipped = rows_gene_skipped,
+    gene_filter = gene_filter
   )
 }

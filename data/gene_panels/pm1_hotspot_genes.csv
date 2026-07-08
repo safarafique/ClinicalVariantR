@@ -1,0 +1,11 @@
+gene,domain_note,source
+MECP2,methyl_CpG_binding_domain,Rett_syndrome
+TP53,DNA_binding_domain,hereditary_cancer
+BRCA1,RING_BRCT_domains,hereditary_cancer
+BRCA2,DNA_repair_domain,hereditary_cancer
+RUNX1,RHD_domain,hematologic
+GATA2,zinc_finger,hematologic
+SCN8A,voltage_gated_channel,neurological
+TCF4,bHLH_domain,neurodevelopmental
+NF1,RasGAP_domain,ACMG_common
+PTEN,phosphatase_domain,ACMG_common

@@ -1,0 +1,3 @@
+username,password_hash
+admin,PLAIN:changeme
+curator,PLAIN:curator123

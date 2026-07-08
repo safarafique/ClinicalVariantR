@@ -29,11 +29,28 @@ build_audit_entry <- function(variant_id, pipeline_mode, classification, criteri
   )
 }
 
+build_audit_entries_from_report <- function(report, session_id = NA_character_) {
+  if (is.null(report) || nrow(report) == 0) return(NULL)
+  do.call(rbind, lapply(seq_len(nrow(report)), function(i) {
+    build_audit_entry(
+      variant_id = report$variant_id[i],
+      pipeline_mode = report$pipeline_mode[i],
+      classification = report$classification[i],
+      criteria_met = report$criteria_met[i],
+      timestamp = report$classified_at[i],
+      session_id = session_id,
+      details = report$evidence_summary[i] %||% ""
+    )
+  }))
+}
+
+#' Append audit rows without re-reading the full log file (O(1) per batch).
 append_audit_log <- function(entries, path = AUDIT_LOG_PATH) {
   if (is.null(entries) || nrow(entries) == 0) return(invisible(path))
   ensure_audit_log(path)
-  existing <- tryCatch(read.csv(path, stringsAsFactors = FALSE), error = function(e) NULL)
-  combined <- if (is.null(existing) || nrow(existing) == 0) entries else rbind(existing, entries)
-  write.csv(combined, path, row.names = FALSE)
+  utils::write.table(
+    entries, file = path, sep = ",",
+    row.names = FALSE, col.names = FALSE, append = TRUE, quote = TRUE
+  )
   invisible(path)
 }

@@ -14,6 +14,16 @@ echo "bcftools version:"
 bcftools --version | head -1
 
 echo ""
+echo "=== R CLI packages (data.table, readr, jsonlite) ==="
+if command -v Rscript >/dev/null 2>&1; then
+  Rscript scripts/install_r_cli_deps.R
+else
+  echo "Rscript not found. Install R first:"
+  echo "  sudo apt-get install -y r-base-core"
+  echo "  Rscript scripts/install_r_cli_deps.R"
+fi
+
+echo ""
 echo "Done. Launch R app from this machine or WSL:"
 echo "  R -e \"shiny::runApp('$(pwd)')\""
 echo ""

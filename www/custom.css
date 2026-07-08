@@ -7,6 +7,22 @@
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12);
 }
 
+.run-action-panel {
+  border-radius: 8px;
+  padding: 10px 0;
+}
+
+.run-action-ready {
+  background-color: #f8fff9;
+  border: 2px solid #28a745;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.run-action-blocked {
+  padding: 4px 0;
+}
+
 .readiness-badge {
   border-radius: 8px;
   padding: 12px 14px;
@@ -27,6 +43,11 @@
 .readiness-neutral {
   background-color: #e9ecef;
   border-color: #adb5bd;
+}
+
+.classification-summary-table tbody tr:hover {
+  outline: 2px solid #0d6efd;
+  outline-offset: -2px;
 }
 
 .readiness-dot {

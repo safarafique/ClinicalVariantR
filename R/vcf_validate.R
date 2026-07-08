@@ -2,13 +2,14 @@
 vcf_app_requirements <- function(mode = c("full", "rapid")) {
   mode <- match.arg(mode)
   list(
-    required_columns = c("#CHROM", "POS", "REF", "ALT"),
-    standard_columns = c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO"),
+    required_columns = c("CHROM", "POS", "REF", "ALT"),
+    standard_columns = c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO"),
   info_fields = data.frame(
-      field = c("CSQ", "GENE", "AF", "REVEL"),
-      tier = c("required", "recommended", "recommended", "recommended"),
+      field = c("CSQ", "ANN", "GENE", "AF", "REVEL"),
+      tier = c("required", "required", "recommended", "recommended", "recommended"),
       used_for = c(
-        "Consequence (PVS1, PM1, BP1, BP7)",
+        "VEP consequence (PVS1, PM4, BP1, BP7, PP3)",
+        "SnpEff consequence (PVS1, PM4, BP1, BP7, PP3)",
         "Gene symbol annotation",
         "Population allele frequency (BA1, BS1, PM2); gnomAD join if missing",
         "Computational pathogenicity (PP3, BP4); reference join if missing"
@@ -24,6 +25,7 @@ vcf_app_requirements <- function(mode = c("full", "rapid")) {
     } else {
       c(
         "Group B uses automated rules only; clinical phenotype is not evaluated.",
+        "PS4 is applied automatically when a variant matches the case-control reference DB.",
         "ClinVar and gnomAD are joined from reference files when absent in VCF."
       )
     }
@@ -38,7 +40,9 @@ open_vcf_connection <- function(path) {
 }
 
 #' Read VCF meta-header: column names, declared INFO/FORMAT fields, sample count.
-read_vcf_header_meta <- function(vcf_path, max_data_rows = 100L) {
+#' When max_scan_variants is set, stops after that many variant rows (fast upload path).
+read_vcf_header_meta <- function(vcf_path, max_data_rows = 100L, max_scan_variants = NULL,
+                                 max_header_lines = 100000L) {
   if (!file.exists(vcf_path)) stop("VCF file not found.")
 
   if (grepl("\\.bcf$", vcf_path, ignore.case = TRUE)) {
@@ -54,10 +58,20 @@ read_vcf_header_meta <- function(vcf_path, max_data_rows = 100L) {
   sample_cols <- character()
   data_rows <- character()
   variant_count <- 0L
+  count_truncated <- FALSE
+  line_count <- 0L
 
   repeat {
     line <- readLines(con, n = 1L, warn = FALSE)
     if (length(line) == 0) break
+    line_count <- line_count + 1L
+
+    if (is.null(header_cols) && line_count > max_header_lines) {
+      stop(sprintf(
+        "Invalid VCF: no #CHROM header found within the first %s lines.",
+        format(max_header_lines, big.mark = ",")
+      ))
+    }
 
     if (grepl("^##INFO=<ID=([^,]+)", line, perl = TRUE)) {
       id <- sub("^##INFO=<ID=([^,]+).*$", "\\1", line)
@@ -75,6 +89,12 @@ read_vcf_header_meta <- function(vcf_path, max_data_rows = 100L) {
       if (length(data_rows) < max_data_rows) {
         data_rows[length(data_rows) + 1L] <- line
       }
+      if (!is.null(max_scan_variants) && is.finite(max_scan_variants) &&
+          variant_count >= max_scan_variants &&
+          length(data_rows) >= min(max_data_rows, variant_count)) {
+        count_truncated <- TRUE
+        break
+      }
     }
   }
 
@@ -85,8 +105,17 @@ read_vcf_header_meta <- function(vcf_path, max_data_rows = 100L) {
     sample_columns = sample_cols,
     is_multi_sample = length(sample_cols) > 1,
     variant_count = variant_count,
+    count_truncated = count_truncated,
     sample_rows = data_rows
   )
+}
+
+format_variant_count_label <- function(count, truncated = FALSE) {
+  count <- as.integer(count)
+  if (isTRUE(truncated)) {
+    return(sprintf("At least %s variant row(s) (fast scan)", format(count, big.mark = ",")))
+  }
+  sprintf("%s variant row(s)", format(count, big.mark = ","))
 }
 
 #' Scan sample variant rows for populated INFO keys.
@@ -113,6 +142,69 @@ scan_info_fields_in_rows <- function(sample_rows, header_cols, fields) {
     }, FUN.VALUE = logical(1)))
   }
   counts
+}
+
+#' Extract VEP CSQ subfield names from ##INFO CSQ header line.
+extract_csq_format_fields <- function(vcf_path) {
+  if (!file.exists(vcf_path)) return(character())
+  con <- open_vcf_connection(vcf_path)
+  on.exit(close(con), add = TRUE)
+  fields <- character()
+  repeat {
+    line <- readLines(con, n = 1L, warn = FALSE)
+    if (length(line) == 0L) break
+    if (grepl("^##INFO=<ID=CSQ", line)) {
+      m <- regexpr("Format: ([^\"]+)", line, perl = TRUE)
+      if (m[1L] > 0L) {
+        fmt <- sub('.*Format: ([^"]+).*', "\\1", line)
+        fields <- strsplit(fmt, "|", fixed = TRUE)[[1L]]
+      }
+      break
+    }
+    if (grepl("^#CHROM\t", line)) break
+  }
+  fields
+}
+
+detect_csq_insilico_in_rows <- function(sample_rows, header_cols) {
+  if (length(sample_rows) == 0) return(character())
+  info_idx <- match("INFO", header_cols)
+  if (is.na(info_idx)) return(character())
+  found <- character()
+  mat <- strsplit(sample_rows, "\t")
+  info_vals <- vapply(mat, function(x) x[info_idx], FUN.VALUE = character(1))
+  csq_vals <- vapply(info_vals, function(s) {
+    if (is.na(s) || !grepl("CSQ=", s, fixed = TRUE)) return("")
+    strsplit(sub(".*CSQ=", "", s), ";")[[1L]][1L]
+  }, FUN.VALUE = character(1))
+  csq_vals <- csq_vals[nzchar(csq_vals)]
+  if (length(csq_vals) == 0) return(character())
+  blob <- paste(csq_vals, collapse = " ")
+  if (grepl("deleterious|tolerated", blob, ignore.case = TRUE)) found <- c(found, "SIFT (CSQ)")
+  if (grepl("damaging|benign", blob, ignore.case = TRUE)) found <- c(found, "PolyPhen (CSQ)")
+  if (grepl("REVEL", blob)) found <- c(found, "REVEL (CSQ)")
+  if (grepl("CADD", blob)) found <- c(found, "CADD (CSQ)")
+  unique(found)
+}
+
+#' Detect SnpEff-style ANN in INFO (Consequence subfield).
+detect_ann_consequence <- function(sample_rows, header_cols) {
+  if (length(sample_rows) == 0) return(FALSE)
+  info_idx <- match("INFO", header_cols)
+  if (is.na(info_idx)) return(FALSE)
+
+  mat <- strsplit(sample_rows, "\t")
+  info_vals <- vapply(mat, function(x) x[info_idx], FUN.VALUE = character(1))
+
+  any(vapply(info_vals, function(s) {
+    if (is.na(s) || s == ".") return(FALSE)
+    if (grepl("ANN=", s, fixed = TRUE)) {
+      ann_val <- sub(".*ANN=", "", s)
+      ann_val <- strsplit(ann_val, ";")[[1]][1]
+      return(grepl("missense|synonymous|stop_gained|frameshift|splice", ann_val, ignore.case = TRUE))
+    }
+    FALSE
+  }, FUN.VALUE = logical(1)))
 }
 
 #' Detect VEP-style CSQ in INFO (Consequence subfield).
@@ -148,7 +240,11 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
   }
 
   meta <- tryCatch(
-    read_vcf_header_meta(vcf_path, max_data_rows = sample_rows),
+    read_vcf_header_meta(
+      vcf_path,
+      max_data_rows = sample_rows,
+      max_scan_variants = max(sample_rows, 1L) + 1L
+    ),
     error = function(e) {
       add_check("File", "Readable VCF", "FAIL", conditionMessage(e))
       return(NULL)
@@ -162,7 +258,9 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
         status = character(), detail = character(), stringsAsFactors = FALSE
       ))
     }
-    do.call(rbind, lapply(checks, as.data.frame, stringsAsFactors = FALSE))
+    df <- do.call(rbind, lapply(checks, as.data.frame, stringsAsFactors = FALSE))
+    rownames(df) <- NULL
+    df
   }
 
   if (is.null(meta)) {
@@ -179,12 +277,13 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
     ))
   }
 
-  add_check("File", "VCF format", "PASS", sprintf("Detected %s variant row(s).", meta$variant_count))
+  count_label <- format_variant_count_label(meta$variant_count, meta$count_truncated)
+  add_check("File", "VCF format", "PASS", count_label)
 
   if (meta$variant_count == 0) {
     add_check("Content", "Variant records", "FAIL", "VCF contains no variant data rows.")
   } else {
-    add_check("Content", "Variant records", "PASS", sprintf("At least %d variant(s) present.", meta$variant_count))
+    add_check("Content", "Variant records", "PASS", count_label)
   }
 
   missing_cols <- setdiff(reqs$required_columns, meta$columns)
@@ -217,6 +316,34 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
   info_fields <- reqs$info_fields$field
   populated <- scan_info_fields_in_rows(meta$sample_rows, meta$columns, info_fields)
   has_csq_consequence <- detect_csq_consequence(meta$sample_rows, meta$columns)
+  has_ann_consequence <- detect_ann_consequence(meta$sample_rows, meta$columns)
+  has_annovar <- any(c("Func.refGene", "Gene.refGene", "ExonicFunc.refGene") %in% meta$info_declared) ||
+    any(grepl("Func\\.refGene=", meta$sample_rows, ignore.case = TRUE))
+  has_consequence_annotation <- has_csq_consequence || has_ann_consequence || has_annovar
+  csq_format_fields <- extract_csq_format_fields(vcf_path)
+  csq_insilico <- detect_csq_insilico_in_rows(meta$sample_rows, meta$columns)
+  csq_plugins <- character()
+  if (length(csq_format_fields) > 0) {
+    if ("REVEL" %in% csq_format_fields) csq_plugins <- c(csq_plugins, "REVEL (CSQ)")
+    if ("CADD_PHRED" %in% csq_format_fields || "CADD" %in% csq_format_fields) {
+      csq_plugins <- c(csq_plugins, "CADD (CSQ)")
+    }
+    if (any(grepl("SpliceAI", csq_format_fields))) csq_plugins <- c(csq_plugins, "SpliceAI (CSQ)")
+    if (any(grepl("am_pathogenicity|AlphaMissense", csq_format_fields))) {
+      csq_plugins <- c(csq_plugins, "AlphaMissense (CSQ)")
+    }
+    if ("SIFT" %in% csq_format_fields) csq_plugins <- c(csq_plugins, "SIFT (CSQ)")
+    if ("PolyPhen" %in% csq_format_fields) csq_plugins <- c(csq_plugins, "PolyPhen (CSQ)")
+  }
+  csq_plugins <- unique(c(csq_plugins, csq_insilico))
+  ann_info <- detect_vcf_annotation(meta$info_declared, character())
+  if (has_csq_consequence) ann_info <- list(source = "CSQ", build_hint = "GRCh38", label = "VEP CSQ")
+  if (has_ann_consequence && !has_csq_consequence) {
+    ann_info <- list(source = "ANN", build_hint = "GRCh37/hg19", label = "SnpEff ANN")
+  }
+  if (has_annovar && !has_csq_consequence && !has_ann_consequence) {
+    ann_info <- list(source = "ANNOVAR", build_hint = "unknown", label = "ANNOVAR")
+  }
 
   for (i in seq_len(nrow(reqs$info_fields))) {
     fld <- reqs$info_fields$field[i]
@@ -228,12 +355,69 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
 
     if (fld == "CSQ") {
       if (has_csq_consequence) {
-        add_check("INFO", "CSQ / consequence", "PASS", sprintf("Consequence detected in sample rows. %s", used))
+        add_check("INFO", "VEP CSQ / consequence", "PASS", sprintf("Consequence detected in sample rows. %s", used))
+      } else if (has_ann_consequence) {
+        add_check("INFO", "VEP CSQ / consequence", "PASS",
+          sprintf("SnpEff ANN used instead (%s). %s", ann_info$label, used))
       } else if (declared) {
-        add_check("INFO", "CSQ / consequence", "WARN", "CSQ declared in header but not populated in sampled rows. PVS1/PM1/BP rules will be limited.")
+        add_check("INFO", "VEP CSQ / consequence", "WARN", "CSQ declared in header but not populated in sampled rows.")
       } else {
-        status <- if (tier == "required") "FAIL" else "WARN"
-        add_check("INFO", "CSQ / consequence", status, paste("No CSQ/consequence annotation.", used))
+        add_check("INFO", "VEP CSQ / consequence", "WARN", paste("No CSQ annotation.", used))
+      }
+      next
+    }
+
+    if (fld == "ANN") {
+      if (has_ann_consequence) {
+        add_check("INFO", "SnpEff ANN / consequence", "PASS", sprintf("Consequence detected in sample rows. %s", used))
+      } else if (has_csq_consequence) {
+        add_check("INFO", "SnpEff ANN / consequence", "PASS", "VEP CSQ present; ANN not required.")
+      } else if (declared) {
+        add_check("INFO", "SnpEff ANN / consequence", "WARN", "ANN declared in header but not populated in sampled rows.")
+      } else {
+        add_check("INFO", "SnpEff ANN / consequence", "WARN", paste("No ANN annotation.", used))
+      }
+      next
+    }
+
+    if (fld == "GENE") {
+      if (pop_n > 0) {
+        add_check("INFO", "GENE", "PASS", sprintf("Present in %d/%d sampled rows. %s", pop_n, sample_n, used))
+      } else if (has_ann_consequence || has_csq_consequence) {
+        add_check("INFO", "GENE", "PASS", sprintf("Gene symbol read from %s annotation field.", ann_info$label))
+      } else {
+        add_check("INFO", "GENE", "WARN", paste("No gene annotation found.", used))
+      }
+      next
+    }
+
+    if (fld == "AF") {
+      af_equiv <- c("AF", "1000Gp3_AF", "ESP6500_MAF", "SAMPLES_AF", "gnomAD_AF", "gnomAD_genome_ALL")
+      present_af <- intersect(af_equiv, meta$info_declared)
+      if (length(present_af) > 0) {
+        add_check("INFO", "AF / population frequency", "PASS",
+          sprintf("Population AF available via: %s. %s", paste(present_af, collapse = ", "), used))
+      } else {
+        add_check("INFO", "AF / population frequency", "WARN",
+          paste("No population AF field found. Reference database join will be attempted.", used))
+      }
+      next
+    }
+
+    if (fld == "REVEL") {
+      pred_equiv <- c("REVEL", "CADD_PHRED", "CADD", "SpliceAI", "MAX_SPLICEAI",
+                      "am_pathogenicity", "AlphaMissense", "ESP6500_PH")
+      present_pred <- intersect(pred_equiv, meta$info_declared)
+      present_pred <- unique(c(present_pred, csq_plugins))
+      if (length(present_pred) > 0) {
+        add_check("INFO", "REVEL / prediction scores", "PASS",
+          sprintf("Computational evidence available via: %s. %s", paste(present_pred, collapse = ", "), used))
+      } else {
+        add_check("INFO", "REVEL / prediction scores", "WARN",
+          paste(
+            "No REVEL/CADD/SpliceAI/AlphaMissense/SIFT/PolyPhen found.",
+            "Re-annotate with VEP plugins for stronger PP3/BP4, or analysis will use population/consequence rules only."
+          ))
       }
       next
     }
@@ -249,6 +433,18 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
       status <- if (tier == "required") "FAIL" else "WARN"
       add_check("INFO", fld, status, sprintf("Not found in VCF header.%s", ref_join_note))
     }
+  }
+
+  if (!has_consequence_annotation) {
+    add_check(
+      "INFO", "Consequence annotation", "FAIL",
+      "No VEP CSQ or SnpEff ANN consequence found. Upload a VEP- or SnpEff-annotated VCF."
+    )
+  } else {
+    add_check(
+      "INFO", "ACMGamp Pro engine", "PASS",
+      sprintf("%s detected — InterVar-style automated criteria enabled.", ann_info$label)
+    )
   }
 
   if (meta$is_multi_sample) {
@@ -271,9 +467,11 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
 
   missing_vcf_columns <- missing_cols
   missing_info_fields <- character()
-  if (!has_csq_consequence) missing_info_fields <- c(missing_info_fields, "CSQ (consequence)")
+  if (!has_consequence_annotation) {
+    missing_info_fields <- c(missing_info_fields, "CSQ or ANN (consequence)")
+  }
   for (fld in info_fields) {
-    if (fld == "CSQ") next
+    if (fld %in% c("CSQ", "ANN")) next
     tier <- reqs$info_fields$tier[reqs$info_fields$field == fld]
     pop_n <- populated[[fld]]
     declared <- fld %in% meta$info_declared
@@ -319,6 +517,7 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
     format_declared = meta$format_declared,
     sample_columns = meta$sample_columns,
     variant_count = meta$variant_count,
+    annotation = ann_info,
     summary = summary
   )
 }
@@ -408,8 +607,10 @@ validate_pedigree_csv <- function(path) {
 }
 
 #' Combined Group A readiness across VCF + clinical + pedigree.
-validate_group_a_inputs <- function(vcf_path, clinical_path, pedigree_path) {
-  vcf_val <- validate_vcf(vcf_path, mode = "full")
+validate_group_a_inputs <- function(vcf_path, clinical_path, pedigree_path, vcf_val = NULL) {
+  if (is.null(vcf_val)) {
+    vcf_val <- validate_vcf(vcf_path, mode = "full")
+  }
   clin_val <- validate_clinical_csv(clinical_path)
   ped_val <- validate_pedigree_csv(pedigree_path)
 

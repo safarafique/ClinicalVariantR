@@ -6,4 +6,8 @@
 .DS_Store
 Thumbs.db
 logs/*.csv
+logs/*.metadata.json
+logs/analysis_log.csv
+logs/secure_uploads/
+results/
 !logs/.gitkeep

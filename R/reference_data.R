@@ -18,6 +18,22 @@ load_reference_data <- function(paths = REFERENCE_PATHS) {
   refs
 }
 
+coalesce_dt_col <- function(dt, target, sources) {
+  existing <- intersect(sources, names(dt))
+  if (length(existing) == 0L) {
+    if (!target %in% names(dt)) dt[[target]] <- NA
+    return(dt)
+  }
+  if (!target %in% names(dt)) {
+    dt[[target]] <- dt[[existing[1]]]
+    existing <- existing[-1]
+  }
+  for (src in existing) {
+    dt[[target]] <- data.table::fifelse(is.na(dt[[target]]), dt[[src]], dt[[target]])
+  }
+  dt
+}
+
 #' Annotate variant table with reference placeholders via data.table joins.
 annotate_variants <- function(variants_dt, refs) {
   dt <- data.table::as.data.table(variants_dt)
@@ -27,35 +43,52 @@ annotate_variants <- function(variants_dt, refs) {
 
   dt <- merge(
     dt,
-    refs$gnomad[, .(variant_key, gnomad_af = AF, gnomad_popmax = popmax_AF)],
+    refs$gnomad[, .(variant_key, ref_gnomad_af = AF, ref_gnomad_popmax = popmax_AF)],
     by = "variant_key",
     all.x = TRUE
   )
   dt <- merge(
     dt,
-    refs$clinvar[, .(variant_key, clinvar_classification = clinical_significance,
-                     clinvar_review_status = review_status)],
+    refs$clinvar[, .(variant_key, ref_clinvar_classification = clinical_significance,
+                     ref_clinvar_review_status = review_status)],
     by = "variant_key",
     all.x = TRUE
   )
   dt <- merge(
     dt,
-    refs$revel[, .(variant_key, revel_score = REVEL)],
+    refs$revel[, .(variant_key, ref_revel_score = REVEL)],
     by = "variant_key",
     all.x = TRUE
   )
 
-  if ("AF" %in% names(dt)) {
-    dt[, gnomad_af := data.table::fifelse(is.na(gnomad_af), AF, gnomad_af)]
-  }
-  if ("REVEL" %in% names(dt)) {
-    dt[, revel_score := data.table::fifelse(is.na(revel_score), REVEL, revel_score)]
-  }
-  if ("ClinVar" %in% names(dt)) {
-    dt[, clinvar_classification := data.table::fifelse(
-      is.na(clinvar_classification), ClinVar, clinvar_classification
-    )]
+  dt <- coalesce_dt_col(dt, "gnomad_af", c("gnomad_af", "ref_gnomad_af", "population_af", "AF"))
+  dt <- coalesce_dt_col(dt, "popmax_af", c("popmax_af", "ref_gnomad_popmax"))
+  dt <- coalesce_dt_col(dt, "revel_score", c("revel_score", "ref_revel_score", "REVEL"))
+  dt <- coalesce_dt_col(
+    dt, "clinvar_classification",
+    c("clinvar_classification", "ref_clinvar_classification", "ClinVar")
+  )
+
+  drop_cols <- intersect(
+    c("ref_gnomad_af", "ref_revel_score",
+      "ref_clinvar_classification", "ref_clinvar_review_status"),
+    names(dt)
+  )
+  if (length(drop_cols) > 0) {
+    dt[, (drop_cols) := NULL]
   }
 
+  as.data.frame(dt)
+}
+
+dedupe_variants_by_key <- function(variants_df) {
+  if (is.null(variants_df) || nrow(variants_df) == 0L) return(variants_df)
+  dt <- data.table::as.data.table(variants_df)
+  if (!"variant_key" %in% names(dt)) {
+    dt[, variant_key := paste(chrom, pos, ref, alt, sep = ":")]
+  }
+  if (anyDuplicated(dt$variant_key) > 0L) {
+    dt <- dt[!duplicated(variant_key)]
+  }
   as.data.frame(dt)
 }

@@ -1,0 +1,10 @@
+# Curated variant-specific case-control / cohort data ONLY (no GWAS rows).
+# GWAS associations belong in gwas_supplementary_evidence.tsv (supplementary, not auto-PS4).
+# ps4_confirmed=TRUE = curator-verified case-control enrichment.
+# Otherwise case_af/control_af must meet enrichment ratio thresholds in ps4_case_control.R
+chrom	pos	ref	alt	gene	rsid	hgvs_p	case_af	control_af	disease	source	ps4_confirmed
+chr17	41223094	T	G	BRCA1	rs80357906	p.Cys61Gly	0.42	0.0001	hereditary breast ovarian cancer	ClinVar_case_control	TRUE
+chr13	32340341	G	A	BRCA2	rs80359567	p.Trp31Ter	0.35	0.00005	hereditary breast ovarian cancer	ClinVar_case_control	TRUE
+chr7	117559593	T	G	CFTR	rs113993960	p.Phe508del	0.48	0.002	cystic fibrosis	CFTR2_case_series	TRUE
+chr11	5227002	C	T	HBB	rs334	p.Glu6Val	0.35	0.001	sickle cell disease	HbVar_cohort	TRUE
+chrX	154030906	T	C	MECP2	rs1273236261	p.Thr320Ala	0.18	0.000001	Rett syndrome	literature_cohort	TRUE

@@ -48,10 +48,10 @@ acmg_criteria_registry <- function() {
       "Synonymous with no predicted splice impact"
     ),
     implementation = c(
-      "automated", "not_implemented", "manual", "manual", "manual",
-      "partial", "automated", "not_implemented", "not_implemented", "not_implemented", "manual",
+      "automated", "automated", "manual", "manual", "automated",
+      "automated", "automated", "not_implemented", "automated", "automated", "manual",
       "manual", "manual", "automated", "manual", "automated",
-      "automated", "automated", "not_implemented", "not_implemented", "not_implemented",
+      "automated", "automated", "automated", "not_implemented", "not_implemented",
       "partial", "not_implemented", "not_implemented", "automated", "not_implemented", "automated", "automated"
     ),
     vcf_inputs = c(
@@ -80,13 +80,7 @@ new_criteria_frame <- function(criterion_codes) {
   )
 }
 
-FULL_CRITERIA <- c(
-  "PVS1", "PS1", "PS2", "PS3", "PS4",
-  "PM1", "PM2", "PM3", "PM4", "PM5", "PM6",
-  "PP1", "PP2", "PP3", "PP4", "PP5",
-  "BA1", "BS1", "BS2", "BS3", "BS4",
-  "BP1", "BP2", "BP3", "BP4", "BP5", "BP6", "BP7"
-)
+FULL_CRITERIA <- FULL_ACMG_CRITERIA
 
 AUTOMATED_CRITERIA <- c(
   "PVS1", "PS1", "PM1", "PM2", "PM3", "PM4", "PM5",

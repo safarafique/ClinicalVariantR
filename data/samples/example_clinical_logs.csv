@@ -1,3 +1,3 @@
-sample_id,phenotype,cml_phase,tki_response
-CML-001,CML chronic phase,chronic,major molecular response
-CML-002,CML accelerated phase,accelerated,hematologic response
+sample_id,phenotype,cml_phase,tki_response,hpo_terms,hpo_ids
+CML-001,CML chronic phase,chronic,major molecular response,Chronic myeloid leukemia,HP:0005506
+CML-002,CML accelerated phase,accelerated,hematologic response,Accelerated phase chronic myeloid leukemia,HP:0005516

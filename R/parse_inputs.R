@@ -66,18 +66,18 @@ parse_vcf_fallback <- function(vcf_path, max_rows = Inf) {
     return(data.frame(
       variant_id = character(), chrom = character(), pos = integer(),
       ref = character(), alt = character(), gene = character(),
-      consequence = character(), AF = numeric(), REVEL = numeric(),
-      ClinVar = character(), stringsAsFactors = FALSE
+      consequence = character(), stringsAsFactors = FALSE
     ))
   }
 
   df <- do.call(rbind, batch)
   rownames(df) <- NULL
-  df[, c("variant_id", "chrom", "pos", "ref", "alt", "gene", "consequence", "AF", "REVEL", "ClinVar")]
+  if (!"sample_genotypes" %in% names(df)) df$sample_genotypes <- "{}"
+  df
 }
 
 #' Build a lightweight VCF preview (header + first N variant rows).
-preview_vcf <- function(vcf_path, max_rows = 50L) {
+preview_vcf <- function(vcf_path, max_rows = 50L, max_header_lines = 100000L) {
   if (!file.exists(vcf_path)) {
     stop("VCF file not found.")
   }
@@ -89,10 +89,19 @@ preview_vcf <- function(vcf_path, max_rows = 50L) {
   preview_lines <- character()
   total_variants <- 0L
   has_more <- FALSE
+  line_count <- 0L
 
   repeat {
     line <- readLines(con, n = 1L, warn = FALSE)
     if (length(line) == 0) break
+    line_count <- line_count + 1L
+
+    if (is.null(header_cols) && line_count > max_header_lines) {
+      stop(sprintf(
+        "Invalid VCF: no #CHROM header found within the first %s lines.",
+        format(max_header_lines, big.mark = ",")
+      ))
+    }
 
     if (grepl("^#CHROM\t", line)) {
       header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
@@ -105,6 +114,7 @@ preview_vcf <- function(vcf_path, max_rows = 50L) {
       preview_lines[length(preview_lines) + 1L] <- line
     } else {
       has_more <- TRUE
+      break
     }
   }
 
@@ -143,17 +153,33 @@ preview_vcf <- function(vcf_path, max_rows = 50L) {
 
   info_idx <- match("INFO", header_cols)
   if (!is.na(info_idx) && nrow(preview_df) > 0) {
-    info_vals <- vapply(strsplit(preview_lines, "\t"), function(x) x[info_idx], FUN.VALUE = character(1))
-    preview_df$gene <- vapply(info_vals, extract_info_field, FUN.VALUE = character(1), key = "GENE")
-    preview_df$consequence <- vapply(info_vals, function(s) {
-      csq <- extract_info_field(s, "CSQ")
-      if (!is.na(csq) && grepl("|", csq, fixed = TRUE)) extract_vep_consequence(csq) else csq
-    }, FUN.VALUE = character(1))
+    mat <- strsplit(preview_lines, "\t")
+    parsed <- lapply(mat, function(x) {
+      if (length(x) < info_idx) return(NULL)
+      parse_variant_from_vcf_fields(
+        chrom = x[1], pos = x[2], ref = x[4],
+        alt = strsplit(x[5], ",")[[1]][1],
+        qual = suppressWarnings(as.numeric(x[6])),
+        filter = if (length(x) >= 7) x[7] else ".",
+        info = x[info_idx]
+      )
+    })
+    parsed <- Filter(Negate(is.null), parsed)
+    if (length(parsed) > 0) {
+      p_df <- do.call(rbind, parsed)
+      rownames(p_df) <- NULL
+      preview_df$gene <- p_df$gene
+      preview_df$all_genes <- p_df$all_genes
+      preview_df$consequence <- p_df$consequence
+      preview_df$annotation_source <- p_df$annotation_source
+      preview_df$population_af <- p_df$population_af
+    }
   }
 
   list(
     preview = preview_df[, intersect(
-      c("chrom", "pos", "ref", "alt", "gene", "consequence", "qual", "filter"),
+      c("chrom", "pos", "ref", "alt", "gene", "all_genes", "consequence", "annotation_source",
+        "population_af", "qual", "filter"),
       names(preview_df)
     ), drop = FALSE],
     total_variants = total_variants,
@@ -171,6 +197,10 @@ parse_clinical_logs <- function(path) {
   missing <- setdiff(required, names(df))
   if (length(missing) > 0) {
     stop("Clinical logs missing columns: ", paste(missing, collapse = ", "))
+  }
+  optional <- c("hpo_terms", "hpo_ids", "disease", "clinical_summary", "omim_id")
+  for (col in optional) {
+    if (!col %in% names(df)) df[[col]] <- NA_character_
   }
   as.data.frame(df)
 }
