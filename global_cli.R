@@ -96,6 +96,7 @@ VARIANT_DETAIL_COLUMNS <- c(
 )
 
 cli_module_files <- c(
+  "R/aaa_constants.R",
   "R/classify_variant.R",
   "R/audit.R",
   "R/reference_data.R",

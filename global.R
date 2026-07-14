@@ -86,6 +86,7 @@ VARIANT_DETAIL_COLUMNS <- c(
 
 # Source application modules (explicit order for dependencies)
 module_files <- c(
+  "R/aaa_constants.R",
   "R/classify_variant.R",
   "R/audit.R",
   "R/reference_data.R",
