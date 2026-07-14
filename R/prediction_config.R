@@ -7,12 +7,17 @@ PREDICTION_SETTINGS <- list(
   require_clinvar_no_conflict_for_pp5_bp6 = TRUE,
   min_clinvar_stars_pp5_bp6 = 0L,
   use_popmax_for_pm2_ba1 = TRUE,
-  insilico_min_tools = 2L,
-  insilico_revel_solo_pathogenic = 0.932,
+  insilico_min_tools = 1L,
+  insilico_revel_solo_pathogenic = 0.75,
   insilico_revel_solo_benign = 0.15,
+  apply_single_tool_pp3 = TRUE,
+  elevate_moderate_pathogenic_vus = TRUE,
+  elevate_pvs1_with_supporting = TRUE,
+  elevate_pvs1_lof_alone = TRUE,
   report_disclaimer = paste(
     "ACMGamp prediction output is decision support.",
     "Classifications require expert review before clinical use.",
+    "Prediction sensitivity rules may upgrade strong VUS to Likely Pathogenic.",
     "See prediction_limitations column per variant."
   )
 )
@@ -78,6 +83,58 @@ build_prediction_limitations <- function(scores, row = NULL) {
     return(if (length(notes) == 0L) "None identified." else paste(notes, collapse = " "))
   }
   if (length(notes) == 0L) "None identified." else paste(notes, collapse = " ")
+}
+
+#' Re-check VUS after automated scoring; upgrade when pathogenic evidence is strong and unconflicted.
+apply_prediction_classification_refinement <- function(scores, evidence) {
+  if (!is_prediction_mode()) return(scores)
+  cls <- scalar_chr(scores$classification %||% "", default = "VUS")
+  if (!identical(cls, "VUS")) return(scores)
+
+  benign_n <- evidence$BS + evidence$BP + if (isTRUE(evidence$BA)) 1L else 0L
+  path_n <- evidence$PVS + evidence$PS + evidence$PM + evidence$PP
+  if (benign_n > 0L || isTRUE(scores$BA1)) return(scores)
+
+  upgraded <- FALSE
+  note <- ""
+
+  if (evidence$PVS >= 1L && evidence$PM >= 1L) {
+    upgraded <- TRUE
+    cls <- "Likely Pathogenic"
+    note <- "ACMG LP rule: PVS1 plus moderate pathogenic evidence."
+  } else if (evidence$PS >= 1L && evidence$PM >= 1L) {
+    upgraded <- TRUE
+    cls <- "Likely Pathogenic"
+    note <- "ACMG LP rule: strong plus moderate pathogenic evidence."
+  } else if (evidence$PM >= 3L) {
+    upgraded <- TRUE
+    cls <- "Likely Pathogenic"
+    note <- "ACMG LP rule: three or more moderate pathogenic criteria."
+  } else if (evidence$PM >= 2L && evidence$PP >= 2L) {
+    upgraded <- TRUE
+    cls <- "Likely Pathogenic"
+    note <- "ACMG LP rule: two moderate plus two supporting pathogenic criteria."
+  } else if (isTRUE(PREDICTION_SETTINGS$elevate_pvs1_with_supporting) &&
+             evidence$PVS >= 1L && evidence$PP >= 1L) {
+    upgraded <- TRUE
+    cls <- "Likely Pathogenic"
+    note <- "Prediction sensitivity: PVS1 plus supporting pathogenic evidence."
+  } else if (isTRUE(PREDICTION_SETTINGS$elevate_pvs1_lof_alone) && evidence$PVS >= 1L) {
+    upgraded <- TRUE
+    cls <- "Likely Pathogenic"
+    note <- "Prediction sensitivity: PVS1 LoF in curated panel gene."
+  } else if (isTRUE(PREDICTION_SETTINGS$elevate_moderate_pathogenic_vus) && path_n >= 2L) {
+    upgraded <- TRUE
+    cls <- "Likely Pathogenic"
+    note <- "Prediction sensitivity: two or more pathogenic criteria without benign conflict."
+  }
+
+  if (!upgraded) return(scores)
+
+  scores$classification <- cls
+  lim <- scalar_chr(scores$prediction_limitations %||% "", default = "")
+  scores$prediction_limitations <- paste(trimws(c(lim, note)), collapse = " ")
+  scores
 }
 
 compute_evidence_strength <- function(scores) {

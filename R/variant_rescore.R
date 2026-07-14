@@ -2,11 +2,6 @@
 
 parse_single_variant_from_vcf <- function(vcf_path, chrom, pos, ref, alt, pass_only = FALSE) {
   if (!file.exists(vcf_path)) stop("VCF not found: ", vcf_path)
-  chrom <- as.character(chrom)
-  pos <- as.character(pos)
-  ref <- as.character(ref)
-  alt <- as.character(alt)
-  alt1 <- strsplit(alt, ",", fixed = TRUE)[[1L]][1L]
 
   con <- if (grepl("\\.gz$", vcf_path, ignore.case = TRUE)) gzfile(vcf_path, "rt") else file(vcf_path, "rt")
   on.exit(close(con), add = TRUE)
@@ -23,10 +18,11 @@ parse_single_variant_from_vcf <- function(vcf_path, chrom, pos, ref, alt, pass_o
     parts <- strsplit(line, "\t", fixed = TRUE)[[1L]]
     if (length(parts) < 8L) next
     if (isTRUE(pass_only) && !(parts[[7L]] %in% c("PASS", "."))) next
-    line_alt <- strsplit(parts[[5L]], ",", fixed = TRUE)[[1L]][1L]
-    if (parts[[1L]] == chrom && parts[[2L]] == pos && parts[[4L]] == ref && line_alt == alt1) {
-      return(parse_vcf_line(line, header_cols))
-    }
+
+    parsed <- parse_vcf_line(line, header_cols)
+    if (is.null(parsed)) next
+    hit <- match_variant_rows(parsed, chrom, pos, ref, alt)
+    if (nrow(hit) >= 1L) return(hit[1L, , drop = FALSE])
   }
   NULL
 }
@@ -74,7 +70,9 @@ patch_report_row <- function(report_df, new_row) {
   if (is.null(report_df) || nrow(report_df) == 0L) return(new_row)
   key <- new_row$variant_id[1]
   if (!"variant_id" %in% names(report_df)) {
-    report_df$variant_id <- paste(report_df$chrom, report_df$pos, report_df$ref, report_df$alt, sep = ":")
+    report_df$variant_id <- variant_key_chr_pos_ref_alt(
+      report_df$chrom, report_df$pos, report_df$ref, report_df$alt
+    )
   }
   idx <- which(report_df$variant_id == key)
   for (col in names(new_row)) {

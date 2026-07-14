@@ -24,15 +24,6 @@ collapse_acmg_tier <- function(x) {
   out
 }
 
-variant_key_chr_pos_ref_alt <- function(chrom, pos, ref, alt) {
-  chrom <- as.character(chrom)
-  pos <- as.character(pos)
-  ref <- as.character(ref)
-  alt <- as.character(alt)
-  alt <- vapply(strsplit(alt, ","), function(a) if (length(a) == 0L) "." else a[[1]], character(1))
-  paste(chrom, pos, ref, alt, sep = ":")
-}
-
 pick_column <- function(df, candidates) {
   hit <- intersect(candidates, names(df))
   if (length(hit) == 0L) return(NA_character_)

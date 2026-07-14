@@ -20,10 +20,6 @@ collapse_to_tier <- function(x) {
   out
 }
 
-variant_key_from_parts <- function(chrom, pos, ref, alt) {
-  paste(chrom, pos, ref, alt, sep = ":")
-}
-
 parse_testing_vcf <- function(vcf_path, pass_only = TRUE) {
   con <- if (grepl("\\.gz$", vcf_path, ignore.case = TRUE)) gzfile(vcf_path, "rt") else file(vcf_path, "rt")
   on.exit(close(con), add = TRUE)
@@ -39,14 +35,17 @@ parse_testing_vcf <- function(vcf_path, pass_only = TRUE) {
       filt <- parts[[7L]]
       if (!(filt %in% c("PASS", "."))) next
     }
-    row <- parse_variant_from_vcf_fields(
-      chrom = parts[[1L]], pos = parts[[2L]], ref = parts[[4L]],
-      alt = strsplit(parts[[5L]], ",")[[1L]][1L],
-      qual = suppressWarnings(as.numeric(parts[[6L]])),
-      filter = parts[[7L]],
-      info = parts[[8L]]
-    )
-    rows[[length(rows) + 1L]] <- row
+    alts <- split_vcf_alt_alleles(parts[[5L]])
+    for (alt in alts) {
+      row <- parse_variant_from_vcf_fields(
+        chrom = parts[[1L]], pos = parts[[2L]], ref = parts[[4L]],
+        alt = alt,
+        qual = suppressWarnings(as.numeric(parts[[6L]])),
+        filter = parts[[7L]],
+        info = parts[[8L]]
+      )
+      rows[[length(rows) + 1L]] <- row
+    }
   }
   if (length(rows) == 0L) return(data.frame())
   do.call(rbind, rows)

@@ -34,11 +34,6 @@ split_rsid_field <- function(x) {
   unique(parts)
 }
 
-variant_key_chr_pos_ref_alt <- function(chrom, pos, ref, alt) {
-  alt1 <- vapply(strsplit(as.character(alt), ","), function(a) if (length(a) == 0L) "." else a[[1L]], character(1L))
-  paste(as.character(chrom), as.character(pos), as.character(ref), alt1, sep = ":")
-}
-
 normalize_ps4_source <- function(x) {
   if (is.na(x) || !nzchar(x)) return("case_control")
   gsub("[^a-z0-9]+", "_", tolower(trimws(x)))
@@ -68,7 +63,10 @@ load_ps4_case_control_db <- function(path = PS4_CASE_CONTROL_DB_PATH) {
     return(empty)
   }
 
+  if ("chrom" %in% names(db)) db$chrom <- normalize_chrom(db$chrom)
   if (!"variant_key" %in% names(db) && all(c("chrom", "pos", "ref", "alt") %in% names(db))) {
+    db$variant_key <- variant_key_chr_pos_ref_alt(db$chrom, db$pos, db$ref, db$alt)
+  } else if ("variant_key" %in% names(db) && all(c("chrom", "pos", "ref", "alt") %in% names(db))) {
     db$variant_key <- variant_key_chr_pos_ref_alt(db$chrom, db$pos, db$ref, db$alt)
   }
   if (!"variant_key" %in% names(db)) db$variant_key <- NA_character_
@@ -122,7 +120,12 @@ load_gwas_supplementary_db <- function(path = GWAS_SUPPLEMENTARY_DB_PATH) {
     return(empty)
   }
 
+  if ("chrom" %in% names(db)) db$chrom <- normalize_chrom(db$chrom)
   if (!"variant_key" %in% names(db) && all(c("chrom", "pos") %in% names(db))) {
+    ref_col <- if ("ref" %in% names(db)) db$ref else "."
+    alt_col <- if ("alt" %in% names(db)) db$alt else "."
+    db$variant_key <- variant_key_chr_pos_ref_alt(db$chrom, db$pos, ref_col, alt_col)
+  } else if ("variant_key" %in% names(db) && all(c("chrom", "pos") %in% names(db))) {
     ref_col <- if ("ref" %in% names(db)) db$ref else "."
     alt_col <- if ("alt" %in% names(db)) db$alt else "."
     db$variant_key <- variant_key_chr_pos_ref_alt(db$chrom, db$pos, ref_col, alt_col)

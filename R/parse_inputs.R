@@ -1,40 +1,6 @@
 #' Parse uploaded VCF into a variant data.frame (small files / legacy).
 #' For complete large VCF analysis use analyze_complete_vcf() instead.
 parse_vcf_upload <- function(vcf_path, max_rows = Inf) {
-  if (max_rows < Inf && .va_available && file.exists(vcf_path)) {
-    tryCatch({
-      vcf <- VariantAnnotation::readVcf(vcf_path)
-      gr <- VariantAnnotation::rowRanges(vcf)
-      alt_alleles <- as.character(BiocGenerics::sapply(
-        VariantAnnotation::alt(vcf),
-        function(x) if (length(x) > 0) x[[1]] else "."
-      ))
-
-      info <- VariantAnnotation::info(vcf)
-      af <- if ("AF" %in% names(info)) info$AF else rep(NA_real_, length(gr))
-      revel <- if ("REVEL" %in% names(info)) info$REVEL else rep(NA_real_, length(gr))
-      gene <- if ("GENE" %in% names(info)) info$GENE else rep(NA_character_, length(gr))
-      consequence <- if ("CSQ" %in% names(info)) info$CSQ else rep(NA_character_, length(gr))
-
-      df <- data.frame(
-        variant_id = names(gr),
-        chrom = as.character(GenomicRanges::seqnames(gr)),
-        pos = as.integer(GenomicRanges::start(gr)),
-        ref = as.character(VariantAnnotation::ref(vcf)),
-        alt = alt_alleles,
-        gene = as.character(gene),
-        consequence = as.character(consequence),
-        AF = as.numeric(af),
-        REVEL = as.numeric(revel),
-        ClinVar = NA_character_,
-        stringsAsFactors = FALSE
-      )
-      return(df)
-    }, error = function(e) {
-      warning("VariantAnnotation parse failed: ", conditionMessage(e))
-    })
-  }
-
   parse_vcf_fallback(vcf_path, max_rows = max_rows)
 }
 
@@ -53,11 +19,20 @@ parse_vcf_fallback <- function(vcf_path, max_rows = Inf) {
       next
     }
     if (grepl("^#", line)) next
-    row <- parse_vcf_line(line, header_cols)
-    if (!is.null(row)) {
-      row$qual <- NULL
-      row$filter <- NULL
-      batch[[length(batch) + 1L]] <- row
+    rows_df <- parse_vcf_line(line, header_cols)
+    if (!is.null(rows_df)) {
+      if (is.data.frame(rows_df)) {
+        for (i in seq_len(nrow(rows_df))) {
+          row <- rows_df[i, , drop = FALSE]
+          row$qual <- NULL
+          row$filter <- NULL
+          batch[[length(batch) + 1L]] <- row
+        }
+      } else {
+        rows_df$qual <- NULL
+        rows_df$filter <- NULL
+        batch[[length(batch) + 1L]] <- rows_df
+      }
     }
     if (length(batch) >= max_rows) break
   }

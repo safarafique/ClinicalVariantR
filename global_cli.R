@@ -40,8 +40,8 @@ if (!requireNamespace("data.table", quietly = TRUE)) {
 }
 
 APP_TITLE <- "ACMGamp"
-APP_VERSION <- "2.6.0"
-ACMG_PRO_ENGINE <- "ACMGamp-Prediction-v2.6.0"
+APP_VERSION <- "2.7.0"
+ACMG_PRO_ENGINE <- "ACMGamp-Prediction-v2.7.0"
 ACMG_GUIDELINE_VERSION <- "ACMG/AMP 2015 + ClinGen refinements"
 
 CONFIG_PATHS <- list(

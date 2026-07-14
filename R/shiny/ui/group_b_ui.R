@@ -39,9 +39,9 @@ group_b_nav_panel <- function() {
               p(class = "text-muted small",
                 "Runs ACMGamp Pro automated criteria from VEP CSQ or SnpEff ANN fields."),
               p(class = "text-muted small",
-                tags$strong("Automated criteria (18):"),
-                " PVS1, PS1, PS4, PM1, PM2, PM4, PM5, PP2, PP3, PP5, BA1, BS1, BS2, BP1, BP3, BP4, BP6, BP7. ",
-                "Manual/clinical criteria (PS2, PS3, PP1, PP4, PM6, etc.) are Group A only.")
+                tags$strong("Prediction v2.7:"),
+                " sensitivity rules upgrade strong VUS to Likely Pathogenic when PVS1/PM/PP evidence supports it.",
+                " Use the classification summary table after run for Pathogenic / Likely Pathogenic counts.")
             )
           )
         ),

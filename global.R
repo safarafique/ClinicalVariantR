@@ -18,8 +18,8 @@ if (!.va_available) {
 }
 
 APP_TITLE <- "ACMGamp"
-APP_VERSION <- "2.6.0"
-ACMG_PRO_ENGINE <- "ACMGamp-Prediction-v2.6.0"
+APP_VERSION <- "2.7.0"
+ACMG_PRO_ENGINE <- "ACMGamp-Prediction-v2.7.0"
 ACMG_GUIDELINE_VERSION <- "ACMG/AMP 2015 + ClinGen refinements"
 
 # Maximum upload size for VCF and companion files (1 GiB)

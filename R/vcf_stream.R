@@ -45,7 +45,7 @@ extract_gene_from_info <- function(info_string) {
   if (length(parts) >= 4) parts[4] else NA_character_
 }
 
-#' Parse one VCF data line into a variant row (CSQ or ANN unified parser).
+#' Parse one VCF data line into variant row(s); multi-allelic records expand to one row per ALT.
 parse_vcf_line <- function(line, header_cols) {
   fields <- strsplit(line, "\t", fixed = TRUE)[[1]]
   if (length(fields) < 8) return(NULL)
@@ -54,28 +54,43 @@ parse_vcf_line <- function(line, header_cols) {
   pos <- fields[2]
   ref <- fields[4]
   alt_raw <- fields[5]
-  alt <- strsplit(alt_raw, ",")[[1]][1]
   qual <- suppressWarnings(as.numeric(fields[6]))
   filter <- if (length(fields) >= 7) fields[7] else "."
   info <- if (length(fields) >= 8) fields[8] else "."
 
-  row <- parse_variant_from_vcf_fields(chrom, pos, ref, alt, qual, filter, info)
-
+  sample_genotypes <- "{}"
   if (length(fields) >= 9L && !is.null(header_cols) && length(header_cols) >= 9L) {
     format_str <- fields[9]
     sample_names <- header_cols[10:length(header_cols)]
     sample_fields <- if (length(fields) >= 10L) fields[10:length(fields)] else character()
     if (length(sample_names) > 0L && nzchar(format_str) && format_str != ".") {
       gts <- parse_vcf_genotypes(format_str, sample_fields, sample_names)
-      row$sample_genotypes <- serialize_sample_genotypes(gts)
-    } else {
-      row$sample_genotypes <- "{}"
+      sample_genotypes <- serialize_sample_genotypes(gts)
     }
-  } else {
-    row$sample_genotypes <- "{}"
   }
 
-  row
+  alts <- split_vcf_alt_alleles(alt_raw)
+  rows <- lapply(alts, function(alt) {
+    row <- parse_variant_from_vcf_fields(chrom, pos, ref, alt, qual, filter, info)
+    row$sample_genotypes <- sample_genotypes
+    row
+  })
+
+  if (length(rows) == 0L) return(NULL)
+  if (length(rows) == 1L) return(rows[[1L]])
+  do.call(rbind, rows)
+}
+
+append_parsed_vcf_rows <- function(batch, parsed_rows) {
+  if (is.null(parsed_rows)) return(batch)
+  if (is.data.frame(parsed_rows)) {
+    for (i in seq_len(nrow(parsed_rows))) {
+      batch[[length(batch) + 1L]] <- parsed_rows[i, , drop = FALSE]
+    }
+    return(batch)
+  }
+  batch[[length(batch) + 1L]] <- parsed_rows
+  batch
 }
 
 #' Count all variant rows in a VCF (streaming, no memory load).
@@ -98,11 +113,15 @@ count_vcf_variants <- function(vcf_path, pass_only = FALSE, min_qual = 0) {
 
     total <- total + 1L
     if (pass_only || min_qual > 0) {
-      row <- parse_vcf_line(line, header_cols)
-      if (is.null(row)) next
-      if (pass_only && !vcf_filter_is_pass(row$filter)) next
-      if (min_qual > 0 && (is.na(row$qual) || row$qual < min_qual)) next
-      pass_n <- pass_n + 1L
+      rows_df <- parse_vcf_line(line, header_cols)
+      if (is.null(rows_df)) next
+      n_rows <- if (is.data.frame(rows_df)) nrow(rows_df) else 1L
+      for (i in seq_len(n_rows)) {
+        row <- if (is.data.frame(rows_df)) rows_df[i, , drop = FALSE] else rows_df
+        if (pass_only && !vcf_filter_is_pass(row$filter)) next
+        if (min_qual > 0 && (is.na(row$qual) || row$qual < min_qual)) next
+        pass_n <- pass_n + 1L
+      }
     }
   }
 
@@ -160,24 +179,32 @@ stream_vcf_chunks <- function(
       next
     }
 
-    row <- parse_vcf_line(line, header_cols)
-    if (is.null(row)) {
+    rows_df <- parse_vcf_line(line, header_cols)
+    if (is.null(rows_df)) {
       skipped_total <- skipped_total + 1L
       next
     }
-    if (pass_only && !vcf_filter_is_pass(row$filter)) {
-      skipped_total <- skipped_total + 1L
-      next
-    }
-    if (min_qual > 0 && (is.na(row$qual) || row$qual < min_qual)) {
-      skipped_total <- skipped_total + 1L
-      next
-    }
+    n_rows <- if (is.data.frame(rows_df)) nrow(rows_df) else 1L
+    for (i in seq_len(n_rows)) {
+      if (kept_total >= max_variants) {
+        skipped_total <- skipped_total + (n_rows - i + 1L)
+        break
+      }
+      row <- if (is.data.frame(rows_df)) rows_df[i, , drop = FALSE] else rows_df
+      if (pass_only && !vcf_filter_is_pass(row$filter)) {
+        skipped_total <- skipped_total + 1L
+        next
+      }
+      if (min_qual > 0 && (is.na(row$qual) || row$qual < min_qual)) {
+        skipped_total <- skipped_total + 1L
+        next
+      }
 
-    row$qual <- NULL
-    row$filter <- NULL
-    batch[[length(batch) + 1L]] <- row
-    kept_total <- kept_total + 1L
+      row$qual <- NULL
+      row$filter <- NULL
+      batch <- append_parsed_vcf_rows(batch, row)
+      kept_total <- kept_total + 1L
+    }
 
     if (!is.null(progress_fn) && read_total %% 50000L == 0L) {
       progress_fn(read_total, kept_total, skipped_total)
@@ -267,18 +294,23 @@ bcftools_stream_chunks <- function(
     parts <- strsplit(line, "\t")[[1]]
     if (length(parts) < 7) next
 
-    row <- parse_variant_from_vcf_fields(
-      chrom = parts[1],
-      pos = parts[2],
-      ref = parts[3],
-      alt = strsplit(parts[4], ",")[[1]][1],
-      qual = suppressWarnings(as.numeric(parts[5])),
-      filter = parts[6],
-      info = if (length(parts) >= 7) parts[7] else "."
-    )
+    alts <- split_vcf_alt_alleles(parts[4])
+    for (alt in alts) {
+      if (kept_total >= max_variants) break
 
-    batch[[length(batch) + 1L]] <- row
-    kept_total <- kept_total + 1L
+      row <- parse_variant_from_vcf_fields(
+        chrom = parts[1],
+        pos = parts[2],
+        ref = parts[3],
+        alt = alt,
+        qual = suppressWarnings(as.numeric(parts[5])),
+        filter = parts[6],
+        info = if (length(parts) >= 7) parts[7] else "."
+      )
+
+      batch[[length(batch) + 1L]] <- row
+      kept_total <- kept_total + 1L
+    }
 
     if (!is.null(progress_fn) && read_total %% 50000L == 0L) {
       progress_fn(read_total, kept_total, 0L)

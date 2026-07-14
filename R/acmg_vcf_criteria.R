@@ -708,6 +708,19 @@ score_variant_row <- function(row, lof_genes = character(),
       "Synonymous variant; in silico predictors do not support a damaging effect (BP4)."
     )
   }
+  if (is_prediction_mode() && isTRUE(PREDICTION_SETTINGS$apply_single_tool_pp3) &&
+      is_missense_consequence(variant_consequence) &&
+      !isTRUE(ins$PP3) && !isTRUE(ins$BP4) &&
+      grepl("damaging|deleterious", ins$insilico_summary %||% "", ignore.case = TRUE)) {
+    ins$PP3 <- TRUE
+    ins$PP3_rationale <- paste(
+      trimws(c(
+        ins$PP3_rationale,
+        "Single in silico predictor supports damaging effect (PP3; prediction sensitivity)."
+      )),
+      collapse = " "
+    )
+  }
   clin <- score_clinvar_criteria(
     scalar_chr(row$clinvar_classification %||% row$ClinVar %||% "", default = "")
   )
@@ -742,6 +755,11 @@ score_variant_row <- function(row, lof_genes = character(),
 
   evidence <- criteria_to_evidence(scores)
   scores$classification <- combine_acmg_evidence(evidence)
+  strength <- compute_evidence_strength(scores)
+  scores$evidence_strength <- strength$strength
+  scores$pathogenic_evidence_count <- strength$path_count
+  scores$benign_evidence_count <- strength$benign_count
+  scores <- apply_prediction_classification_refinement(scores, evidence)
   scores$criteria_met <- collect_met_criteria(scores)
   scores$criteria_rationale <- collect_criteria_rationale(scores)
 
@@ -752,10 +770,6 @@ score_variant_row <- function(row, lof_genes = character(),
   scores$prediction_scores <- prediction_scores_to_text(row)
   scores$confidence_score <- conf$confidence_score
   scores$confidence_label <- conf$confidence_label
-  strength <- compute_evidence_strength(scores)
-  scores$evidence_strength <- strength$strength
-  scores$pathogenic_evidence_count <- strength$path_count
-  scores$benign_evidence_count <- strength$benign_count
   scores$prediction_limitations <- build_prediction_limitations(scores, row)
   scores$disease_profile <- profile_id
   scores
@@ -806,6 +820,11 @@ apply_manual_evidence_overlay <- function(scores, manual_inputs = list(), thresh
   scores <- normalize_criterion_flags(scores)
   evidence <- criteria_to_evidence(scores)
   scores$classification <- combine_acmg_evidence(evidence)
+  strength <- compute_evidence_strength(scores)
+  scores$evidence_strength <- strength$strength
+  scores$pathogenic_evidence_count <- strength$path_count
+  scores$benign_evidence_count <- strength$benign_count
+  scores <- apply_prediction_classification_refinement(scores, evidence)
   scores$criteria_met <- collect_met_criteria(scores)
   scores$criteria_rationale <- collect_criteria_rationale(scores)
   thresholds <- thresholds %||% resolve_thresholds(NULL, scores$disease_profile %||% DEFAULT_PROFILE_ID)
@@ -818,10 +837,6 @@ apply_manual_evidence_overlay <- function(scores, manual_inputs = list(), thresh
   scores$evidence_summary <- format_evidence_summary_text(evidence_tbl)
   scores$confidence_score <- conf$confidence_score
   scores$confidence_label <- conf$confidence_label
-  strength <- compute_evidence_strength(scores)
-  scores$evidence_strength <- strength$strength
-  scores$pathogenic_evidence_count <- strength$path_count
-  scores$benign_evidence_count <- strength$benign_count
   scores$prediction_limitations <- build_prediction_limitations(scores)
   scores
 }

@@ -524,8 +524,12 @@ parse_variant_from_vcf_fields <- function(chrom, pos, ref, alt, qual = NA_real_,
   all_genes <- extract_all_annotation_genes(info)
   if (length(all_genes) == 0L && nzchar(gene)) all_genes <- gene
 
+  chrom <- normalize_chrom(chrom)
+  vkey <- variant_key_chr_pos_ref_alt(chrom, pos, ref, alt)
+
   data.frame(
-    variant_id = paste(chrom, pos, ref, alt, sep = ":"),
+    variant_id = vkey,
+    variant_key = vkey,
     chrom = chrom, pos = as.integer(pos), ref = ref, alt = alt,
     gene = gene, all_genes = paste(all_genes, collapse = ";"),
     consequence = consequence, impact = impact,

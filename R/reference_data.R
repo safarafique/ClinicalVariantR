@@ -10,10 +10,22 @@ load_reference_data <- function(paths = REFERENCE_PATHS) {
     revel = data.table::fread(paths$revel, showProgress = FALSE)
   )
 
-  # Normalize join keys
-  refs$gnomad[, variant_key := paste(chrom, pos, ref, alt, sep = ":")]
-  refs$clinvar[, variant_key := paste(chrom, pos, ref, alt, sep = ":")]
-  refs$revel[, variant_key := paste(chrom, pos, ref, alt, sep = ":")]
+  # Normalize join keys (chr-prefixed for cross-source matching)
+  for (ref_name in names(refs)) {
+    if ("chrom" %in% names(refs[[ref_name]])) {
+      data.table::set(refs[[ref_name]], j = "chrom", value = normalize_chrom(refs[[ref_name]]$chrom))
+    }
+    data.table::set(
+      refs[[ref_name]],
+      j = "variant_key",
+      value = variant_key_chr_pos_ref_alt(
+        refs[[ref_name]]$chrom,
+        refs[[ref_name]]$pos,
+        refs[[ref_name]]$ref,
+        refs[[ref_name]]$alt
+      )
+    )
+  }
 
   refs
 }
@@ -37,26 +49,40 @@ coalesce_dt_col <- function(dt, target, sources) {
 #' Annotate variant table with reference placeholders via data.table joins.
 annotate_variants <- function(variants_dt, refs) {
   dt <- data.table::as.data.table(variants_dt)
-  if (!"variant_key" %in% names(dt)) {
-    dt[, variant_key := paste(chrom, pos, ref, alt, sep = ":")]
+  if ("chrom" %in% names(dt)) {
+    data.table::set(dt, j = "chrom", value = normalize_chrom(dt$chrom))
   }
+  data.table::set(dt, j = "variant_key", value = variant_key_chr_pos_ref_alt(dt$chrom, dt$pos, dt$ref, dt$alt))
 
   dt <- merge(
     dt,
-    refs$gnomad[, .(variant_key, ref_gnomad_af = AF, ref_gnomad_popmax = popmax_AF)],
+    data.frame(
+      variant_key = refs$gnomad$variant_key,
+      ref_gnomad_af = refs$gnomad$AF,
+      ref_gnomad_popmax = refs$gnomad$popmax_AF,
+      stringsAsFactors = FALSE
+    ),
     by = "variant_key",
     all.x = TRUE
   )
   dt <- merge(
     dt,
-    refs$clinvar[, .(variant_key, ref_clinvar_classification = clinical_significance,
-                     ref_clinvar_review_status = review_status)],
+    data.frame(
+      variant_key = refs$clinvar$variant_key,
+      ref_clinvar_classification = refs$clinvar$clinical_significance,
+      ref_clinvar_review_status = refs$clinvar$review_status,
+      stringsAsFactors = FALSE
+    ),
     by = "variant_key",
     all.x = TRUE
   )
   dt <- merge(
     dt,
-    refs$revel[, .(variant_key, ref_revel_score = REVEL)],
+    data.frame(
+      variant_key = refs$revel$variant_key,
+      ref_revel_score = refs$revel$REVEL,
+      stringsAsFactors = FALSE
+    ),
     by = "variant_key",
     all.x = TRUE
   )
@@ -75,7 +101,7 @@ annotate_variants <- function(variants_dt, refs) {
     names(dt)
   )
   if (length(drop_cols) > 0) {
-    dt[, (drop_cols) := NULL]
+    dt[, drop_cols] <- NULL
   }
 
   as.data.frame(dt)
@@ -84,11 +110,12 @@ annotate_variants <- function(variants_dt, refs) {
 dedupe_variants_by_key <- function(variants_df) {
   if (is.null(variants_df) || nrow(variants_df) == 0L) return(variants_df)
   dt <- data.table::as.data.table(variants_df)
-  if (!"variant_key" %in% names(dt)) {
-    dt[, variant_key := paste(chrom, pos, ref, alt, sep = ":")]
+  if ("chrom" %in% names(dt)) {
+    data.table::set(dt, j = "chrom", value = normalize_chrom(dt$chrom))
   }
+  data.table::set(dt, j = "variant_key", value = variant_key_chr_pos_ref_alt(dt$chrom, dt$pos, dt$ref, dt$alt))
   if (anyDuplicated(dt$variant_key) > 0L) {
-    dt <- dt[!duplicated(variant_key)]
+    dt <- dt[!duplicated(dt$variant_key)]
   }
   as.data.frame(dt)
 }

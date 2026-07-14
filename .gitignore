@@ -11,3 +11,17 @@ logs/analysis_log.csv
 logs/secure_uploads/
 results/
 !logs/.gitkeep
+
+# R package build artifacts
+*.tar.gz
+*.Rcheck/
+src/*.o
+src/*.so
+src/*.dll
+
+# Vignette build / knitr cache
+vignettes/*.html
+vignettes/*_cache/
+vignettes/*_files/
+Meta/
+doc/
