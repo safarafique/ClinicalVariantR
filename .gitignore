@@ -25,3 +25,4 @@ vignettes/*_cache/
 vignettes/*_files/
 Meta/
 doc/
+.Rproj.user

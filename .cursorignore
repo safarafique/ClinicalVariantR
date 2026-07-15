@@ -1,0 +1,16 @@
+*.tar.gz
+*.Rcheck/
+*.BiocCheck/
+ClinicalVariantR.BiocCheck/
+.RData
+.Rhistory
+.Rproj.user/
+logs/
+results/
+.Rcache/
+renv/library/
+renv/staging/
+temp/
+tmp/
+*.tmp
+.git/
