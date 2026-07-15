@@ -1,4 +1,4 @@
 library(testthat)
-library(ACMGamp)
+library(ClinicalVariantR)
 
-test_check("ACMGamp")
+test_check("ClinicalVariantR")

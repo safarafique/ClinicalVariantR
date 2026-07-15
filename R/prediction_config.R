@@ -1,4 +1,4 @@
-#' ACMGamp clinical prediction mode — stricter rules and report metadata.
+#' ClinicalVariantR clinical prediction mode: stricter rules and report metadata.
 
 PREDICTION_MODE <- TRUE
 
@@ -15,7 +15,7 @@ PREDICTION_SETTINGS <- list(
   elevate_pvs1_with_supporting = TRUE,
   elevate_pvs1_lof_alone = TRUE,
   report_disclaimer = paste(
-    "ACMGamp prediction output is decision support.",
+    "ClinicalVariantR prediction output is decision support.",
     "Classifications require expert review before clinical use.",
     "Prediction sensitivity rules may upgrade strong VUS to Likely Pathogenic.",
     "See prediction_limitations column per variant."

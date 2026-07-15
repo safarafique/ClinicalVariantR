@@ -1,4 +1,4 @@
-# ACMGamp — thin UI entry (panels in R/shiny/ui/*_ui.R)
+# ClinicalVariantR thin UI entry (panels in R/shiny/ui/*_ui.R)
 ui <- tagList(
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
   bslib::page_navbar(

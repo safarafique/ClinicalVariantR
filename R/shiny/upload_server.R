@@ -35,9 +35,9 @@ register_upload_server <- function(ctx) {
         stringsAsFactors = FALSE
       ),
       summary = if (nzchar(file_name %||% "")) {
-        sprintf("Upload of '%s' incomplete — re-select the file.", file_name)
+        sprintf("Upload of '%s' incomplete - re-select the file.", file_name)
       } else {
-        "Upload incomplete — re-select the file."
+        "Upload incomplete - re-select the file."
       },
       missing_items = "File not available on server"
     )

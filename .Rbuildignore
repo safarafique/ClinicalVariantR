@@ -1,0 +1,12 @@
+^ClinicalVariantR[.]BiocCheck$
+^[^/]+[.]Rcheck$
+[.]tar[.]gz$
+^[.]RData$
+^[.]Rhistory$
+^[.]Rproj[.]user$
+^[.]cursorignore$
+^[.]gitignore$
+^logs$
+^results$
+^renv/library$
+^renv/staging$

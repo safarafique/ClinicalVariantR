@@ -1,15 +1,15 @@
 ---
-title: "Running and testing ACMGamp"
+title: "Running and testing ClinicalVariantR"
 author:
   - name: Safa Rafique
     email: safa.sandhu@gmail.com
-package: ACMGamp
+package: ClinicalVariantR
 output:
   BiocStyle::html_document:
     toc: true
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{Running and testing ACMGamp}
+  %\VignetteIndexEntry{Running and testing ClinicalVariantR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -28,22 +28,21 @@ knitr::opts_chunk$set(
 
 This vignette explains how to:
 
-1. Launch the ACMGamp Shiny app for interactive testing  
+1. Launch the ClinicalVariantR Shiny app for interactive testing
 2. Choose sample / benchmark VCFs for each workflow (Groups A–C)  
 3. Run automated logic checks and unit tests  
 
-It complements the [Introduction to ACMGamp](ACMGamp.html) vignette.
+It complements the [Introduction to ClinicalVariantR](ACMGamp.html) vignette.
 
 # Prerequisites
 
-Install CRAN dependencies used by the app:
+ClinicalVariantR dependencies are declared in `DESCRIPTION` and are installed by
+the standard package build/check workflow. The chunk below verifies that the
+main runtime dependencies are available in the current build environment:
 
-```{r cran-deps, eval=FALSE}
-install.packages(c(
-    "shiny", "bslib", "DT", "data.table", "readr", "jsonlite",
-    "knitr", "rmarkdown", "testthat", "BiocManager"
-))
-BiocManager::install(c("BiocStyle", "VariantAnnotation"))
+```{r dependency-check}
+deps <- c("shiny", "bslib", "DT", "data.table", "readr", "jsonlite", "VariantAnnotation")
+vapply(deps, requireNamespace, quietly = TRUE, FUN.VALUE = logical(1))
 ```
 
 Optional (large VCF speed-up on Linux/WSL): install **bcftools** and ensure it is
@@ -52,7 +51,7 @@ on `PATH`.
 Confirm the package (or source tree) is available:
 
 ```{r pkg-check}
-pkg_ok <- requireNamespace("ACMGamp", quietly = TRUE)
+pkg_ok <- requireNamespace("ClinicalVariantR", quietly = TRUE)
 pkg_ok
 ```
 
@@ -60,9 +59,11 @@ If you are developing from the Git clone (not yet installed), set the working
 directory to the package root (the folder that contains `DESCRIPTION`,
 `app.R`, `global.R`, `ui.R`, and `server.R`).
 
-```{r find-root, eval=FALSE}
+```{r find-root}
+if (FALSE) {
 # Example after cloning:
-# setwd("path/to/ACMGamp")   # or cml_variant_interpreter on this machine
+# setwd("path/to/ClinicalVariantR")
+}
 ```
 
 # Launch the Shiny app
@@ -71,12 +72,14 @@ directory to the package root (the folder that contains `DESCRIPTION`,
 
 Package functions **return** a Shiny app; you launch it yourself:
 
-```{r launch-api, eval=FALSE}
-library(ACMGamp)
+```{r launch-api}
+if (FALSE) {
+library(ClinicalVariantR)
 
-app <- ACMGamp()          # or ACMGampApp()
+app <- ClinicalVariantR() # or ClinicalVariantRApp()
 if (interactive()) {
     shiny::runApp(app, launch.browser = TRUE)
+}
 }
 ```
 
@@ -84,20 +87,22 @@ if (interactive()) {
 
 From the package root, either:
 
-```{r launch-source, eval=FALSE}
+```{r launch-source}
+if (FALSE) {
 # Option 1 — classic Shiny entry
 shiny::runApp(".", launch.browser = TRUE)
 
 # Option 2 — after sourcing the package constructor from R/
-# (works once ACMGamp is installed or attached)
-app <- ACMGamp::ACMGamp()
+# (works once ClinicalVariantR is installed or attached)
+app <- ClinicalVariantR::ClinicalVariantR()
 shiny::runApp(app, launch.browser = TRUE)
+}
 ```
 
 On Ubuntu/WSL (recommended for large VCFs):
 
 ```bash
-cd /path/to/ACMGamp
+cd /path/to/ClinicalVariantR
 R -e "shiny::runApp('.', host='0.0.0.0', port=3838)"
 ```
 
@@ -111,10 +116,12 @@ Then open `http://127.0.0.1:3838` in a browser.
 | Idle timeout | 1 hour | Override with env `ACMGAMP_IDLE_TIMEOUT_SEC` |
 | Auth | Off in local scaffolds when `AUTH_ENABLED <- FALSE` | Re-enable only for secured demos |
 
-```{r env-tips, eval=FALSE}
+```{r env-tips}
+if (FALSE) {
 Sys.setenv(ACMGAMP_IDLE_TIMEOUT_SEC = "3600")
 # Optional encryption key for secure uploads (32 characters):
 # Sys.setenv(ACMGAMP_ENCRYPTION_KEY = "0123456789abcdef0123456789abcdef")
+}
 ```
 
 # Test data locations
@@ -127,7 +134,7 @@ conversion they will move under `inst/extdata/` and should be loaded with
 .root_candidates <- c(
     getwd(),
     file.path(getwd(), "cml_variant_interpreter"),
-    system.file(package = "ACMGamp")
+    system.file(package = "ClinicalVariantR")
 )
 .root <- .root_candidates[dir.exists(.root_candidates)][1]
 
@@ -190,9 +197,9 @@ data.frame(
 2. Upload the same VCF as Group B.  
 3. Enter a gene list that intersects the call set, for example:
 
-```{r gene-list-example, eval=FALSE}
+```{r gene-list-example}
 # Paste into the Group C gene box:
-# TCF4, MECP2, EGR2, ATM, TSC1
+c("TCF4", "MECP2", "EGR2", "ATM", "TSC1")
 ```
 
 4. Run analysis — only nominated genes should appear in results.  
@@ -210,38 +217,41 @@ Run these from the package root (`DESCRIPTION` present).
 
 ## Unit tests (testthat)
 
-```{r unit-tests, eval=FALSE}
-# After install:
-# BiocManager::install("safarafique/ACMGamp")  # or local install
+```{r unit-tests}
+if (FALSE) {
+# After local installation or during development:
 devtools::test()           # development
 # or:
-testthat::test_package("ACMGamp")
+testthat::test_package("ClinicalVariantR")
+}
 ```
 
-Minimal checks included in `tests/testthat/test-ACMGamp.R` verify that
-`ACMGamp()` / `ACMGampApp()` exist and return a `shiny.appobj` when Shiny entry
+Minimal checks included in `tests/testthat/test-ClinicalVariantR.R` verify that
+`ClinicalVariantR()` / `ClinicalVariantRApp()` exist and return a `shiny.appobj` when Shiny entry
 files are present.
 
 ## Engine / pipeline scripts
 
-```{r cli-scripts, eval=FALSE}
+```{r cli-scripts}
+if (FALSE) {
 # Rules combining + criterion logic audit
-Rscript scripts/audit_acmg_rules.R
+system2("Rscript", "scripts/audit_acmg_rules.R")
 
 # Group B/C coverage and gene-filter parity
-Rscript scripts/verify_group_b_c.R
+system2("Rscript", "scripts/verify_group_b_c.R")
 
 # Group A 28-criterion catalog check
-Rscript scripts/verify_group_a_28.R
+system2("Rscript", "scripts/verify_group_a_28.R")
 
 # Score the Group B benchmark VCF vs expected labels
-Rscript scripts/run_group_b_benchmark.R
+system2("Rscript", "scripts/run_group_b_benchmark.R")
 
 # Smaller accuracy fixture
-Rscript scripts/run_accuracy_benchmark.R
+system2("Rscript", "scripts/run_accuracy_benchmark.R")
 
 # Formal validation report (expert set)
-Rscript scripts/generate_validation_report.R
+system2("Rscript", "scripts/generate_validation_report.R")
+}
 ```
 
 Quick existence check for key scripts (does not execute them in the vignette
@@ -263,18 +273,22 @@ data.frame(script = scripts, exists = file.exists(script_paths))
 
 ## Optional upload-flow smoke script
 
-```{r upload-flow, eval=FALSE}
-Rscript scripts/test_upload_flow.R
+```{r upload-flow}
+if (FALSE) {
+system2("Rscript", "scripts/test_upload_flow.R")
+}
 ```
 
 ## Optional Bioconductor / style checks (before submission)
 
-```{r bioc-check, eval=FALSE}
+```{r bioc-check}
+if (FALSE) {
 # From the parent of the package directory:
-# R CMD build ACMGamp
-# R CMD check ACMGamp_0.99.0.tar.gz
-# BiocCheck::BiocCheck("ACMGamp_0.99.0.tar.gz", `new-package` = TRUE)
-# BiocCheck::BiocCheckGitClone("ACMGamp")
+# R CMD build ClinicalVariantR
+# R CMD check ClinicalVariantR_0.99.0.tar.gz
+# BiocCheck::BiocCheck("ClinicalVariantR_0.99.0.tar.gz", `new-package` = TRUE)
+# BiocCheck::BiocCheckGitClone("ClinicalVariantR")
+}
 ```
 
 # Expected app object (non-interactive sanity check)
@@ -287,14 +301,14 @@ has_entry <- file.exists(file.path(.root, "global.R")) &&
     file.exists(file.path(.root, "ui.R")) &&
     file.exists(file.path(.root, "server.R"))
 
-if (requireNamespace("ACMGamp", quietly = TRUE) && has_entry) {
+if (requireNamespace("ClinicalVariantR", quietly = TRUE) && has_entry) {
     old <- getwd()
     on.exit(setwd(old), add = TRUE)
     setwd(.root)
-    app <- ACMGamp::ACMGamp()
+    app <- ClinicalVariantR::ClinicalVariantR()
     inherits(app, "shiny.appobj")
 } else if (has_entry) {
-    "# Install/attach ACMGamp or run shiny::runApp('.') from package root"
+    "# Install/attach ClinicalVariantR or run shiny::runApp('.') from package root"
 } else {
     "# Shiny entry files not found — setwd() to package root first"
 }

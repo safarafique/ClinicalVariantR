@@ -1,15 +1,15 @@
 ---
-title: "Introduction to ACMGamp"
+title: "Introduction to ClinicalVariantR"
 author:
   - name: Safa Rafique
     email: safa.sandhu@gmail.com
-package: ACMGamp
+package: ClinicalVariantR
 output:
   BiocStyle::html_document:
     toc: true
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Introduction to ACMGamp}
+  %\VignetteIndexEntry{Introduction to ClinicalVariantR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
 
 # Overview
 
-**ACMGamp** is an R / Bioconductor software package that classifies germline
+**ClinicalVariantR** is an R / Bioconductor software package that classifies germline
 sequence variants under the ACMG/AMP 2015 framework from pre-annotated VCF
 files (VEP CSQ, SnpEff ANN, or ANNOVAR-style INFO fields).
 
@@ -40,39 +40,32 @@ The package exposes an interactive Shiny application with three workflows:
 
 # Installation
 
-```{r install, eval=FALSE}
-if (!requireNamespace("BiocManager", quietly = TRUE)) {
-    install.packages("BiocManager")
-}
-BiocManager::install("ACMGamp")
-```
-
-Until the package is accepted on Bioconductor, install from GitHub:
-
-```{r install-github, eval=FALSE}
-# install.packages("remotes")
-remotes::install_github("safarafique/ACMGamp")
-```
+ClinicalVariantR declares its required packages in `DESCRIPTION`. During
+Bioconductor checks and installation, these dependencies are resolved by the
+standard package installation workflow. The source repository is available at
+<https://github.com/safarafique/ClinicalVariantR>.
 
 # Launching the Shiny app
 
 Following Bioconductor Shiny guidelines, package functions **return** a Shiny
 app object; the user launches it:
 
-```{r launch, eval=FALSE}
-library(ACMGamp)
+```{r launch}
+if (FALSE) {
+library(ClinicalVariantR)
 
-app <- ACMGamp()
+app <- ClinicalVariantR()
 if (interactive()) {
     shiny::runApp(app)
 }
+}
 ```
 
-`ACMGampApp()` is an alias of `ACMGamp()`.
+`ClinicalVariantRApp()` is an alias of `ClinicalVariantR()`.
 
 For a full walkthrough of launching the app, choosing sample VCFs, Group A/B/C
 UI checks, and command-line tests, see the companion vignette
-**Running and testing ACMGamp** (`vignettes/ACMGamp-run-and-test.Rmd`).
+**Running and testing ClinicalVariantR** (`vignettes/ACMGamp-run-and-test.Rmd`).
 
 # Input requirements
 
@@ -88,7 +81,7 @@ VCF unless curated references are installed (see package `README`).
 
 # Scope and limitations
 
-ACMGamp targets **germline SNV and small-indel** interpretation. It does not
+ClinicalVariantR targets **germline SNV and small-indel** interpretation. It does not
 classify somatic variants, structural variants, CNVs, or mitochondrial genomes.
 Several ACMG criteria require external data (functional assays, phasing,
 matched pathogenic variants) and are registered as manual or not automated.

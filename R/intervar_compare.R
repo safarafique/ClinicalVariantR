@@ -1,4 +1,4 @@
-#' Compare ACMGamp classifications with InterVar or InterVar-style reference files.
+#' Compare ClinicalVariantR classifications with InterVar or InterVar-style reference files.
 
 ACMG_CLASS_LABELS <- c(
   "Pathogenic", "Likely Pathogenic", "VUS", "Likely Benign", "Benign"
@@ -31,7 +31,7 @@ pick_column <- function(df, candidates) {
 }
 
 load_acmgamp_report_csv <- function(path) {
-  if (!file.exists(path)) stop("ACMGamp report not found: ", path)
+  if (!file.exists(path)) stop("ClinicalVariantR report not found: ", path)
   df <- utils::read.csv(path, stringsAsFactors = FALSE, check.names = FALSE)
   chrom_col <- pick_column(df, c("chrom", "chr", "CHROM", "Chr"))
   pos_col <- pick_column(df, c("pos", "POS", "Start", "start"))
@@ -40,14 +40,14 @@ load_acmgamp_report_csv <- function(path) {
   class_col <- pick_column(df, c("classification", "Classification"))
   criteria_col <- pick_column(df, c("criteria_met", "criteria", "Criteria"))
   if (any(is.na(c(chrom_col, pos_col, ref_col, alt_col, class_col)))) {
-    stop("ACMGamp CSV missing required columns (chrom/pos/ref/alt/classification).")
+    stop("ClinicalVariantR CSV missing required columns (chrom/pos/ref/alt/classification).")
   }
   out <- data.frame(
     variant_key = variant_key_chr_pos_ref_alt(df[[chrom_col]], df[[pos_col]], df[[ref_col]], df[[alt_col]]),
     gene = if ("gene" %in% names(df)) df$gene else NA_character_,
     classification = normalize_acmg_class_label(df[[class_col]]),
     criteria = if (!is.na(criteria_col)) df[[criteria_col]] else "",
-    source = "ACMGamp",
+    source = "ClinicalVariantR",
     stringsAsFactors = FALSE
   )
   out$tier <- collapse_acmg_tier(out$classification)
@@ -155,7 +155,7 @@ classification_count_table <- function(df, label = "classification") {
   )
 }
 
-compare_two_classification_tables <- function(left_df, right_df, left_name = "ACMGamp", right_name = "Reference") {
+compare_two_classification_tables <- function(left_df, right_df, left_name = "ClinicalVariantR", right_name = "Reference") {
   cmp <- merge(
     left_df[, c("variant_key", "gene", "classification", "tier", "criteria")],
     right_df[, c("variant_key", "classification", "tier", "criteria")],
@@ -231,16 +231,16 @@ write_comparison_outputs <- function(result, output_prefix) {
   }
 
   m <- result$metrics
-  cat(
-    paste0(
-      "ACMGamp vs ", m$right_name, " comparison\n",
-      "Overlap variants: ", m$n_overlap, "\n",
-      "ACMGamp variants: ", m$n_left, "\n",
-      "Reference variants: ", m$n_right, "\n",
-      "Exact 5-class accuracy (%): ", m$exact_accuracy, "\n",
-      "Tier accuracy (pathogenic/benign/vus) (%): ", m$tier_accuracy, "\n"
+  writeLines(
+    c(
+      paste0("ClinicalVariantR vs ", m$right_name, " comparison"),
+      paste0("Overlap variants: ", m$n_overlap),
+      paste0("ClinicalVariantR variants: ", m$n_left),
+      paste0("Reference variants: ", m$n_right),
+      paste0("Exact 5-class accuracy (%): ", m$exact_accuracy),
+      paste0("Tier accuracy (pathogenic/benign/vus) (%): ", m$tier_accuracy)
     ),
-    file = metrics_path
+    con = metrics_path
   )
 
   list(

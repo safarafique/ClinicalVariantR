@@ -12,7 +12,7 @@ explorer_nav_panel <- function() {
           p("Transparent criterion-level explanations with observed values, thresholds, strength, and confidence."),
           fluidRow(
             column(3, selectInput("explorer_source", "Results source",
-              choices = c("Group A" = "a", "Group B" = "b", "Group C — Gene panel" = "c"))),
+              choices = c("Group A" = "a", "Group B" = "b", "Group C - Gene panel" = "c"))),
             column(3, selectInput("explorer_pdf_scope", "Export scope",
               choices = c(
                 "All variants" = "all",

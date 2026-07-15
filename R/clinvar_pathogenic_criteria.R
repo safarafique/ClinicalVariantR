@@ -1,9 +1,9 @@
 #' PS1, PM5, and PM1 criteria using ClinVar protein-level reference data.
 #'
 #' InterVar-style logic:
-#'   PS1 — same amino acid change as established pathogenic variant
-#'   PM5 — missense at residue with different established pathogenic missense
-#'   PM1 — missense in curated critical domain / hotspot gene panel
+#'   PS1 - same amino acid change as established pathogenic variant
+#'   PM5 - missense at residue with different established pathogenic missense
+#'   PM1 - missense in curated critical domain / hotspot gene panel
 
 CLINVAR_PROTEIN_DB_PATH <- file.path("data", "reference", "clinvar_pathogenic_protein.tsv")
 PM1_HOTSPOT_PANEL_PATH <- file.path("data", "gene_panels", "pm1_hotspot_genes.csv")

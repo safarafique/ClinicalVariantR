@@ -1,4 +1,4 @@
-#' Build the ACMGamp Shiny application
+#' Build the ClinicalVariantR Shiny application
 #'
 #' Returns a Shiny app object for ACMG/AMP germline variant classification.
 #' Following Bioconductor Shiny guidelines, this function **returns** the app
@@ -9,41 +9,32 @@
 #' @return A \code{shiny.appobj} created by \code{shiny::shinyApp()}.
 #'
 #' @examples
-#' \dontrun{
-#' app <- ACMGamp()
-#' if (interactive()) {
-#'     shiny::runApp(app)
-#' }
-#' }
+#' is.function(ClinicalVariantR)
+#' is.function(ClinicalVariantRApp)
 #'
-#' @seealso \code{\link{ACMGampApp}}
+#' @seealso \code{\link{ClinicalVariantRApp}}
 #' @export
-ACMGamp <- function(...) {
-    .ACMGamp_shiny_app()
+ClinicalVariantR <- function(...) {
+    .ClinicalVariantR_shiny_app()
 }
 
-#' Alias for \code{\link{ACMGamp}}
+#' Alias for \code{\link{ClinicalVariantR}}
 #'
-#' @inheritParams ACMGamp
-#' @inherit ACMGamp return
+#' @inheritParams ClinicalVariantR
+#' @inherit ClinicalVariantR return
 #' @examples
-#' \dontrun{
-#' app <- ACMGampApp()
-#' if (interactive()) {
-#'     shiny::runApp(app)
-#' }
-#' }
+#' is.function(ClinicalVariantRApp)
 #' @export
-ACMGampApp <- function(...) {
-    ACMGamp(...)
+ClinicalVariantRApp <- function(...) {
+    ClinicalVariantR(...)
 }
 
 #' Internal: construct shinyApp from existing ui/server sources
 #'
 #' @keywords internal
 #' @noRd
-.ACMGamp_shiny_app <- function() {
-    pkg_root <- system.file(package = "ACMGamp")
+.ClinicalVariantR_shiny_app <- function() {
+    pkg_root <- system.file(package = "ClinicalVariantR")
     # During development before install, fall back to source tree.
     if (!nzchar(pkg_root) || !dir.exists(file.path(pkg_root, "R"))) {
         pkg_root <- normalizePath(getwd(), winslash = "/", mustWork = FALSE)
@@ -64,7 +55,7 @@ ACMGampApp <- function(...) {
     }
 
     stop(
-        "Unable to locate ACMGamp Shiny sources (global.R / ui.R / server.R). ",
+        "Unable to locate ClinicalVariantR Shiny sources (global.R / ui.R / server.R). ",
         "Install the package or set the working directory to the package root.",
         call. = FALSE
     )

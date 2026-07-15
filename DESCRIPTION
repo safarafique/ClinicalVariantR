@@ -1,52 +1,66 @@
-Package: ACMGamp
-Title: ACMG/AMP Germline Variant Interpretation from Annotated VCF Files
+Package: ClinicalVariantR
+Title: Clinical Variant Interpretation Using ACMG/AMP Germline Criteria
 Version: 0.99.0
 Date: 2026-07-08
 Authors@R: c(
     person(
         given = "Safa",
         family = "Rafique",
+        email = "safa.sandhu@gmail.com",
         role = c("aut", "cre"),
-        email = "safa.sandhu@gmail.com"
+        comment = c(ORCID = "0000-0003-2646-8106")
+    ),
+    person(
+        given = "Naeem",
+        family = "Mahmood",
+        email = "naeem.sbb@pu.edu.pk",
+        role = "aut"
+    ),
+    person(
+        given = "Muhammad Farooq",
+        family = "Sabar",
+        email = "farooq.sbb@pu.edu.pk",
+        role = "aut"
     )
-    )
-Author: Safa Rafique [aut, cre]
+)
 Maintainer: Safa Rafique <safa.sandhu@gmail.com>
-Description: ACMGamp is an interactive Shiny platform for evidence-based
-    germline variant classification under ACMG/AMP 2015 guidelines. It
-    accepts VEP-, SnpEff-, or ANNOVAR-annotated VCF files, applies automated
-    and curator-guided ACMG criteria, supports streaming analysis of large
-    call sets, and exports structured per-criterion evidence with
-    reproducibility metadata.
+Description: ClinicalVariantR is an interactive Shiny platform for
+    evidence-based germline variant classification under ACMG/AMP 2015
+    guidelines. It accepts VEP-, SnpEff-, or ANNOVAR-annotated VCF files,
+    applies automated and curator-guided ACMG criteria, supports streaming
+    analysis of large call sets, and exports structured per-criterion
+    evidence with reproducibility metadata.
 License: MIT + file LICENSE
-URL: https://github.com/safarafique/ACMGamp
-BugReports: https://github.com/safarafique/ACMGamp/issues
+URL: https://github.com/safarafique/ClinicalVariantR
+BugReports: https://github.com/safarafique/ClinicalVariantR/issues
 biocViews: Software, VariantAnnotation, Genetics, Sequencing,
-    Visualization, GUI
+    Visualization, GUI, Classification
 Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 Depends:
-    R (>= 4.4.0)
+    R (>= 4.6.0)
 Imports:
     shiny (>= 1.8.0),
     bslib,
     DT,
     data.table,
+    digest,
     readr,
     jsonlite,
     methods,
+    openssl,
     stats,
-    utils
+    utils,
+    VariantAnnotation
 Suggests:
     BiocStyle,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
     BiocCheck,
-    VariantAnnotation,
     shinytest2
 Config/testthat/edition: 3
 Config/Needs/website: BiocStyle

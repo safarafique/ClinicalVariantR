@@ -1,4 +1,4 @@
-# Bioconductor docs for ACMGamp
+# Bioconductor docs for ClinicalVariantR
 
 Start here:
 

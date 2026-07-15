@@ -133,7 +133,7 @@ apply_automated_acmg_rules <- function(fields, mark, mode = c("full", "rapid")) 
   }
 
   if (fields$is_missense) {
-    mark("PM1", "Missense variant — domain/hotspot annotation not yet integrated (partial).")
+    mark("PM1", "Missense variant - domain/hotspot annotation not yet integrated (partial).")
     mark("BP1", "Missense in gene where truncating is primary mechanism (gene list required).")
   }
 
@@ -169,7 +169,7 @@ apply_clinical_context_hints <- function(criteria, clinical_context) {
     if (!is.na(idx)) {
       criteria$rationale[idx] <- paste(
         criteria$rationale[idx],
-        "Clinical logs suggest advanced CML phase — review PP4."
+        "Clinical logs suggest advanced CML phase - review PP4."
       )
     }
   }

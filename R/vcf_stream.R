@@ -322,7 +322,7 @@ bcftools_stream_chunks <- function(
   list(rows_read = read_total, rows_analyzed = kept_total, rows_skipped = 0L, chunks = chunk_id)
 }
 
-#' Analyze complete VCF — all rows, chunked, results written to CSV on disk.
+#' Analyze complete VCF - all rows, chunked, results written to CSV on disk.
 analyze_complete_vcf <- function(
     vcf_path,
     mode = c("full", "rapid"),

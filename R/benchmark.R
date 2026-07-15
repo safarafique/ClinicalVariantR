@@ -1,4 +1,4 @@
-#' Benchmark ACMGamp against reference ACMG classifications.
+#' Benchmark ClinicalVariantR against reference ACMG classifications.
 
 normalize_acmg_class <- function(x) {
   vapply(x, function(val) {

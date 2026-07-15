@@ -1,8 +1,8 @@
-# ACMGamp — Variant Prediction Platform
+# ClinicalVariantR: Clinical Variant Interpretation Platform
 
-**ACMGamp** is an R Shiny application for ACMG/AMP evidence-based germline variant **prediction** with per-variant curator workflow.
+**ClinicalVariantR** is an R Shiny application for ACMG/AMP evidence-based germline variant **prediction** with per-variant curator workflow.
 
-Repository: [https://github.com/safarafique/ACMGamp](https://github.com/safarafique/ACMGamp)
+Repository: [https://github.com/safarafique/ClinicalVariantR](https://github.com/safarafique/ClinicalVariantR)
 
 ## Bioconductor submission docs
 
@@ -19,8 +19,8 @@ Core package files: `DESCRIPTION` (version `0.99.0`), `NAMESPACE`, `LICENSE`, `N
 Launch API (Bioconductor Shiny style — return app, user runs it):
 
 ```r
-library(ACMGamp)
-app <- ACMGamp()
+library(ClinicalVariantR)
+app <- ClinicalVariantR()
 if (interactive()) shiny::runApp(app)
 ```
 
@@ -69,7 +69,7 @@ install.packages(c("shiny", "bslib", "DT", "data.table", "readr"))
 ### Run the app
 
 ```r
-shiny::runApp("path/to/ACMGamp")
+shiny::runApp("path/to/ClinicalVariantR")
 ```
 
 ### Ubuntu / WSL (recommended for large VEP VCFs)
@@ -102,7 +102,7 @@ Use the full prediction report for audit; use the worklist export to start manua
 ## Project structure
 
 ```
-ACMGamp/
+ClinicalVariantR/
 ├── app.R
 ├── global.R
 ├── ui.R
@@ -127,13 +127,13 @@ ACMGamp/
 
 ## Outputs
 
-**Best input for expert review:** download the ACMGamp **CSV export** after analysis completes.
+**Best input for expert review:** download the ClinicalVariantR **CSV export** after analysis completes.
 
 | Export | When to use |
 |--------|-------------|
-| `ACMGamp_Expert_Worklist_*.csv` | **Start here** — LP+ and high-priority VUS for sign-out review |
-| `ACMGamp_LP_Plus_*.csv` | Pathogenic / Likely Pathogenic only |
-| `ACMGamp_Prediction_Report_*.csv` | Full audit trail — all variants and evidence |
+| `ClinicalVariantR_Expert_Worklist_*.csv` | **Start here** — LP+ and high-priority VUS for sign-out review |
+| `ClinicalVariantR_LP_Plus_*.csv` | Pathogenic / Likely Pathogenic only |
+| `ClinicalVariantR_Prediction_Report_*.csv` | Full audit trail — all variants and evidence |
 
 Key columns for expert review: `variant_id`, `gene`, `classification`, `criteria_met`, `criteria_rationale`, `prediction_limitations`, `evidence_json`, `confidence_score`, `evidence_strength`.
 
@@ -142,7 +142,7 @@ Also written automatically under `logs/` during streaming runs. Audit trail: `lo
 ## Logic check
 
 ```r
-setwd("path/to/ACMGamp")
+setwd("path/to/ClinicalVariantR")
 source("global.R")
 test_acmg_logic_engine()
 ```

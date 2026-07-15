@@ -130,7 +130,7 @@ score_autopvs1 <- function(
       return(out)
     }
     out$PVS1_rationale <- sprintf(
-      "LoF in last exon (%s/%s); likely NMD escape — PVS1 not applied (AutoPVS1).",
+      "LoF in last exon (%s/%s); likely NMD escape - PVS1 not applied (AutoPVS1).",
       exon_num, exon_total
     )
     return(out)
