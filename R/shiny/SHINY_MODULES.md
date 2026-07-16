@@ -1,4 +1,4 @@
-# ACMGamp Shiny module map
+# ClinicalVariantR Shiny module map
 
 Edit **one file per feature** instead of the full `server.R` / `ui.R`.
 

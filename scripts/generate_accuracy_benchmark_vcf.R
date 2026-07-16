@@ -1,13 +1,13 @@
 #!/usr/bin/env Rscript
-# Build a compact accuracy-check VCF + reference TSV for ACMGamp.
+# Build a compact accuracy-check VCF + reference TSV for ClinicalVariantR.
 #
 # Usage:
 #   Rscript scripts/generate_accuracy_benchmark_vcf.R
 #
 # Output:
-#   testig/acmgamp_benchmark/acmgamp_accuracy_benchmark.vcf
-#   testig/acmgamp_benchmark/acmgamp_accuracy_benchmark.acmg.tsv
-#   testig/acmgamp_benchmark/acmgamp_accuracy_benchmark.key.csv
+#   testig/clinicalvariantr_benchmark/clinicalvariantr_accuracy_benchmark.vcf
+#   testig/clinicalvariantr_benchmark/clinicalvariantr_accuracy_benchmark.acmg.tsv
+#   testig/clinicalvariantr_benchmark/clinicalvariantr_accuracy_benchmark.key.csv
 
 script_dir <- dirname(normalizePath(
   sub("^--file=", "", commandArgs(trailingOnly = FALSE)[grep("^--file=", commandArgs(trailingOnly = FALSE))][1]),
@@ -15,7 +15,7 @@ script_dir <- dirname(normalizePath(
 ))
 project_root <- normalizePath(file.path(script_dir, ".."), winslash = "/", mustWork = FALSE)
 testig_dir <- normalizePath(file.path(project_root, "..", "testig", "testig"), mustWork = TRUE)
-out_dir <- normalizePath(file.path(project_root, "..", "testig", "acmgamp_benchmark"), mustWork = FALSE)
+out_dir <- normalizePath(file.path(project_root, "..", "testig", "clinicalvariantr_benchmark"), mustWork = FALSE)
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
 sample_col <- "BENCHMARK_SAMPLE"
@@ -111,10 +111,10 @@ data_lines <- vapply(variants, function(v) {
   normalize_sample_column(line, sample_col)
 }, FUN.VALUE = character(1L))
 
-vcf_out <- file.path(out_dir, "acmgamp_accuracy_benchmark.vcf")
+vcf_out <- file.path(out_dir, "clinicalvariantr_accuracy_benchmark.vcf")
 writeLines(c(header_lines, data_lines), vcf_out, useBytes = TRUE)
 
-# Expected ACMGamp v2.3 classifications (ground truth for this benchmark).
+# Expected ClinicalVariantR v2.3 classifications (ground truth for this benchmark).
 truth <- data.frame(
   chr = c("chr18", "chrX", "chr5", "chr12", "chr11", "chr3", "chr14", "chr9"),
   pos = c(55631301L, 154030906L, 126544289L, 51687181L, 62694680L, 193614765L, 73223597L, 132892556L),
@@ -138,10 +138,10 @@ truth <- data.frame(
   stringsAsFactors = FALSE
 )
 
-tsv_out <- file.path(out_dir, "acmgamp_accuracy_benchmark.acmg.tsv")
+tsv_out <- file.path(out_dir, "clinicalvariantr_accuracy_benchmark.acmg.tsv")
 write.table(truth, tsv_out, sep = "\t", row.names = FALSE, quote = FALSE)
 
-key_out <- file.path(out_dir, "acmgamp_accuracy_benchmark.key.csv")
+key_out <- file.path(out_dir, "clinicalvariantr_accuracy_benchmark.key.csv")
 write.csv(truth[, c("benchmark_id", "chr", "pos", "ref", "alt", "gene_symbol_base",
                     "acmg_classification_base", "acmg_criteria_base", "benchmark_note")],
           key_out, row.names = FALSE)

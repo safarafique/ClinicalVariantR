@@ -1,5 +1,5 @@
-# ACMGamp — ACMG/AMP Variant Classification Shiny Application
-# Launch with: shiny::runApp("path/to/ACMGamp")
+# ClinicalVariantR — ACMG/AMP Variant Classification Shiny Application
+# Launch with: shiny::runApp("path/to/ClinicalVariantR")
 
 source("global.R", local = TRUE)
 source("ui.R", local = TRUE)

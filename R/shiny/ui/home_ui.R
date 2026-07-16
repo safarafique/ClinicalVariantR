@@ -8,7 +8,7 @@ home_nav_panel <- function() {
       class = "container-fluid py-4",
       div(
         class = "text-center mb-4",
-        h2("ACMGamp — Variant Prediction Platform"),
+        h2("ClinicalVariantR — Variant Prediction Platform"),
         p(
           class = "lead text-muted",
           "ACMG/AMP evidence-based variant classification with streaming VCF analysis, ",

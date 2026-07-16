@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# Validate ACMGamp Publishable MVP on HMC-1 ANN and Sample 3 CSQ fixtures.
+# Validate ClinicalVariantR Publishable MVP on HMC-1 ANN and Sample 3 CSQ fixtures.
 
 script_dir <- dirname(normalizePath(
   sub("^--file=", "", commandArgs(trailingOnly = FALSE)[grep("^--file=", commandArgs(trailingOnly = FALSE))][1]),
@@ -23,7 +23,7 @@ check <- function(name, cond, msg = "") {
   }
 }
 
-cat("=== ACMGamp Publishable MVP Validation ===\n\n")
+cat("=== ClinicalVariantR Publishable MVP Validation ===\n\n")
 
 cfg <- load_rule_config("general_germline")
 check("Rule config loads", length(cfg$thresholds) > 0)

@@ -12,7 +12,7 @@ source("global_cli.R")
 test_folder <- normalizePath(Sys.getenv("ACMG_TEST_FOLDER", file.path(project_root, "..", "testig", "testig")),
                              winslash = "/", mustWork = FALSE)
 
-cat("=== ACMGamp InterVar-parity validation ===\n\n")
+cat("=== ClinicalVariantR InterVar-parity validation ===\n\n")
 
 # 1) TCF4 stop_gained transcript priority (sample 041 chr18:55631301)
 vcf_041 <- file.path(test_folder, "260324100041.haplotypecaller_VEP.ann.split.vcf")

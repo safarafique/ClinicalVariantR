@@ -1,4 +1,4 @@
-# Bioconductor submission (ACMGamp)
+# Bioconductor submission (ClinicalVariantR)
 
 This document lists **required package files**, the **current status** of this
 repository, and **remaining conversion work** before opening a submission issue
@@ -19,19 +19,20 @@ Official guides:
 | Item | Path | Status |
 |------|------|--------|
 | Package metadata | `DESCRIPTION` | ✅ `Version: 0.99.0`, `biocViews`, MIT |
-| Namespace | `NAMESPACE` | ✅ minimal exports (`ACMGamp`, `ACMGampApp`) |
+| Namespace | `NAMESPACE` | ✅ minimal exports (`ClinicalVariantR`, `ClinicalVariantRApp`) |
 | License | `LICENSE`, `LICENSE.md` | ✅ MIT |
 | News | `NEWS.md` | ✅ |
 | Citation | `inst/CITATION` | ✅ update author ORCID/email before submit |
-| Package man page | `man/ACMGamp-package.Rd` | ✅ |
-| Exported function man pages | `man/ACMGamp.Rd` | ✅ |
-| Vignette | `vignettes/ACMGamp.Rmd` | ✅ draft (needs BiocStyle) |
+| Package man page | `man/ClinicalVariantR-package.Rd` | ✅ |
+| Exported function man pages | `man/ClinicalVariantR.Rd` | ✅ |
+| Vignette | `vignettes/ClinicalVariantR.Rmd` | ✅ draft (needs BiocStyle) |
 | Unit test scaffold | `tests/testthat.R`, `tests/testthat/` | ✅ minimal |
 | Bioconductor checklist | `inst/Bioconductor/SUBMISSION_CHECKLIST.md` | ✅ this file’s companion |
 | Submission issue draft | `inst/Bioconductor/ISSUE_TEMPLATE_DRAFT.md` | ✅ |
 | Conversion plan | `inst/Bioconductor/PACKAGE_CONVERSION.md` | ✅ |
 
 **Maintainer (current):** Safa Rafique `<safa.sandhu@gmail.com>`.
+**Authors:** Safa Rafique, Naeem Mahmood, Muhammad Farooq Sabar.
 Add ORCID and affiliations in `DESCRIPTION` / vignette if available before submit.
 
 ---
@@ -43,7 +44,7 @@ Your default branch must satisfy:
 1. Public GitHub URL  
 2. `DESCRIPTION` + `vignettes/` present  
 3. Fields: `Package`, `Version`, `biocViews`  
-4. **Package name == GitHub repository name** (case-sensitive) → repo is `ACMGamp` ✅  
+4. **Package name == GitHub repository name** (case-sensitive) → repo is `ClinicalVariantR` ✅  
 5. Version **`x.99.y`** → `0.99.0` ✅  
 6. **No `Remotes:`** / **No `Additional_repositories`** ✅  
 7. No file **> 5 MB**  
@@ -55,7 +56,7 @@ Then comment exactly: `/accept-policies`
 
 ## 3. Critical conversion still required (NOT optional)
 
-Bioconductor reviewers treat ACMGamp as a **software package**, not a loose
+Bioconductor reviewers treat ClinicalVariantR as a **software package**, not a loose
 Shiny project. The following must be finished **before** clean `R CMD check`
 and `BiocCheck`:
 
@@ -73,7 +74,7 @@ See `PACKAGE_CONVERSION.md` for a step-by-step move plan.
 
 ### 3.2 Shiny policy ([Chapter 18](https://contributions.bioconductor.org/shiny.html))
 
-- ✅ Entry points return `shinyApp` (`ACMGamp()` / `ACMGampApp()`).  
+- ✅ Entry points return `shinyApp` (`ClinicalVariantR()` / `ClinicalVariantRApp()`).  
 - ⚠️ Do **not** call `shiny::runApp()` inside package functions (except optional interactive `launch = TRUE` — prefer documenting user-side `runApp`).  
 - ⚠️ Prefer Bioconductor naming: `interface_*.R`, `observers_*.R`, `outputs_*.R`, `utils_*.R` (or migrate existing `R/shiny/` modules toward that convention).  
 - Man-page examples must wrap launch in `if (interactive())`.
@@ -82,11 +83,11 @@ See `PACKAGE_CONVERSION.md` for a step-by-step move plan.
 
 ```r
 # From a parent directory of the package source:
-R CMD build ACMGamp
-R CMD check ACMGamp_0.99.0.tar.gz
+R CMD build ClinicalVariantR
+R CMD check ClinicalVariantR_0.99.0.tar.gz
 # Bioconductor-specific:
-BiocCheck::BiocCheckGitClone("ACMGamp")
-BiocCheck::BiocCheck("ACMGamp_0.99.0.tar.gz", `new-package` = TRUE)
+BiocCheck::BiocCheckGitClone("ClinicalVariantR")
+BiocCheck::BiocCheck("ClinicalVariantR_0.99.0.tar.gz", `new-package` = TRUE)
 ```
 
 Expectations: **no ERROR / WARNING**; justify any NOTE.
@@ -120,10 +121,10 @@ Also:
 ## 4. Submission steps (after conversion + clean checks)
 
 1. Ensure default branch contains **only package code**.  
-2. Open issue titled **`ACMGamp`** on
+2. Open issue titled **`ClinicalVariantR`** on
    [BiocContributions](https://github.com/Bioconductor/BiocContributions/issues)
    using the official template; paste
-   `https://github.com/safarafique/ACMGamp`.  
+   `https://github.com/safarafique/ClinicalVariantR`.  
 3. Fix any precheck failures.  
 4. Comment `/accept-policies`.  
 5. Link / push to Bioconductor staging as instructed.  

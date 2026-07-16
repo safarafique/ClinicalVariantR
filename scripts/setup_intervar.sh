@@ -39,14 +39,14 @@ NEXT STEPS (required):
      bash scripts/subset_sample3_vcf.sh
      bash scripts/run_intervar_sample3.sh
 
-5. Compare with ACMGamp:
-     Rscript standalone/compare_acmgamp_intervar.R \
-       --acmgamp report.csv \
+5. Compare with ClinicalVariantR:
+     Rscript standalone/compare_clinicalvariantr_intervar.R \
+       --clinicalvariantr report.csv \
        --intervar OUT/prefix.hg38_multianno.txt.intervar
 
 FAST PATH (no InterVar install):
-     Rscript standalone/compare_acmgamp_intervar.R \
-       --acmgamp report.csv \
+     Rscript standalone/compare_clinicalvariantr_intervar.R \
+       --clinicalvariantr report.csv \
        --reference ../testig/testig/260324100042.acmg.tsv
 
 EOF

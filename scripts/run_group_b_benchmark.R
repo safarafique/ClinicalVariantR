@@ -13,19 +13,19 @@ project_root <- normalizePath(file.path(script_dir, ".."), winslash = "/", mustW
 setwd(project_root)
 source("global_cli.R")
 
-bench_dir <- normalizePath(file.path(project_root, "..", "testig", "acmgamp_benchmark"), mustWork = FALSE)
-vcf_path <- file.path(bench_dir, "acmgamp_group_b_benchmark.vcf")
-tsv_path <- file.path(bench_dir, "acmgamp_group_b_benchmark.acmg.tsv")
+bench_dir <- normalizePath(file.path(project_root, "..", "testig", "clinicalvariantr_benchmark"), mustWork = FALSE)
+vcf_path <- file.path(bench_dir, "clinicalvariantr_group_b_benchmark.vcf")
+tsv_path <- file.path(bench_dir, "clinicalvariantr_group_b_benchmark.acmg.tsv")
 
 if (!file.exists(vcf_path) || !file.exists(tsv_path)) {
   message("Group B benchmark files missing — generating...")
   source(file.path(project_root, "scripts", "generate_group_b_benchmark.R"))
 }
 
-out_dir <- file.path(project_root, "..", "results", "acmgamp_benchmark")
+out_dir <- file.path(project_root, "..", "results", "clinicalvariantr_benchmark")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
-cat("=== ACMGamp Group B efficiency benchmark ===\n")
+cat("=== ClinicalVariantR Group B efficiency benchmark ===\n")
 cat("Engine:", ACMG_PRO_ENGINE, " (", APP_VERSION, ")\n", sep = "")
 cat("VCF:", vcf_path, "\n\n")
 

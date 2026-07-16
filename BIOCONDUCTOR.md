@@ -1,4 +1,4 @@
-# Bioconductor docs for ACMGamp
+# Bioconductor docs for ClinicalVariantR
 
 Start here:
 
@@ -10,8 +10,8 @@ Start here:
 
 | File | Topic |
 |------|--------|
-| `vignettes/ACMGamp.Rmd` | Introduction / overview |
-| `vignettes/ACMGamp-run-and-test.Rmd` | App launch, sample VCFs, Group A/B/C UI tests, CLI & unit tests |
+| `vignettes/ClinicalVariantR.Rmd` | Introduction / overview |
+| `vignettes/ClinicalVariantR-run-and-test.Rmd` | App launch, sample VCFs, Group A/B/C UI tests, CLI & unit tests |
 
 Build locally (from package root, with BiocStyle installed):
 
@@ -19,7 +19,7 @@ Build locally (from package root, with BiocStyle installed):
 # BiocManager::install("BiocStyle")
 devtools::build_vignettes()
 # or:
-rmarkdown::render("vignettes/ACMGamp-run-and-test.Rmd")
+rmarkdown::render("vignettes/ClinicalVariantR-run-and-test.Rmd")
 ```
 
 Official portals:

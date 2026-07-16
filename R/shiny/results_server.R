@@ -341,7 +341,7 @@ register_results_server <- function(ctx) {
   })
 
   output$download_a <- downloadHandler(
-    filename = function() paste0("ACMGamp_Prediction_Report_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv"),
+    filename = function() paste0("ClinicalVariantR_Prediction_Report_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv"),
     content = function(file) {
       path <- report_a_csv()
       if (!is.null(path) && file.exists(path)) {
@@ -354,7 +354,7 @@ register_results_server <- function(ctx) {
   )
 
   output$download_b <- downloadHandler(
-    filename = function() paste0("ACMGamp_Prediction_Report_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv"),
+    filename = function() paste0("ClinicalVariantR_Prediction_Report_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv"),
     content = function(file) {
       path <- report_b_csv()
       if (!is.null(path) && file.exists(path)) {

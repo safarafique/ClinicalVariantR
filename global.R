@@ -1,4 +1,4 @@
-# Global configuration and module loading for ACMGamp
+# Global configuration and module loading for ClinicalVariantR
 
 suppressPackageStartupMessages({
   library(shiny)
@@ -17,15 +17,15 @@ if (!.va_available) {
   )
 }
 
-APP_TITLE <- "ACMGamp"
+APP_TITLE <- "ClinicalVariantR"
 APP_VERSION <- "2.7.0"
-ACMG_PRO_ENGINE <- "ACMGamp-Prediction-v2.7.0"
+ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v2.7.0"
 ACMG_GUIDELINE_VERSION <- "ACMG/AMP 2015 + ClinGen refinements"
 
 # Maximum upload size for VCF and companion files (1 GiB)
 MAX_UPLOAD_SIZE_BYTES <- 1024 * 1024^2
 # Keep idle sessions alive for at least 1 hour (local + hosted Shiny)
-SESSION_IDLE_TIMEOUT_SEC <- as.integer(Sys.getenv("ACMGAMP_IDLE_TIMEOUT_SEC", unset = "3600"))
+SESSION_IDLE_TIMEOUT_SEC <- as.integer(Sys.getenv("CLINICALVARIANTR_IDLE_TIMEOUT_SEC", unset = "3600"))
 options(
   shiny.maxRequestSize = MAX_UPLOAD_SIZE_BYTES,
   shiny.http.timeout = SESSION_IDLE_TIMEOUT_SEC
@@ -90,6 +90,7 @@ module_files <- c(
   "R/classify_variant.R",
   "R/audit.R",
   "R/reference_data.R",
+  "R/variant_key.R",
   "R/vcf_unified_parser.R",
   "R/rule_config.R",
   "R/prediction_config.R",

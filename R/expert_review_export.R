@@ -115,7 +115,7 @@ expert_review_checklist_static_ui <- function(show_curation = FALSE) {
 expert_csv_handoff_ui <- function() {
   div(
     class = "alert alert-success border mb-3",
-    h6(class = "alert-heading mb-2", icon("file-csv"), " Best input for expert review: ACMGamp CSV export"),
+    h6(class = "alert-heading mb-2", icon("file-csv"), " Best input for expert review: ClinicalVariantR CSV export"),
     tags$ol(
       class = "small mb-2 ps-3",
       tags$li("Run ", tags$strong("Run Analysis"), " and wait for results."),
@@ -138,9 +138,9 @@ expert_csv_handoff_ui <- function() {
     tags$p(
       class = "small text-muted mb-0",
       "Filename pattern: ",
-      tags$code("ACMGamp_Expert_Worklist_*.csv"),
+      tags$code("ClinicalVariantR_Expert_Worklist_*.csv"),
       " or ",
-      tags$code("ACMGamp_Prediction_Report_*.csv"),
+      tags$code("ClinicalVariantR_Prediction_Report_*.csv"),
       "."
     )
   )
@@ -189,7 +189,7 @@ register_expert_worklist_downloads <- function(
   output[[lp_id]] <- downloadHandler(
     filename = function() {
       paste0(
-        "ACMGamp_LP_Plus_", toupper(suffix), "_",
+        "ClinicalVariantR_LP_Plus_", toupper(suffix), "_",
         format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv"
       )
     },
@@ -206,7 +206,7 @@ register_expert_worklist_downloads <- function(
   output[[wl_id]] <- downloadHandler(
     filename = function() {
       paste0(
-        "ACMGamp_Expert_Worklist_", toupper(suffix), "_",
+        "ClinicalVariantR_Expert_Worklist_", toupper(suffix), "_",
         format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv"
       )
     },

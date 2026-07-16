@@ -4,7 +4,7 @@ AUTH_USERS_PATH <- file.path("config", "auth_users.csv")
 SECURE_UPLOAD_DIR <- file.path("logs", "secure_uploads")
 AUTH_ENABLED <- FALSE
 # Skip encrypting very large uploads on receive (analysis uses Shiny temp path).
-SECURE_UPLOAD_ENCRYPT_MAX_MB <- as.numeric(Sys.getenv("ACMGAMP_ENCRYPT_MAX_MB", unset = "25"))
+SECURE_UPLOAD_ENCRYPT_MAX_MB <- as.numeric(Sys.getenv("CLINICALVARIANTR_ENCRYPT_MAX_MB", unset = "25"))
 AES_GCM_IV_BYTES <- 12L
 
 load_auth_users <- function(path = AUTH_USERS_PATH) {
@@ -23,8 +23,8 @@ verify_user_password <- function(username, password, path = AUTH_USERS_PATH) {
   if (!isTRUE(AUTH_ENABLED)) return(TRUE)
   users <- load_auth_users(path)
   if (nrow(users) == 0L) {
-    env_user <- Sys.getenv("ACMGAMP_USER", unset = "")
-    env_pass <- Sys.getenv("ACMGAMP_PASSWORD", unset = "")
+    env_user <- Sys.getenv("CLINICALVARIANTR_USER", unset = "")
+    env_pass <- Sys.getenv("CLINICALVARIANTR_PASSWORD", unset = "")
     if (nzchar(env_user) && nzchar(env_pass)) {
       return(identical(username, env_user) && identical(password, env_pass))
     }
@@ -41,12 +41,12 @@ verify_user_password <- function(username, password, path = AUTH_USERS_PATH) {
 }
 
 get_encryption_key <- function() {
-  key <- Sys.getenv("ACMGAMP_ENCRYPTION_KEY", unset = "")
+  key <- Sys.getenv("CLINICALVARIANTR_ENCRYPTION_KEY", unset = "")
   if (nzchar(key)) return(charToRaw(substr(key, 1, 32)))
   if (requireNamespace("digest", quietly = TRUE)) {
     return(charToRaw(substr(digest::digest(Sys.info()[["nodename"]], algo = "sha256"), 1, 32)))
   }
-  charToRaw(paste0("ACMGamp-default-key-", Sys.info()[["user"]]))
+  charToRaw(paste0("ClinicalVariantR-default-key-", Sys.info()[["user"]]))
 }
 
 encrypt_upload_file <- function(src_path, dest_path = NULL) {

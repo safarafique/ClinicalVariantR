@@ -7,7 +7,7 @@ register_upload_server <- function(ctx) {
 
   ctx$auth_required_msg <- function() {
     showNotification(
-      "Sign in first (admin / changeme). Files selected before login are processed after sign-in.",
+      "Sign in first. Files selected before login are processed after sign-in.",
       type = "warning",
       duration = 8
     )

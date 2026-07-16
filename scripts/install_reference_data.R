@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
-# Install or validate production reference snapshots for ACMGamp prediction mode.
+# Install or validate production reference snapshots for ClinicalVariantR prediction mode.
 #
-# Usage (from cml_variant_interpreter/):
+# Usage (from ClinicalVariantR/):
 #   Rscript scripts/install_reference_data.R --check
 #   Rscript scripts/install_reference_data.R --gnomad /path/gnomad_subset.tsv --clinvar /path/clinvar.tsv --revel /path/revel.tsv
 #   Rscript scripts/install_reference_data.R --copy-placeholders

@@ -14,7 +14,7 @@ IMPLEMENTED <- c(
   "BA1", "BS1", "BS2", "BP1", "BP3", "BP4", "BP6", "BP7"
 )
 
-cat("=== ACMGamp 18-criteria verification ===\n\n")
+cat("=== ClinicalVariantR 18-criteria verification ===\n\n")
 cat("Engine:", ACMG_PRO_ENGINE, "\n")
 cat("Automated (18):", paste(IMPLEMENTED, collapse = ", "), "\n\n")
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env Rscript
-# Run ACMGamp on one VCF (CLI, no Shiny).
+# Run ClinicalVariantR on one VCF (CLI, no Shiny).
 #
 # Usage:
 #   Rscript scripts/run_acgm_cli.R <vcf> <output_csv> [profile_id] [gene1,gene2,...]
 #
 # Examples:
-#   Rscript scripts/run_acgm_cli.R ../HMC-1.final.vcf ../results/HMC-1.acmgamp.csv hematologic_predisposition
+#   Rscript scripts/run_acgm_cli.R ../HMC-1.final.vcf ../results/HMC-1.clinicalvariantr.csv hematologic_predisposition
 #   Rscript scripts/run_acgm_cli.R sample.vcf out.csv hematologic_predisposition ABL1,BCR,RUNX1,GATA2
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -39,7 +39,7 @@ dir.create(dirname(output_csv), recursive = TRUE, showWarnings = FALSE)
 sample_id <- tools::file_path_sans_ext(basename(vcf_path))
 session_id <- paste0(sample_id, "-CLI")
 
-message("ACMGamp CLI: ", basename(vcf_path))
+message("ClinicalVariantR CLI: ", basename(vcf_path))
 message("Profile: ", profile_id)
 if (length(gene_filter) > 0L) message("Gene panel: ", paste(gene_filter, collapse = ", "))
 

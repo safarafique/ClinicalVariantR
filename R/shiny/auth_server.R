@@ -8,9 +8,9 @@ register_auth_server <- function(ctx) {
   observe({
     if (!isTRUE(AUTH_ENABLED) || authorized()) return()
     showModal(modalDialog(
-      title = tagList(icon("lock"), " ACMGamp Login"),
+      title = tagList(icon("lock"), " ClinicalVariantR Login"),
       p("Sign in to upload clinical data. Uploads are encrypted at rest when OpenSSL is available."),
-      p(class = "text-muted small", "Use admin / changeme or curator / curator123. Select files after sign-in (or re-select if you chose a file before login)."),
+      p(class = "text-muted small", "Use configured credentials. Select files after sign-in, or re-select if you chose a file before login."),
       textInput("login_user", "Username", placeholder = "admin"),
       passwordInput("login_pass", "Password"),
       footer = actionButton("login_btn", "Sign in", class = "btn-primary"),

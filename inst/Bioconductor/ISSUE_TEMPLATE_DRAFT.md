@@ -3,13 +3,13 @@
 **Where to submit:**  
 https://github.com/Bioconductor/BiocContributions/issues/new  
 
-**Issue title:** `ACMGamp`  
+**Issue title:** `ClinicalVariantR`  
 
 Use the official **new submission template** without modifying its structure.
 Paste your repository URL where indicated:
 
 ```text
-https://github.com/safarafique/ACMGamp
+https://github.com/safarafique/ClinicalVariantR
 ```
 
 Confirm that you have read:
@@ -26,7 +26,7 @@ After precheck passes, comment **exactly**:
 
 ## Suggested short description (if the template asks)
 
-ACMGamp is a Bioconductor / Shiny software package for ACMG/AMP germline variant
+ClinicalVariantR is a Bioconductor / Shiny software package for ACMG/AMP germline variant
 classification from VEP-, SnpEff-, or ANNOVAR-annotated VCF files, with streaming
 support for large call sets and structured criterion-level evidence export.
 

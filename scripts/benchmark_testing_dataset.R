@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# Benchmark ACMGamp efficiency against testing dataset with reference .acmg.tsv files.
+# Benchmark ClinicalVariantR efficiency against testing dataset with reference .acmg.tsv files.
 #
 # Usage:
 #   Rscript scripts/benchmark_testing_dataset.R [test_folder] [output_dir] [profile_id]
@@ -26,7 +26,7 @@ profile_id <- if (length(args) >= 3L) args[[3L]] else DEFAULT_PROFILE_ID
 
 if (!dir.exists(test_folder)) stop("Test folder not found: ", test_folder)
 
-cat("=== ACMGamp Benchmark ===\n")
+cat("=== ClinicalVariantR Benchmark ===\n")
 cat("Test folder: ", test_folder, "\n", sep = "")
 cat("Profile:     ", profile_id, "\n", sep = "")
 cat("Output:      ", output_dir, "\n\n", sep = "")

@@ -1,8 +1,8 @@
-# ACMGamp — Variant Prediction Platform
+# ClinicalVariantR — Variant Prediction Platform
 
-**ACMGamp** is an R Shiny application for ACMG/AMP evidence-based germline variant **prediction** with per-variant curator workflow.
+**ClinicalVariantR** is an R Shiny application for ACMG/AMP evidence-based germline variant **prediction** with per-variant curator workflow.
 
-Repository: [https://github.com/safarafique/ACMGamp](https://github.com/safarafique/ACMGamp)
+Repository: [https://github.com/safarafique/ClinicalVariantR](https://github.com/safarafique/ClinicalVariantR)
 
 ## Bioconductor submission docs
 
@@ -14,17 +14,17 @@ Package metadata and submission guides live under `inst/Bioconductor/`:
 | [`inst/Bioconductor/PACKAGE_CONVERSION.md`](inst/Bioconductor/PACKAGE_CONVERSION.md) | Convert Shiny-app layout → Bioconductor package |
 | [`inst/Bioconductor/ISSUE_TEMPLATE_DRAFT.md`](inst/Bioconductor/ISSUE_TEMPLATE_DRAFT.md) | Draft for BiocContributions issue |
 
-Core package files: `DESCRIPTION` (version `0.99.0`), `NAMESPACE`, `LICENSE`, `NEWS.md`, `man/`, `vignettes/ACMGamp.Rmd`, `tests/`, `inst/CITATION`.
+Core package files: `DESCRIPTION` (version `0.99.0`), `NAMESPACE`, `LICENSE`, `NEWS.md`, `man/`, `vignettes/ClinicalVariantR.Rmd`, `tests/`, `inst/CITATION`.
 
 Launch API (Bioconductor Shiny style — return app, user runs it):
 
 ```r
-library(ACMGamp)
-app <- ACMGamp()
+library(ClinicalVariantR)
+app <- ClinicalVariantR()
 if (interactive()) shiny::runApp(app)
 ```
 
-**Important:** documentation scaffold is ready; full package conversion (paths → `inst/`, remove `source()` chains, clean `R CMD check` / `BiocCheck`) must finish before opening a BiocContributions issue.
+**Important:** documentation scaffold is ready; full package conversion (paths to `inst/`, remove `source()` chains, clean `R CMD check` / `BiocCheck`) must finish before opening a BiocContributions issue.
 
 ## Pipelines
 
@@ -42,19 +42,19 @@ See `config/prediction_reference_install.md` for full gnomAD/ClinVar/REVEL setup
 
 ### Authentication and PHI storage (v2.5)
 
-- Default users in `config/auth_users.csv` (`admin` / `changeme`, `curator` / `curator123`). Set `AUTH_ENABLED <- FALSE` in `R/auth_storage.R` to disable login for local dev.
-- Override with environment variables `ACMGAMP_USER` and `ACMGAMP_PASSWORD` when no user file is present.
-- Uploads are encrypted at rest (AES-256-GCM via OpenSSL) under `logs/secure_uploads/`; set `ACMGAMP_ENCRYPTION_KEY` (32 chars) for production.
+- Authentication is disabled for local development by default (`AUTH_ENABLED <- FALSE` in `R/auth_storage.R`). For secured demos, provide users through `config/auth_users.csv` or the `CLINICALVARIANTR_USER` / `CLINICALVARIANTR_PASSWORD` environment variables.
+- Override with environment variables `CLINICALVARIANTR_USER` and `CLINICALVARIANTR_PASSWORD` when no user file is present.
+- Uploads are encrypted at rest (AES-256-GCM via OpenSSL) under `logs/secure_uploads/`; set `CLINICALVARIANTR_ENCRYPTION_KEY` (32 chars) for production.
 - Access events are logged to `logs/access_audit.csv`.
 
 ### Validation report
 
 ```bash
-cd cml_variant_interpreter
+cd ClinicalVariantR
 Rscript scripts/generate_validation_report.R
 ```
 
-Expert-classified variants live in `data/validation/acmgamp_validation_set.tsv` (expand toward 500+ for production sign-off).
+Expert-classified variants live in `data/validation/clinicalvariantr_validation_set.tsv` (expand toward 500+ for production sign-off).
 
 Features include VCF requirement validation (green/red readiness), variant preview, **complete large-VCF streaming analysis** (no row cap), optional **bcftools** integration on Ubuntu/WSL, color-coded results, audit logging, and CSV export.
 
@@ -69,13 +69,13 @@ install.packages(c("shiny", "bslib", "DT", "data.table", "readr"))
 ### Run the app
 
 ```r
-shiny::runApp("path/to/ACMGamp")
+shiny::runApp("path/to/ClinicalVariantR")
 ```
 
 ### Ubuntu / WSL (recommended for large VEP VCFs)
 
 ```bash
-cd /mnt/e/ACGM/cml_variant_interpreter
+cd /mnt/e/ACGM/ClinicalVariantR
 bash scripts/ubuntu_setup.sh          # bcftools + R CLI packages
 # Or install R CLI deps only:
 Rscript scripts/install_r_cli_deps.R  # data.table, readr, jsonlite → ~/R/.../library
@@ -101,8 +101,10 @@ Use the full prediction report for audit; use the worklist export to start manua
 
 ## Project structure
 
+For a fuller file-by-file orientation, see `CODEBASE_MAP.md`.
+
 ```
-ACMGamp/
+ClinicalVariantR/
 ├── app.R
 ├── global.R
 ├── ui.R
@@ -127,13 +129,13 @@ ACMGamp/
 
 ## Outputs
 
-**Best input for expert review:** download the ACMGamp **CSV export** after analysis completes.
+**Best input for expert review:** download the ClinicalVariantR **CSV export** after analysis completes.
 
 | Export | When to use |
 |--------|-------------|
-| `ACMGamp_Expert_Worklist_*.csv` | **Start here** — LP+ and high-priority VUS for sign-out review |
-| `ACMGamp_LP_Plus_*.csv` | Pathogenic / Likely Pathogenic only |
-| `ACMGamp_Prediction_Report_*.csv` | Full audit trail — all variants and evidence |
+| `ClinicalVariantR_Expert_Worklist_*.csv` | **Start here** — LP+ and high-priority VUS for sign-out review |
+| `ClinicalVariantR_LP_Plus_*.csv` | Pathogenic / Likely Pathogenic only |
+| `ClinicalVariantR_Prediction_Report_*.csv` | Full audit trail — all variants and evidence |
 
 Key columns for expert review: `variant_id`, `gene`, `classification`, `criteria_met`, `criteria_rationale`, `prediction_limitations`, `evidence_json`, `confidence_score`, `evidence_strength`.
 
@@ -142,7 +144,7 @@ Also written automatically under `logs/` during streaming runs. Audit trail: `lo
 ## Logic check
 
 ```r
-setwd("path/to/ACMGamp")
+setwd("path/to/ClinicalVariantR")
 source("global.R")
 test_acmg_logic_engine()
 ```

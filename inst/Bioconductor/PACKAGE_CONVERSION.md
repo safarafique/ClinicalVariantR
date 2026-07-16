@@ -1,4 +1,4 @@
-# ACMGamp → Bioconductor package conversion plan
+# ClinicalVariantR → Bioconductor package conversion plan
 
 Use this checklist after reading `SUBMISSION_CHECKLIST.md`. Goal: convert the
 current Shiny **application** tree into a standards-compliant Bioconductor
@@ -7,7 +7,7 @@ current Shiny **application** tree into a standards-compliant Bioconductor
 ## Target tree
 
 ```
-ACMGamp/
+ClinicalVariantR/
 ├── DESCRIPTION
 ├── NAMESPACE
 ├── LICENSE / LICENSE.md
@@ -15,8 +15,8 @@ ACMGamp/
 ├── README.md
 ├── app.R                    # optional thin launcher only
 ├── R/
-│   ├── ACMGamp-package.R
-│   ├── ACMGamp.R            # exported ACMGamp() / ACMGampApp()
+│   ├── ClinicalVariantR-package.R
+│   ├── ClinicalVariantR.R   # exported ClinicalVariantR() / ClinicalVariantRApp()
 │   ├── utils_*.R            # parsers, engines, helpers
 │   ├── interface_*.R        # UI builders (from R/shiny/ui/)
 │   ├── observers_*.R        # observeEvent modules
@@ -37,17 +37,17 @@ ACMGamp/
 ### A. Path resolution
 
 1. Replace hard-coded `file.path("config", ...)` / `file.path("data", ...)` with
-   `system.file("config", ..., package = "ACMGamp")` and
-   `system.file("extdata", ..., package = "ACMGamp")`.
+   `system.file("config", ..., package = "ClinicalVariantR")` and
+   `system.file("extdata", ..., package = "ClinicalVariantR")`.
 2. Write logs to `tempdir()` or user-configurable paths, never into the package
    library tree.
-3. Load `www` CSS via `system.file("www", "custom.css", package = "ACMGamp")`.
+3. Load `www` CSS via `system.file("www", "custom.css", package = "ClinicalVariantR")`.
 
 ### B. Stop sourcing files
 
 1. Remove `lapply(module_files, source, ...)` from `global.R`.
 2. All logic under `R/` must be package functions (roxygen + NAMESPACE).
-3. Keep only `ACMGamp()` constructing `shiny::shinyApp(ui, server)`.
+3. Keep only `ClinicalVariantR()` constructing `shiny::shinyApp(ui, server)`.
 
 ### C. Relocate assets
 
@@ -80,7 +80,7 @@ Reviewers allow modules; naming scheme improves BiocCheck friendliness.
 After conversion, root `app.R` may contain only:
 
 ```r
-shiny::runApp(ACMGamp::ACMGamp())
+shiny::runApp(ClinicalVariantR::ClinicalVariantR())
 ```
 
 Do not put business logic in `app.R`.
@@ -114,7 +114,7 @@ benchmark raw dumps, and lab notes to another branch (e.g. `devtools`).
 ```text
 [ ] DESCRIPTION Version 0.99.z + biocViews
 [ ] system.file paths work after install
-[ ] ACMGamp() returns shiny.appobj; vignette builds
+[ ] ClinicalVariantR() returns shiny.appobj; vignette builds
 [ ] R CMD build / check clean
 [ ] BiocCheck + BiocCheckGitClone clean (or justified notes)
 [ ] No file > 5 MB; tarball < 10 MB

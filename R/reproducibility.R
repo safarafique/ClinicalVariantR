@@ -1,4 +1,4 @@
-#' Reproducibility metadata for ACMGamp runs.
+#' Reproducibility metadata for ClinicalVariantR runs.
 
 file_checksum_md5 <- function(path) {
   if (!file.exists(path)) return(NA_character_)

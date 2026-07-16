@@ -1,4 +1,4 @@
-# CLI bootstrap for ACMGamp scripts (no Shiny / DT / bslib).
+# CLI bootstrap for ClinicalVariantR scripts (no Shiny / DT / bslib).
 # Usage in scripts: source("global_cli.R")
 
 bootstrap_user_r_library <- function() {
@@ -30,7 +30,7 @@ if (!requireNamespace("data.table", quietly = TRUE)) {
   stop(
     "Package 'data.table' is required for CLI analysis.\n",
     "Install in WSL (one-time):\n",
-    "  cd /mnt/e/ACGM/cml_variant_interpreter\n",
+    "  cd /mnt/e/ACGM/ClinicalVariantR\n",
     "  Rscript scripts/install_r_cli_deps.R\n",
     "Or via apt (faster, if available):\n",
     "  sudo apt install -y r-cran-data.table r-cran-readr\n",
@@ -39,9 +39,9 @@ if (!requireNamespace("data.table", quietly = TRUE)) {
   )
 }
 
-APP_TITLE <- "ACMGamp"
+APP_TITLE <- "ClinicalVariantR"
 APP_VERSION <- "2.7.0"
-ACMG_PRO_ENGINE <- "ACMGamp-Prediction-v2.7.0"
+ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v2.7.0"
 ACMG_GUIDELINE_VERSION <- "ACMG/AMP 2015 + ClinGen refinements"
 
 CONFIG_PATHS <- list(
@@ -100,6 +100,7 @@ cli_module_files <- c(
   "R/classify_variant.R",
   "R/audit.R",
   "R/reference_data.R",
+  "R/variant_key.R",
   "R/vcf_unified_parser.R",
   "R/rule_config.R",
   "R/prediction_config.R",

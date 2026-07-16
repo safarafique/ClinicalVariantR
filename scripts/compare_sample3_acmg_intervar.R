@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# Score Sample 3 pilot VCF with ACMGamp and compare to InterVar when available.
+# Score Sample 3 pilot VCF with ClinicalVariantR and compare to InterVar when available.
 #
 # Usage:
 #   Rscript scripts/compare_sample3_acmg_intervar.R
@@ -28,7 +28,7 @@ parse_args <- function(args) {
       out$profile <- args[[i + 1L]]; i <- i + 2L
     } else if (key %in% c("--help", "-h")) {
       cat(
-        "Compare ACMGamp vs InterVar on Sample 3 pilot VCF\n\n",
+        "Compare ClinicalVariantR vs InterVar on Sample 3 pilot VCF\n\n",
         "Options:\n",
         "  --pilot-vcf FILE   Pilot VCF (default: ../results/intervar_compare/Sample3.pilot.vcf)\n",
         "  --intervar FILE    InterVar *.intervar output (auto-detected if present)\n",
@@ -116,11 +116,11 @@ scored <- score_variants_table(
   profile_id = opts$profile
 )
 
-acmg_pilot_path <- file.path(out_dir, "Sample3.pilot.acmgamp.csv")
+acmg_pilot_path <- file.path(out_dir, "Sample3.pilot.clinicalvariantr.csv")
 write.csv(scored, acmg_pilot_path, row.names = FALSE)
-message("Wrote ACMGamp pilot results: ", acmg_pilot_path)
+message("Wrote ClinicalVariantR pilot results: ", acmg_pilot_path)
 
-cat("\nACMGamp pilot classification counts:\n")
+cat("\nClinicalVariantR pilot classification counts:\n")
 print(table(scored$classification, useNA = "ifany"))
 
 if (!file.exists(intervar_path)) {
@@ -136,20 +136,20 @@ if (!file.exists(intervar_path)) {
 
 source(file.path(project_root, "R", "intervar_compare.R"), local = FALSE)
 
-acmg_df <- load_acmgamp_report_csv(acmg_pilot_path)
+acmg_df <- load_clinicalvariantr_report_csv(acmg_pilot_path)
 ref_df <- load_intervar_output(intervar_path)
-result <- compare_two_classification_tables(acmg_df, ref_df, left_name = "ACMGamp", right_name = "InterVar")
+result <- compare_two_classification_tables(acmg_df, ref_df, left_name = "ClinicalVariantR", right_name = "InterVar")
 prefix <- file.path(out_dir, "Sample3.pilot_compare")
 paths <- write_comparison_outputs(result, prefix)
 
-cat("\n=== ACMGamp vs InterVar (Sample 3 pilot) ===\n")
-cat("ACMGamp variants:  ", nrow(acmg_df), "\n", sep = "")
+cat("\n=== ClinicalVariantR vs InterVar (Sample 3 pilot) ===\n")
+cat("ClinicalVariantR variants:  ", nrow(acmg_df), "\n", sep = "")
 cat("InterVar variants: ", nrow(ref_df), "\n", sep = "")
 cat("Overlap:           ", result$metrics$n_overlap, "\n", sep = "")
 cat("Exact 5-class acc: ", result$metrics$exact_accuracy, "%\n", sep = "")
 cat("Tier accuracy:     ", result$metrics$tier_accuracy, "%\n\n", sep = "")
 
-cat("ACMGamp category counts:\n")
+cat("ClinicalVariantR category counts:\n")
 print(classification_count_table(acmg_df))
 cat("\nInterVar category counts:\n")
 print(classification_count_table(ref_df))

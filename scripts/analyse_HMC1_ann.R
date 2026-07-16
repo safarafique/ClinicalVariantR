@@ -22,7 +22,7 @@ if (dir.exists(file.path(project_root, "R"))) {
   data_root <- normalizePath(file.path(project_root, ".."), winslash = "/", mustWork = FALSE)
 } else {
   data_root <- project_root
-  acgm_root <- file.path(project_root, "cml_variant_interpreter")
+  acgm_root <- file.path(project_root, "ClinicalVariantR")
 }
 
 vcf_path <- if (length(args) >= 2L) {

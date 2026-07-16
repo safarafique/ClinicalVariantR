@@ -1,5 +1,5 @@
 # Verify Group A exports all 28 ACMG criteria when clinical + pedigree files are supplied.
-# Usage (WSL): cd /mnt/e/ACGM/cml_variant_interpreter && Rscript scripts/verify_group_a_28.R
+# Usage (WSL): cd /mnt/e/ACGM/ClinicalVariantR && Rscript scripts/verify_group_a_28.R
 
 source("global_cli.R")
 source("R/parse_inputs.R")

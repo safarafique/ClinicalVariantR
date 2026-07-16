@@ -1,15 +1,19 @@
-citHeader("To cite ACMGamp in publications use:")
+citHeader("To cite ClinicalVariantR in publications use:")
 
 bibentry(
     bibtype = "Manual",
-    title = "ACMGamp: ACMG/AMP Germline Variant Interpretation from Annotated VCF Files",
-    author = person("Safa", "Rafique"),
+    title = "ClinicalVariantR: ACMG/AMP Germline Variant Interpretation from Annotated VCF Files",
+    author = c(
+        person("Safa", "Rafique"),
+        person("Naeem", "Mahmood"),
+        person("Muhammad Farooq", "Sabar")
+    ),
     year = "2026",
     note = paste("R package version", meta$Version),
-    url = "https://github.com/safarafique/ACMGamp",
+    url = "https://github.com/safarafique/ClinicalVariantR",
     textVersion = paste0(
-        "Rafique, S. (2026). ACMGamp: ACMG/AMP Germline Variant Interpretation ",
+        "Rafique, S., Mahmood, N., and Sabar, M. F. (2026). ClinicalVariantR: ACMG/AMP Germline Variant Interpretation ",
         "from Annotated VCF Files. R package version ", meta$Version, ". ",
-        "https://github.com/safarafique/ACMGamp"
+        "https://github.com/safarafique/ClinicalVariantR"
     )
 )

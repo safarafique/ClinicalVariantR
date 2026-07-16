@@ -102,7 +102,7 @@ with open(path, encoding="utf-8", errors="replace") as fh:
         print(f"  {cls}: {n}")
 PY
   echo ""
-  echo "Compare with ACMGamp:"
+  echo "Compare with ClinicalVariantR:"
   RSCRIPT="${RSCRIPT:-/mnt/c/Program Files/R/R-4.6.0/bin/Rscript.exe}"
   if [[ -x "$RSCRIPT" ]] || command -v Rscript >/dev/null 2>&1; then
     RS="${RSCRIPT:-Rscript}"

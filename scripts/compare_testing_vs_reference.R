@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# Score testing VCFs with ACMGamp and compare to bundled .acmg.tsv (InterVar-style reference).
+# Score testing VCFs with ClinicalVariantR and compare to bundled .acmg.tsv (InterVar-style reference).
 #
 # Usage:
 #   Rscript scripts/compare_testing_vs_reference.R [test_folder] [output_dir]
@@ -41,26 +41,26 @@ for (vcf_path in vcf_files) {
   result <- analyze_complete_vcf(
     vcf_path = vcf_path,
     mode = "rapid",
-    output_csv = paste0(out_prefix, ".acmgamp.csv"),
+    output_csv = paste0(out_prefix, ".clinicalvariantr.csv"),
     pass_only = FALSE,
     use_bcftools = FALSE,
     refs = refs,
     profile_id = DEFAULT_PROFILE_ID
   )
 
-  acmg_df <- load_acmgamp_report_csv(result$output_csv)
+  acmg_df <- load_clinicalvariantr_report_csv(result$output_csv)
   ref_df <- load_intervar_reference_tsv(tsv_path)
-  cmp <- compare_two_classification_tables(acmg_df, ref_df, left_name = "ACMGamp", right_name = "Reference")
+  cmp <- compare_two_classification_tables(acmg_df, ref_df, left_name = "ClinicalVariantR", right_name = "Reference")
   paths <- write_comparison_outputs(cmp, out_prefix)
 
   summary_rows[[length(summary_rows) + 1L]] <- data.frame(
     sample_id = sample_id,
-    n_acmgamp = nrow(acmg_df),
+    n_clinicalvariantr = nrow(acmg_df),
     n_reference = nrow(ref_df),
     n_overlap = cmp$metrics$n_overlap,
     exact_accuracy_pct = cmp$metrics$exact_accuracy,
     tier_accuracy_pct = cmp$metrics$tier_accuracy,
-    acmgamp_csv = result$output_csv,
+    clinicalvariantr_csv = result$output_csv,
     comparison_csv = paths$comparison_csv,
     stringsAsFactors = FALSE
   )
@@ -72,6 +72,6 @@ summary_df <- do.call(rbind, summary_rows)
 summary_path <- file.path(output_dir, "intervar_style_comparison_summary.csv")
 utils::write.csv(summary_df, summary_path, row.names = FALSE)
 
-cat("\n=== ACMGamp vs reference .acmg.tsv (InterVar-style) ===\n")
+cat("\n=== ClinicalVariantR vs reference .acmg.tsv (InterVar-style) ===\n")
 print(summary_df)
 cat("\nWrote: ", summary_path, "\n", sep = "")

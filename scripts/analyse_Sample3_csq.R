@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# Parse Sample 3 VEP CSQ VCF (GRCh38), filter rare coding variants, run ACMGamp Pro.
+# Parse Sample 3 VEP CSQ VCF (GRCh38), filter rare coding variants, run ClinicalVariantR Pro.
 
 args <- commandArgs(trailingOnly = TRUE)
 initial_options <- commandArgs(trailingOnly = FALSE)
@@ -19,7 +19,7 @@ project_root <- if (length(args) >= 1L) {
 acgm_root <- project_root
 data_root <- normalizePath(file.path(project_root, ".."), winslash = "/", mustWork = FALSE)
 if (!dir.exists(file.path(project_root, "R"))) {
-  acgm_root <- file.path(project_root, "cml_variant_interpreter")
+  acgm_root <- file.path(project_root, "ClinicalVariantR")
   data_root <- project_root
 }
 

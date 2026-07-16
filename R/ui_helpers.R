@@ -163,7 +163,6 @@ filter_report_by_classifications <- function(report_df, selected) {
   if (is.null(selected) || length(selected) == 0) {
     return(report_df[0, , drop = FALSE])
   }
-  selected <- if (length(selected) == 1L) selected else selected
   report_df[report_df$classification %in% selected, , drop = FALSE]
 }
 
@@ -546,7 +545,7 @@ resolve_explorer_export_df <- function(
 export_evidence_summary_pdf <- function(
     summary_df,
     file,
-    title = "ACMGamp Evidence Report — Summary",
+    title = "ClinicalVariantR Evidence Report — Summary",
     subtitle = "",
     total_variants = NA_integer_) {
 
@@ -616,7 +615,7 @@ export_evidence_summary_pdf <- function(
 export_evidence_report_pdf <- function(
     report_df,
     file,
-    title = "ACMGamp Evidence Report",
+    title = "ClinicalVariantR Evidence Report",
     subtitle = "",
     progress_callback = NULL) {
 

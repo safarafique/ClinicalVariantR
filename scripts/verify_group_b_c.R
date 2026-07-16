@@ -2,7 +2,7 @@
 # Verify Group B/C automated criteria coverage and Group C gene filter parity.
 #
 # Usage (WSL):
-#   cd /mnt/e/ACGM/cml_variant_interpreter && Rscript scripts/verify_group_b_c.R
+#   cd /mnt/e/ACGM/ClinicalVariantR && Rscript scripts/verify_group_b_c.R
 
 source("global_cli.R")
 
@@ -70,9 +70,9 @@ chk("Rapid mode does not auto-trigger PS2 from pedigree when scope=automated",
     !isTRUE(ctx$PS2[1]))
 
 # Benchmark if available
-bench_vcf <- normalizePath(file.path("..", "testig", "acmgamp_benchmark", "acmgamp_group_b_benchmark.vcf"),
+bench_vcf <- normalizePath(file.path("..", "testig", "clinicalvariantr_benchmark", "clinicalvariantr_group_b_benchmark.vcf"),
                            mustWork = FALSE)
-bench_tsv <- normalizePath(file.path("..", "testig", "acmgamp_benchmark", "acmgamp_group_b_benchmark.acmg.tsv"),
+bench_tsv <- normalizePath(file.path("..", "testig", "clinicalvariantr_benchmark", "clinicalvariantr_group_b_benchmark.acmg.tsv"),
                            mustWork = FALSE)
 if (file.exists(bench_vcf) && file.exists(bench_tsv)) {
   cat("\n=== Group B benchmark (20 variants) ===\n")

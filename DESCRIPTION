@@ -1,4 +1,4 @@
-Package: ACMGamp
+Package: ClinicalVariantR
 Title: ACMG/AMP Germline Variant Interpretation from Annotated VCF Files
 Version: 0.99.0
 Date: 2026-07-08
@@ -6,21 +6,35 @@ Authors@R: c(
     person(
         given = "Safa",
         family = "Rafique",
-        role = c("aut", "cre"),
-        email = "safa.sandhu@gmail.com"
+        email = "safa.sandhu@gmail.com",
+        role = c("aut", "cre")
+    ),
+    person(
+        given = "Naeem",
+        family = "Mahmood",
+        email = "naeem.sbb@pu.edu.pk",
+        role = "aut"
+    ),
+    person(
+        given = "Muhammad Farooq",
+        family = "Sabar",
+        email = "farooq.sbb@pu.edu.pk",
+        role = "aut"
     )
     )
-Author: Safa Rafique [aut, cre]
+Author: Safa Rafique [aut, cre],
+    Naeem Mahmood [aut],
+    Muhammad Farooq Sabar [aut]
 Maintainer: Safa Rafique <safa.sandhu@gmail.com>
-Description: ACMGamp is an interactive Shiny platform for evidence-based
+Description: ClinicalVariantR is an interactive Shiny platform for evidence-based
     germline variant classification under ACMG/AMP 2015 guidelines. It
     accepts VEP-, SnpEff-, or ANNOVAR-annotated VCF files, applies automated
     and curator-guided ACMG criteria, supports streaming analysis of large
     call sets, and exports structured per-criterion evidence with
     reproducibility metadata.
 License: MIT + file LICENSE
-URL: https://github.com/safarafique/ACMGamp
-BugReports: https://github.com/safarafique/ACMGamp/issues
+URL: https://github.com/safarafique/ClinicalVariantR
+BugReports: https://github.com/safarafique/ClinicalVariantR/issues
 biocViews: Software, VariantAnnotation, Genetics, Sequencing,
     Visualization, GUI
 Encoding: UTF-8

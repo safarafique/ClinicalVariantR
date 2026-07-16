@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
-# Compare existing ACMGamp CSV reports to reference .acmg.tsv files (base R only).
+# Compare existing ClinicalVariantR CSV reports to reference .acmg.tsv files (base R only).
 # No Shiny, no VCF re-analysis — use when reports were generated on Windows.
 #
 # Usage:
-#   Rscript scripts/compare_reference_only.R [test_folder] [acmgamp_csv_dir] [output_dir]
+#   Rscript scripts/compare_reference_only.R [test_folder] [clinicalvariantr_csv_dir] [output_dir]
 
 args <- commandArgs(trailingOnly = TRUE)
 script_dir <- dirname(normalizePath(
@@ -29,30 +29,30 @@ if (length(tsv_files) == 0L) stop("No .acmg.tsv reference files in: ", test_fold
 summary_rows <- list()
 for (tsv_path in tsv_files) {
   sample_id <- sub("\\.acmg\\.tsv$", "", basename(tsv_path))
-  acmg_candidates <- list.files(acmg_dir, pattern = paste0("^", sample_id, ".*\\.acmgamp\\.csv$"), full.names = TRUE)
+  acmg_candidates <- list.files(acmg_dir, pattern = paste0("^", sample_id, ".*\\.clinicalvariantr\\.csv$"), full.names = TRUE)
   if (length(acmg_candidates) == 0L) {
     acmg_candidates <- list.files(acmg_dir, pattern = paste0(sample_id, ".*\\.csv$"), full.names = TRUE)
   }
   if (length(acmg_candidates) == 0L) {
-    message("Skip (no ACMGamp CSV): ", sample_id)
+    message("Skip (no ClinicalVariantR CSV): ", sample_id)
     next
   }
   acmg_path <- acmg_candidates[[1L]]
   out_prefix <- file.path(output_dir, sample_id)
 
-  acmg_df <- load_acmgamp_report_csv(acmg_path)
+  acmg_df <- load_clinicalvariantr_report_csv(acmg_path)
   ref_df <- load_intervar_reference_tsv(tsv_path)
-  cmp <- compare_two_classification_tables(acmg_df, ref_df, left_name = "ACMGamp", right_name = "Reference")
+  cmp <- compare_two_classification_tables(acmg_df, ref_df, left_name = "ClinicalVariantR", right_name = "Reference")
   paths <- write_comparison_outputs(cmp, out_prefix)
 
   summary_rows[[length(summary_rows) + 1L]] <- data.frame(
     sample_id = sample_id,
-    n_acmgamp = nrow(acmg_df),
+    n_clinicalvariantr = nrow(acmg_df),
     n_reference = nrow(ref_df),
     n_overlap = cmp$metrics$n_overlap,
     exact_accuracy_pct = cmp$metrics$exact_accuracy,
     tier_accuracy_pct = cmp$metrics$tier_accuracy,
-    acmgamp_csv = acmg_path,
+    clinicalvariantr_csv = acmg_path,
     comparison_csv = paths$comparison_csv,
     stringsAsFactors = FALSE
   )
@@ -60,7 +60,7 @@ for (tsv_path in tsv_files) {
 
 if (length(summary_rows) == 0L) {
   stop(
-    "No comparisons run. Place ACMGamp CSV files in: ", acmg_dir,
+    "No comparisons run. Place ClinicalVariantR CSV files in: ", acmg_dir,
     "\nOr run full pipeline after: Rscript scripts/install_r_cli_deps.R"
   )
 }
@@ -69,6 +69,6 @@ summary_df <- do.call(rbind, summary_rows)
 summary_path <- file.path(output_dir, "intervar_style_comparison_summary.csv")
 utils::write.csv(summary_df, summary_path, row.names = FALSE)
 
-cat("\n=== ACMGamp vs reference .acmg.tsv ===\n")
+cat("\n=== ClinicalVariantR vs reference .acmg.tsv ===\n")
 print(summary_df)
 cat("\nWrote: ", summary_path, "\n", sep = "")

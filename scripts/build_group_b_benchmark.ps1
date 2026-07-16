@@ -1,7 +1,7 @@
 # Build Group B benchmark VCF from source testing samples (no R required).
 $ErrorActionPreference = "Stop"
 $testig = "e:\ACGM\testig\testig"
-$outDir = "e:\ACGM\testig\acmgamp_benchmark"
+$outDir = "e:\ACGM\testig\clinicalvariantr_benchmark"
 $sampleCol = "GROUP_B_BENCHMARK"
 
 $variants = @(
@@ -64,6 +64,6 @@ $dataLines = foreach ($v in $variants) {
   Normalize-SampleColumn (Get-VcfLine $path $v.pattern)
 }
 
-$vcfOut = Join-Path $outDir "acmgamp_group_b_benchmark.vcf"
+$vcfOut = Join-Path $outDir "clinicalvariantr_group_b_benchmark.vcf"
 $header + $dataLines | Set-Content -Path $vcfOut -Encoding UTF8
 Write-Host "Wrote VCF: $vcfOut ($($dataLines.Count) variants)"

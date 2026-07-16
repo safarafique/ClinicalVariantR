@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # Import GWAS Catalog associations as SUPPLEMENTARY evidence only.
 #
-# Policy (ACMGamp professional germline interpretation):
+# Policy (ClinicalVariantR professional germline interpretation):
 #   - GWAS rows are written to data/reference/gwas_supplementary_evidence.tsv
 #   - They are NEVER copied into ps4_case_control_enrichment.tsv
 #   - Automated PS4 is NOT awarded from GWAS data

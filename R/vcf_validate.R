@@ -442,7 +442,7 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
     )
   } else {
     add_check(
-      "INFO", "ACMGamp Pro engine", "PASS",
+      "INFO", "ClinicalVariantR Pro engine", "PASS",
       sprintf("%s detected — InterVar-style automated criteria enabled.", ann_info$label)
     )
   }

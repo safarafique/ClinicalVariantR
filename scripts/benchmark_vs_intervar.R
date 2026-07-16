@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
-# Phase 1 parity benchmark: ACMGamp vs expert labels and optional InterVar-style reference.
+# Phase 1 parity benchmark: ClinicalVariantR vs expert labels and optional InterVar-style reference.
 #
-# Usage (from cml_variant_interpreter/):
+# Usage (from ClinicalVariantR/):
 #   Rscript scripts/benchmark_vs_intervar.R
-#   Rscript scripts/benchmark_vs_intervar.R --vcf ../testig/acmgamp_benchmark/acmgamp_group_b_benchmark.vcf
+#   Rscript scripts/benchmark_vs_intervar.R --vcf ../testig/clinicalvariantr_benchmark/clinicalvariantr_group_b_benchmark.vcf
 #   Rscript scripts/benchmark_vs_intervar.R --reference ../testig/testig/sample041.acmg.tsv --min-tier 0.95
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -22,10 +22,10 @@ parse_num_arg <- function(flag, default) {
 
 vcf_path <- parse_arg(
   "--vcf",
-  file.path("..", "testig", "acmgamp_benchmark", "acmgamp_group_b_benchmark.vcf")
+  file.path("..", "testig", "clinicalvariantr_benchmark", "clinicalvariantr_group_b_benchmark.vcf")
 )
 reference_tsv <- parse_arg("--reference", NA_character_)
-validation_tsv <- file.path("data", "validation", "acmgamp_validation_set.tsv")
+validation_tsv <- file.path("data", "validation", "clinicalvariantr_validation_set.tsv")
 min_tier <- parse_num_arg("--min-tier", 0.95)
 output_dir <- file.path("results", "intervar_compare")
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
@@ -91,11 +91,11 @@ if (!is.na(reference_tsv) && nzchar(reference_tsv) && file.exists(reference_tsv)
     gene = scored$gene,
     classification = scored$pred_class,
     criteria = scored$criteria_met,
-    source = "ACMGamp",
+    source = "ClinicalVariantR",
     stringsAsFactors = FALSE
   )
   acmg_df$tier <- collapse_to_tier(acmg_df$classification)
-  iv_cmp <- compare_two_classification_tables(acmg_df, iv, left_name = "ACMGamp", right_name = "Reference")
+  iv_cmp <- compare_two_classification_tables(acmg_df, iv, left_name = "ClinicalVariantR", right_name = "Reference")
   intervar_tier_acc <- iv_cmp$metrics$tier_accuracy / 100
   intervar_exact_acc <- iv_cmp$metrics$exact_accuracy / 100
   utils::write.csv(
@@ -123,7 +123,7 @@ summary <- data.frame(
 )
 utils::write.csv(summary, summary_out, row.names = FALSE)
 
-cat("=== ACMGamp Phase 1 InterVar parity benchmark ===\n")
+cat("=== ClinicalVariantR Phase 1 InterVar parity benchmark ===\n")
 cat("Engine:", ACMG_PRO_ENGINE, "\n")
 cat(sprintf("Exact accuracy: %.1f%% (%d/%d)\n", 100 * exact_acc, sum(cmp$exact_match), nrow(cmp)))
 cat(sprintf("Tier accuracy:  %.1f%% (%d/%d)\n", 100 * tier_acc, sum(cmp$tier_match), nrow(cmp)))
@@ -139,7 +139,7 @@ if (nrow(bad) == 0L) {
 } else {
   for (i in seq_len(nrow(bad))) {
     cat(sprintf(
-      "  %s: expert=%s (%s) vs ACMGamp=%s (%s) [%s]\n",
+      "  %s: expert=%s (%s) vs ClinicalVariantR=%s (%s) [%s]\n",
       bad$benchmark_id[i],
       bad$ref_class[i], bad$ref_tier[i],
       ifelse(bad$missed[i], "MISSING", bad$pred_class[i]),

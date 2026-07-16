@@ -1,16 +1,16 @@
 #!/usr/bin/env Rscript
 # Formal validation report: score expert-classified benchmark variants and emit metrics.
-# Usage (from cml_variant_interpreter/):
+# Usage (from ClinicalVariantR/):
 #   Rscript scripts/generate_validation_report.R
-#   Rscript scripts/generate_validation_report.R --vcf ../testig/acmgamp_benchmark/acmgamp_group_b_benchmark.vcf
+#   Rscript scripts/generate_validation_report.R --vcf ../testig/clinicalvariantr_benchmark/clinicalvariantr_group_b_benchmark.vcf
 
 args <- commandArgs(trailingOnly = TRUE)
 vcf_path <- if (length(args) >= 2L && args[[1L]] == "--vcf") {
   args[[2L]]
 } else {
-  file.path("..", "testig", "acmgamp_benchmark", "acmgamp_group_b_benchmark.vcf")
+  file.path("..", "testig", "clinicalvariantr_benchmark", "clinicalvariantr_group_b_benchmark.vcf")
 }
-validation_tsv <- file.path("data", "validation", "acmgamp_validation_set.tsv")
+validation_tsv <- file.path("data", "validation", "clinicalvariantr_validation_set.tsv")
 output_dir <- file.path("results", "validation")
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
@@ -67,7 +67,7 @@ md_out <- file.path(output_dir, paste0("validation_report_", stamp, ".md"))
 utils::write.csv(cmp, csv_out, row.names = FALSE)
 
 md_lines <- c(
-  "# ACMGamp Validation Report",
+  "# ClinicalVariantR Validation Report",
   "",
   sprintf("- **Engine:** %s", ACMG_PRO_ENGINE),
   sprintf("- **App version:** %s", APP_VERSION),

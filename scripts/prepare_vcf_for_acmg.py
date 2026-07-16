@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-Prepare an exome VCF (CP-96 and similar) for ACMGamp.
+Prepare an exome VCF (CP-96 and similar) for ClinicalVariantR.
 
-What this script does BEFORE you open ACMGamp:
+What this script does BEFORE you open ClinicalVariantR:
   1. Read input VCF (SnpEff ANN, hg19, chr-prefixed)
   2. Optionally keep PASS variants only
   3. Optionally keep coding / splice consequence variants only
   4. Join REVEL + CADD_PHRED from local reference files (if provided)
   5. Write a cleaned VCF with REVEL and CADD_PHRED in the INFO column
 
-ACMGamp reads REVEL / CADD from INFO or VEP CSQ — it does NOT compute them.
+ClinicalVariantR reads REVEL / CADD from INFO or VEP CSQ — it does NOT compute them.
 This script adds scores via lookup tables you download once.
 
 Usage (CP-96 example):
@@ -44,7 +44,7 @@ import sys
 from pathlib import Path
 from typing import Dict, Optional
 
-# Consequences ACMGamp treats as "coding" for rare-variant screens
+# Consequences ClinicalVariantR treats as "coding" for rare-variant screens
 CODING_CONSEQUENCE_KEYWORDS = (
     "missense_variant",
     "synonymous_variant",
@@ -72,7 +72,7 @@ CADD_HEADER = '##INFO=<ID=CADD_PHRED,Number=1,Type=Float,Description="CADD Phred
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
-        description="Prepare CP/AP/BC hg19 VCF for ACMGamp (add REVEL/CADD, filter)."
+        description="Prepare CP/AP/BC hg19 VCF for ClinicalVariantR (add REVEL/CADD, filter)."
     )
     p.add_argument(
         "--input", "-i", required=True,
@@ -375,14 +375,14 @@ def print_summary(stats: dict) -> None:
     print(f"Skipped (noncoding):{stats['skipped_noncoding']:,}")
     print(f"REVEL scores added: {stats['revel_added']:,}")
     print(f"CADD scores added:  {stats['cadd_added']:,}")
-    print("\nNext step — run ACMGamp CLI:")
-    print("  cd cml_variant_interpreter")
+    print("\nNext step — run ClinicalVariantR CLI:")
+    print("  cd ClinicalVariantR")
     print(f"  Rscript scripts/run_acgm_cli.R \\")
     print(f"    \"{stats['output']}\" \\")
     print(f"    \"../../results/batch/CP-96/cml_panel.csv\" \\")
     print(f"    hematologic_predisposition \\")
     print(f"    \"ABL1,BCR,RUNX1,GATA2,TP53\"")
-    print("\nOr open ACMGamp Shiny > Group C > upload prepared VCF.")
+    print("\nOr open ClinicalVariantR Shiny > Group C > upload prepared VCF.")
 
 
 def main() -> None:

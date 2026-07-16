@@ -1,4 +1,4 @@
-#' Benchmark ACMGamp against reference ACMG classifications.
+#' Benchmark ClinicalVariantR against reference ACMG classifications.
 
 normalize_acmg_class <- function(x) {
   vapply(x, function(val) {
@@ -16,7 +16,7 @@ collapse_to_tier <- function(x) {
   out <- rep("other", length(x))
   out[x %in% c("Pathogenic", "Likely Pathogenic")] <- "pathogenic"
   out[x %in% c("Benign", "Likely Benign")] <- "benign"
-  out[x %in% c("Vus")] <- "vus"
+  out[x %in% c("VUS")] <- "vus"
   out
 }
 
