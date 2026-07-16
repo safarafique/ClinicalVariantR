@@ -1,7 +1,7 @@
 Package: ClinicalVariantR
 Title: ACMG/AMP Germline Variant Interpretation from Annotated VCF Files
-Version: 0.99.0
-Date: 2026-07-08
+Version: 0.99.1
+Date: 2026-07-17
 Authors@R: c(
     person(
         given = "Safa",
@@ -52,6 +52,8 @@ Imports:
     data.table,
     readr,
     jsonlite,
+    digest,
+    openssl,
     VariantAnnotation,
     methods,
     stats,
@@ -60,6 +62,8 @@ Suggests:
     BiocStyle,
     knitr,
     rmarkdown,
+    ggplot2,
+    shinyjs,
     testthat (>= 3.0.0),
     BiocCheck,
     shinytest2
