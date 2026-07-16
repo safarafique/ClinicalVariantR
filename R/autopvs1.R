@@ -3,16 +3,17 @@
 #' Reference: Abou Tayoun et al., Genetics in Medicine 2018; ClinGen SVI PVS1 specification.
 
 CRITICAL_EXON_DOMAINS_PATH <- file.path("data", "reference", "critical_exon_domains.tsv")
-.critical_exon_domains <- NULL
+.critical_exon_domains_cache <- new.env(parent = emptyenv())
+.critical_exon_domains_cache$db <- NULL
 
 load_critical_exon_domains <- function(path = CRITICAL_EXON_DOMAINS_PATH) {
-  if (!is.null(.critical_exon_domains) && identical(attr(.critical_exon_domains, "path"), path)) {
-    return(.critical_exon_domains)
+  if (!is.null(.critical_exon_domains_cache$db) && identical(attr(.critical_exon_domains_cache$db, "path"), path)) {
+    return(.critical_exon_domains_cache$db)
   }
   if (!file.exists(path)) {
     empty <- data.frame(gene = character(), start_exon = integer(), end_exon = integer(), stringsAsFactors = FALSE)
     attr(empty, "path") <- path
-    .critical_exon_domains <<- empty
+    .critical_exon_domains_cache$db <- empty
     return(empty)
   }
   df <- utils::read.delim(path, stringsAsFactors = FALSE, comment.char = "#")
@@ -20,7 +21,7 @@ load_critical_exon_domains <- function(path = CRITICAL_EXON_DOMAINS_PATH) {
   df$start_exon <- as.integer(df$start_exon)
   df$end_exon <- as.integer(df$end_exon)
   attr(df, "path") <- path
-  .critical_exon_domains <<- df
+  .critical_exon_domains_cache$db <- df
   df
 }
 
@@ -34,15 +35,14 @@ is_nmd_escape_consequence <- function(consequence) {
 parse_exon_number <- function(exon_field) {
   exon_field <- scalar_chr(exon_field, default = "")
   if (!nzchar(exon_field)) return(NA_integer_)
-  num <- suppressWarnings(as.integer(sub("/.*$", "", exon_field)))
-  if (is.na(num)) suppressWarnings(as.integer(sub("^.*?/", "", exon_field)))
-  else num
+  num <- scalar_int(sub("/.*$", "", exon_field))
+  if (is.na(num)) scalar_int(sub("^.*?/", "", exon_field)) else num
 }
 
 parse_coding_exon_count <- function(exon_field) {
   exon_field <- scalar_chr(exon_field, default = "")
   if (!grepl("/", exon_field, fixed = TRUE)) return(NA_integer_)
-  suppressWarnings(as.integer(sub("^.*/", "", exon_field)))
+  scalar_int(sub("^.*/", "", exon_field))
 }
 
 is_critical_exon <- function(gene, exon_num, domains_df) {

@@ -127,7 +127,7 @@ format_gene_filter_label <- function(genes) {
   genes <- parse_gene_filter(genes)
   if (length(genes) == 0L) return("(none)")
   if (length(genes) <= 5L) paste(genes, collapse = ", ")
-  paste(paste(genes[1:5], collapse = ", "), sprintf("(+%d more)", length(genes) - 5L))
+  paste(paste(genes[seq_len(5L)], collapse = ", "), sprintf("(+%d more)", length(genes) - 5L))
 }
 
 pathogenic_tier_count <- function(classification_counts) {

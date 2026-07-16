@@ -17,7 +17,11 @@ parse_arg <- function(flag, default = NA_character_) {
 parse_num_arg <- function(flag, default) {
   raw <- parse_arg(flag, NA_character_)
   if (is.na(raw)) return(default)
-  suppressWarnings(as.numeric(raw))
+  raw <- trimws(raw)
+  if (!grepl("^[+-]?([0-9]+\\.?[0-9]*|\\.[0-9]+)([eE][+-]?[0-9]+)?$", raw)) {
+    return(default)
+  }
+  as.numeric(raw)
 }
 
 vcf_path <- parse_arg(

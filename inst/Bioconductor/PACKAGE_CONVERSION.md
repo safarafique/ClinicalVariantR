@@ -118,7 +118,7 @@ benchmark raw dumps, and lab notes to another branch (e.g. `devtools`).
 [ ] R CMD build / check clean
 [ ] BiocCheck + BiocCheckGitClone clean (or justified notes)
 [ ] No file > 5 MB; tarball < 10 MB
-[ ] Maintainer email + ORCID finalized
+[x] Maintainer email + ORCID finalized
 ```
 
 When all boxes are checked, open the BiocContributions issue using

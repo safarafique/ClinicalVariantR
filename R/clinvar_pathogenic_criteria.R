@@ -9,8 +9,10 @@ CLINVAR_PROTEIN_DB_PATH <- file.path("data", "reference", "clinvar_pathogenic_pr
 PM1_HOTSPOT_PANEL_PATH <- file.path("data", "gene_panels", "pm1_hotspot_genes.csv")
 PM1_CRITICAL_DOMAINS_PATH <- file.path("data", "reference", "pm1_critical_domains.tsv")
 
-.clinvar_protein_db <- NULL
-.pm1_domains <- NULL
+.clinvar_protein_cache <- new.env(parent = emptyenv())
+.clinvar_protein_cache$db <- NULL
+.pm1_domains_cache <- new.env(parent = emptyenv())
+.pm1_domains_cache$db <- NULL
 
 normalize_aa_letter <- function(aa) {
   if (is.na(aa) || !nzchar(aa)) return(NA_character_)
@@ -58,7 +60,7 @@ parse_protein_change <- function(hgvs_p = NA_character_, amino_acids = NA_charac
   }
 
   if (!is.na(protein_position) && nzchar(protein_position)) {
-    pos <- suppressWarnings(as.integer(sub("/.*$", "", protein_position)))
+    pos <- scalar_int(sub("/.*$", "", protein_position))
     if (!is.na(pos)) out$protein_position <- pos
   }
 
@@ -73,8 +75,8 @@ is_pathogenic_significance <- function(x) {
 }
 
 load_clinvar_protein_db <- function(path = CLINVAR_PROTEIN_DB_PATH) {
-  if (!is.null(.clinvar_protein_db) && identical(attr(.clinvar_protein_db, "path"), path)) {
-    return(.clinvar_protein_db)
+  if (!is.null(.clinvar_protein_cache$db) && identical(attr(.clinvar_protein_cache$db, "path"), path)) {
+    return(.clinvar_protein_cache$db)
   }
   if (!file.exists(path)) {
     db <- data.frame(
@@ -84,7 +86,7 @@ load_clinvar_protein_db <- function(path = CLINVAR_PROTEIN_DB_PATH) {
       stringsAsFactors = FALSE
     )
     attr(db, "path") <- path
-    .clinvar_protein_db <<- db
+    .clinvar_protein_cache$db <- db
     return(db)
   }
 
@@ -100,7 +102,7 @@ load_clinvar_protein_db <- function(path = CLINVAR_PROTEIN_DB_PATH) {
   if (!"hgvs_p" %in% names(db)) db$hgvs_p <- NA_character_
   db <- db[is_pathogenic_significance(db$clinical_significance), , drop = FALSE]
   attr(db, "path") <- path
-  .clinvar_protein_db <<- db
+  .clinvar_protein_cache$db <- db
   db
 }
 
@@ -111,13 +113,13 @@ load_pm1_hotspot_genes <- function(path = PM1_HOTSPOT_PANEL_PATH) {
 }
 
 load_pm1_critical_domains <- function(path = PM1_CRITICAL_DOMAINS_PATH) {
-  if (!is.null(.pm1_domains) && identical(attr(.pm1_domains, "path"), path)) {
-    return(.pm1_domains)
+  if (!is.null(.pm1_domains_cache$db) && identical(attr(.pm1_domains_cache$db, "path"), path)) {
+    return(.pm1_domains_cache$db)
   }
   if (!file.exists(path)) {
     empty <- data.frame(gene = character(), aa_start = integer(), aa_end = integer(), stringsAsFactors = FALSE)
     attr(empty, "path") <- path
-    .pm1_domains <<- empty
+    .pm1_domains_cache$db <- empty
     return(empty)
   }
   df <- utils::read.delim(path, stringsAsFactors = FALSE, comment.char = "#")
@@ -125,7 +127,7 @@ load_pm1_critical_domains <- function(path = PM1_CRITICAL_DOMAINS_PATH) {
   df$aa_start <- as.integer(df$aa_start)
   df$aa_end <- as.integer(df$aa_end)
   attr(df, "path") <- path
-  .pm1_domains <<- df
+  .pm1_domains_cache$db <- df
   df
 }
 

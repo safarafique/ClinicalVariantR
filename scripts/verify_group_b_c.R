@@ -11,14 +11,15 @@ cat("Engine:", ACMG_PRO_ENGINE, "\n")
 cat("Automated (18):", paste(AUTOMATED_ACMG_CRITERIA, collapse = ", "), "\n")
 cat("Not in B/C (manual/context):", paste(c(CONTEXT_ASSISTED_CRITERIA, MANUAL_ONLY_CRITERIA), collapse = ", "), "\n\n")
 
-pass <- 0L
-fail <- 0L
+state <- new.env(parent = emptyenv())
+state$pass <- 0L
+state$fail <- 0L
 chk <- function(name, cond, detail = "") {
   if (isTRUE(cond)) {
-    pass <<- pass + 1L
+    state$pass <- state$pass + 1L
     cat("[PASS]", name, "\n")
   } else {
-    fail <<- fail + 1L
+    state$fail <- state$fail + 1L
     cat("[FAIL]", name, if (nzchar(detail)) paste0(": ", detail) else "", "\n")
   }
 }
@@ -79,7 +80,7 @@ if (file.exists(bench_vcf) && file.exists(bench_tsv)) {
   res <- benchmark_one_sample(bench_vcf, bench_tsv, profile_id = "general_germline")
   if (!is.null(res$error)) {
     cat("Benchmark error:", res$error, "\n")
-    fail <- fail + 1L
+    state$fail <- state$fail + 1L
   } else {
     cat("Exact accuracy:", round(100 * res$metrics$exact_accuracy, 1), "%\n")
     cat("Tier accuracy:", round(100 * res$metrics$tier_accuracy, 1), "%\n")
@@ -89,13 +90,13 @@ if (file.exists(bench_vcf) && file.exists(bench_tsv)) {
         cat("  MISMATCH:", r[["variant_key"]], "| expected", r[["ref_class"]],
             "| got", r[["pred_class"]], "\n")
       })
-      fail <- fail + 1L
+      state$fail <- state$fail + 1L
     } else {
       cat("All 20 benchmark variants matched.\n")
-      pass <- pass + 1L
+      state$pass <- state$pass + 1L
     }
   }
 }
 
-cat("\nSummary:", pass, "passed,", fail, "failed\n")
-if (fail > 0L) quit(status = 1)
+cat("\nSummary:", state$pass, "passed,", state$fail, "failed\n")
+if (state$fail > 0L) quit(status = 1)

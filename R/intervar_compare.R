@@ -231,17 +231,14 @@ write_comparison_outputs <- function(result, output_prefix) {
   }
 
   m <- result$metrics
-  cat(
-    paste0(
-      "ClinicalVariantR vs ", m$right_name, " comparison\n",
-      "Overlap variants: ", m$n_overlap, "\n",
-      "ClinicalVariantR variants: ", m$n_left, "\n",
-      "Reference variants: ", m$n_right, "\n",
-      "Exact 5-class accuracy (%): ", m$exact_accuracy, "\n",
-      "Tier accuracy (pathogenic/benign/vus) (%): ", m$tier_accuracy, "\n"
-    ),
-    file = metrics_path
-  )
+  writeLines(c(
+    paste0("ClinicalVariantR vs ", m$right_name, " comparison"),
+    paste0("Overlap variants: ", m$n_overlap),
+    paste0("ClinicalVariantR variants: ", m$n_left),
+    paste0("Reference variants: ", m$n_right),
+    paste0("Exact 5-class accuracy (%): ", m$exact_accuracy),
+    paste0("Tier accuracy (pathogenic/benign/vus) (%): ", m$tier_accuracy)
+  ), con = metrics_path)
 
   list(
     comparison_csv = if (file.exists(cmp_path)) cmp_path else NA_character_,

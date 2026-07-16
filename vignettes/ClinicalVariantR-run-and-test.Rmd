@@ -3,6 +3,7 @@ title: "Running and testing ClinicalVariantR"
 author:
   - name: Safa Rafique
     email: safa.sandhu@gmail.com
+    orcid: 0000-0003-2646-8106
   - name: Naeem Mahmood
     email: naeem.sbb@pu.edu.pk
   - name: Muhammad Farooq Sabar
@@ -42,7 +43,7 @@ It complements the [Introduction to ClinicalVariantR](ClinicalVariantR.html) vig
 
 Install CRAN dependencies used by the app:
 
-```{r cran-deps, eval=FALSE}
+```r
 install.packages(c(
     "shiny", "bslib", "DT", "data.table", "readr", "jsonlite",
     "knitr", "rmarkdown", "testthat", "BiocManager"
@@ -64,9 +65,8 @@ If you are developing from the Git clone (not yet installed), set the working
 directory to the package root (the folder that contains `DESCRIPTION`,
 `app.R`, `global.R`, `ui.R`, and `server.R`).
 
-```{r find-root, eval=FALSE}
-# Example after cloning:
-# setwd("path/to/ClinicalVariantR")
+```{r find-root}
+normalizePath(getwd(), winslash = "/", mustWork = FALSE)
 ```
 
 # Launch the Shiny app
@@ -75,20 +75,19 @@ directory to the package root (the folder that contains `DESCRIPTION`,
 
 Package functions **return** a Shiny app; you launch it yourself:
 
-```{r launch-api, eval=FALSE}
-library(ClinicalVariantR)
-
-app <- ClinicalVariantR()          # or ClinicalVariantRApp()
-if (interactive()) {
-    shiny::runApp(app, launch.browser = TRUE)
+```{r launch-api}
+if (requireNamespace("ClinicalVariantR", quietly = TRUE)) {
+    stopifnot(is.function(ClinicalVariantR::ClinicalVariantR))
 }
+# To launch interactively:
+# shiny::runApp(ClinicalVariantR(), launch.browser = TRUE)
 ```
 
 ## Source-tree launch (development)
 
 From the package root, either:
 
-```{r launch-source, eval=FALSE}
+```r
 # Option 1 - classic Shiny entry
 shiny::runApp(".", launch.browser = TRUE)
 
@@ -115,10 +114,9 @@ Then open `http://127.0.0.1:3838` in a browser.
 | Idle timeout | 1 hour | Override with env `CLINICALVARIANTR_IDLE_TIMEOUT_SEC` |
 | Auth | Off in local scaffolds when `AUTH_ENABLED <- FALSE` | Re-enable only for secured demos |
 
-```{r env-tips, eval=FALSE}
+```{r env-tips}
 Sys.setenv(CLINICALVARIANTR_IDLE_TIMEOUT_SEC = "3600")
-# Optional encryption key for secure uploads (32 characters):
-# Sys.setenv(CLINICALVARIANTR_ENCRYPTION_KEY = "0123456789abcdef0123456789abcdef")
+Sys.getenv("CLINICALVARIANTR_IDLE_TIMEOUT_SEC")
 ```
 
 # Test data locations
@@ -194,7 +192,7 @@ data.frame(
 2. Upload the same VCF as Group B.
 3. Enter a gene list that intersects the call set, for example:
 
-```{r gene-list-example, eval=FALSE}
+```r
 # Paste into the Group C gene box:
 # TCF4, MECP2, EGR2, ATM, TSC1
 ```
@@ -214,7 +212,7 @@ Run these from the package root (`DESCRIPTION` present).
 
 ## Unit tests (testthat)
 
-```{r unit-tests, eval=FALSE}
+```r
 # After install:
 # BiocManager::install("safarafique/ClinicalVariantR")  # or local install
 devtools::test()           # development
@@ -228,7 +226,7 @@ files are present.
 
 ## Engine / pipeline scripts
 
-```{r cli-scripts, eval=FALSE}
+```r
 # Rules combining + criterion logic audit
 Rscript scripts/audit_acmg_rules.R
 
@@ -267,13 +265,13 @@ data.frame(script = scripts, exists = file.exists(script_paths))
 
 ## Optional upload-flow smoke script
 
-```{r upload-flow, eval=FALSE}
+```r
 Rscript scripts/test_upload_flow.R
 ```
 
 ## Optional Bioconductor / style checks (before submission)
 
-```{r bioc-check, eval=FALSE}
+```r
 # From the parent of the package directory:
 # R CMD build ClinicalVariantR
 # R CMD check ClinicalVariantR_0.99.0.tar.gz

@@ -31,7 +31,7 @@ filter_report_expert_worklist <- function(
 
   if (isTRUE(include_vus_with_pathogenic_evidence)) {
     path_n <- if ("pathogenic_evidence_count" %in% names(df)) {
-      suppressWarnings(as.integer(df$pathogenic_evidence_count))
+      vapply(df$pathogenic_evidence_count, scalar_int, integer(1L))
     } else {
       rep(0L, nrow(df))
     }

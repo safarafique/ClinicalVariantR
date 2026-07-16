@@ -64,15 +64,15 @@ if (is.na(chrom_col) || is.na(pos_col)) {
 
 out <- data.frame(
   chrom = as.character(raw[[chrom_col]]),
-  pos = suppressWarnings(as.integer(raw[[pos_col]])),
+  pos = vapply(raw[[pos_col]], scalar_int, integer(1L)),
   ref = ".",
   alt = ".",
   rsid = if (!is.na(rsid_col)) as.character(raw[[rsid_col]]) else NA_character_,
   gene = if (!is.na(gene_col)) as.character(raw[[gene_col]]) else NA_character_,
   trait = if (!is.na(trait_col)) as.character(raw[[trait_col]]) else NA_character_,
-  pvalue = if (!is.na(p_col)) suppressWarnings(as.numeric(raw[[p_col]])) else NA_real_,
-  odds_ratio = if (!is.na(or_col)) suppressWarnings(as.numeric(raw[[or_col]])) else NA_real_,
-  maf = if (!is.na(maf_col)) suppressWarnings(as.numeric(raw[[maf_col]])) else NA_real_,
+  pvalue = if (!is.na(p_col)) vapply(raw[[p_col]], scalar_num, numeric(1L)) else NA_real_,
+  odds_ratio = if (!is.na(or_col)) vapply(raw[[or_col]], scalar_num, numeric(1L)) else NA_real_,
+  maf = if (!is.na(maf_col)) vapply(raw[[maf_col]], scalar_num, numeric(1L)) else NA_real_,
   source = "GWAS_Catalog_import",
   stringsAsFactors = FALSE
 )

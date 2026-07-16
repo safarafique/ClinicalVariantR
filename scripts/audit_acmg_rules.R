@@ -10,15 +10,16 @@ setwd(project_root)
 source("global_cli.R")
 source("R/acmg_pipeline.R")
 
-pass_n <- 0L
-fail_n <- 0L
+state <- new.env(parent = emptyenv())
+state$pass_n <- 0L
+state$fail_n <- 0L
 
 check <- function(name, cond, detail = "") {
   if (isTRUE(cond)) {
-    pass_n <<- pass_n + 1L
+    state$pass_n <- state$pass_n + 1L
     cat("[PASS] ", name, "\n", sep = "")
   } else {
-    fail_n <<- fail_n + 1L
+    state$fail_n <- state$fail_n + 1L
     cat("[FAIL] ", name, if (nzchar(detail)) paste0(": ", detail) else "", "\n", sep = "")
   }
 }
@@ -171,5 +172,5 @@ check("BP3 only on homopolymer in-frame indel",
 
 cat("Not automated (require manual/clinical data): ", paste(not_auto, collapse = ", "), "\n", sep = "")
 
-cat("\nSummary: ", pass_n, " passed, ", fail_n, " failed\n", sep = "")
-if (fail_n > 0) quit(status = 1)
+cat("\nSummary: ", state$pass_n, " passed, ", state$fail_n, " failed\n", sep = "")
+if (state$fail_n > 0) quit(status = 1)

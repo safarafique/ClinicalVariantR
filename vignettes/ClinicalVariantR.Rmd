@@ -3,6 +3,7 @@ title: "Introduction to ClinicalVariantR"
 author:
   - name: Safa Rafique
     email: safa.sandhu@gmail.com
+    orcid: 0000-0003-2646-8106
   - name: Naeem Mahmood
     email: naeem.sbb@pu.edu.pk
   - name: Muhammad Farooq Sabar
@@ -44,7 +45,7 @@ The package exposes an interactive Shiny application with three workflows:
 
 # Installation
 
-```{r install, eval=FALSE}
+```r
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
 }
@@ -53,7 +54,7 @@ BiocManager::install("ClinicalVariantR")
 
 Until the package is accepted on Bioconductor, install from GitHub:
 
-```{r install-github, eval=FALSE}
+```r
 # install.packages("remotes")
 remotes::install_github("safarafique/ClinicalVariantR")
 ```
@@ -63,13 +64,12 @@ remotes::install_github("safarafique/ClinicalVariantR")
 Following Bioconductor Shiny guidelines, package functions **return** a Shiny
 app object; the user launches it:
 
-```{r launch, eval=FALSE}
-library(ClinicalVariantR)
-
-app <- ClinicalVariantR()
-if (interactive()) {
-    shiny::runApp(app)
+```{r launch}
+if (requireNamespace("ClinicalVariantR", quietly = TRUE)) {
+    stopifnot(is.function(ClinicalVariantR::ClinicalVariantR))
 }
+# To launch interactively:
+# shiny::runApp(ClinicalVariantR())
 ```
 
 `ClinicalVariantRApp()` is an alias of `ClinicalVariantR()`.

@@ -134,7 +134,7 @@ preview_vcf <- function(vcf_path, max_rows = 50L, max_header_lines = 100000L) {
       parse_variant_from_vcf_fields(
         chrom = x[1], pos = x[2], ref = x[4],
         alt = strsplit(x[5], ",")[[1]][1],
-        qual = suppressWarnings(as.numeric(x[6])),
+        qual = scalar_num(x[6]),
         filter = if (length(x) >= 7) x[7] else ".",
         info = x[info_idx]
       )

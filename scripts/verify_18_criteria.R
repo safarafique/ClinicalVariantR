@@ -22,14 +22,15 @@ cat("Automated (18):", paste(IMPLEMENTED, collapse = ", "), "\n\n")
 source("scripts/audit_acmg_rules.R")
 
 cat("\n=== Per-criterion smoke tests ===\n")
-pass <- 0L
-fail <- 0L
+state <- new.env(parent = emptyenv())
+state$pass <- 0L
+state$fail <- 0L
 chk <- function(name, cond, detail = "") {
   if (isTRUE(cond)) {
-    pass <<- pass + 1L
+    state$pass <- state$pass + 1L
     cat("[PASS]", name, "\n")
   } else {
-    fail <<- fail + 1L
+    state$fail <- state$fail + 1L
     cat("[FAIL]", name, if (nzchar(detail)) paste0(": ", detail) else "", "\n")
   }
 }
@@ -135,7 +136,7 @@ if (file.exists(test_vcf)) {
   }
 }
 
-cat("\nSmoke tests:", pass, "passed,", fail, "failed\n")
+cat("\nSmoke tests:", state$pass, "passed,", state$fail, "failed\n")
 
 test_dir <- normalizePath(Sys.getenv("ACMG_TEST_FOLDER",
   file.path(project_root, "..", "testig", "testig")), mustWork = FALSE)
@@ -147,4 +148,4 @@ if (dir.exists(test_dir)) {
 }
 
 cat("\nDone.\n")
-if (fail > 0L) quit(status = 1)
+if (state$fail > 0L) quit(status = 1)

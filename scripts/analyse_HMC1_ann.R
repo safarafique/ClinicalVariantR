@@ -57,7 +57,7 @@ parse_info_tag <- function(info, tag) {
 parse_info_num <- function(info, tag) {
   raw <- parse_info_tag(info, tag)
   if (is.na(raw) || !nzchar(raw)) return(NA_real_)
-  nums <- suppressWarnings(as.numeric(unlist(strsplit(raw, "[,|]"))))
+  nums <- vapply(unlist(strsplit(raw, "[,|]")), scalar_num, numeric(1L))
   nums <- nums[!is.na(nums)]
   if (length(nums) == 0L) NA_real_ else max(nums)
 }
@@ -157,7 +157,7 @@ parse_vcf_ann <- function(path) {
     ph <- parse_info_tag(info, "ESP6500_PH")
     polyphen_score <- NA_real_
     if (!is.na(ph) && grepl(":", ph)) {
-      polyphen_score <- suppressWarnings(as.numeric(sub(".*:", "", ph)))
+      polyphen_score <- scalar_num(sub(".*:", "", ph))
     }
     clinvar <- decode_clinvar_sig(parse_info_tag(info, "CLINVAR_CLNSIG"))
 

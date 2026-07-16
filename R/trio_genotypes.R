@@ -30,7 +30,7 @@ gt_has_alt <- function(gt) {
   gt <- normalize_gt(gt)
   if (!nzchar(gt) || gt %in% c(".", "./.")) return(FALSE)
   alleles <- strsplit(gt, "/", fixed = TRUE)[[1L]]
-  alleles <- suppressWarnings(as.integer(alleles))
+  alleles <- vapply(alleles, scalar_int, integer(1L))
   any(!is.na(alleles) & alleles > 0L)
 }
 

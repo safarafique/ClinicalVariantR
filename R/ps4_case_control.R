@@ -9,8 +9,10 @@
 PS4_CASE_CONTROL_DB_PATH <- file.path("data", "reference", "ps4_case_control_enrichment.tsv")
 GWAS_SUPPLEMENTARY_DB_PATH <- file.path("data", "reference", "gwas_supplementary_evidence.tsv")
 
-.ps4_case_control_db <- NULL
-.gwas_supplementary_db <- NULL
+.ps4_case_control_cache <- new.env(parent = emptyenv())
+.ps4_case_control_cache$db <- NULL
+.gwas_supplementary_cache <- new.env(parent = emptyenv())
+.gwas_supplementary_cache$db <- NULL
 
 DEFAULT_PS4_THRESHOLDS <- list(
   ps4_min_case_af = 0.001,
@@ -40,8 +42,8 @@ normalize_ps4_source <- function(x) {
 }
 
 load_ps4_case_control_db <- function(path = PS4_CASE_CONTROL_DB_PATH) {
-  if (!is.null(.ps4_case_control_db) && identical(attr(.ps4_case_control_db, "path"), path)) {
-    return(.ps4_case_control_db)
+  if (!is.null(.ps4_case_control_cache$db) && identical(attr(.ps4_case_control_cache$db, "path"), path)) {
+    return(.ps4_case_control_cache$db)
   }
   empty <- data.frame(
     variant_key = character(), chrom = character(), pos = integer(),
@@ -52,14 +54,14 @@ load_ps4_case_control_db <- function(path = PS4_CASE_CONTROL_DB_PATH) {
   )
   if (!file.exists(path)) {
     attr(empty, "path") <- path
-    .ps4_case_control_db <<- empty
+    .ps4_case_control_cache$db <- empty
     return(empty)
   }
 
   db <- utils::read.delim(path, stringsAsFactors = FALSE, comment.char = "#")
   if (nrow(db) == 0L) {
     attr(empty, "path") <- path
-    .ps4_case_control_db <<- empty
+    .ps4_case_control_cache$db <- empty
     return(empty)
   }
 
@@ -93,13 +95,13 @@ load_ps4_case_control_db <- function(path = PS4_CASE_CONTROL_DB_PATH) {
   }, character(1L))
 
   attr(db, "path") <- path
-  .ps4_case_control_db <<- db
+  .ps4_case_control_cache$db <- db
   db
 }
 
 load_gwas_supplementary_db <- function(path = GWAS_SUPPLEMENTARY_DB_PATH) {
-  if (!is.null(.gwas_supplementary_db) && identical(attr(.gwas_supplementary_db, "path"), path)) {
-    return(.gwas_supplementary_db)
+  if (!is.null(.gwas_supplementary_cache$db) && identical(attr(.gwas_supplementary_cache$db, "path"), path)) {
+    return(.gwas_supplementary_cache$db)
   }
   empty <- data.frame(
     variant_key = character(), chrom = character(), pos = integer(),
@@ -109,14 +111,14 @@ load_gwas_supplementary_db <- function(path = GWAS_SUPPLEMENTARY_DB_PATH) {
   )
   if (!file.exists(path)) {
     attr(empty, "path") <- path
-    .gwas_supplementary_db <<- empty
+    .gwas_supplementary_cache$db <- empty
     return(empty)
   }
 
   db <- utils::read.delim(path, stringsAsFactors = FALSE, comment.char = "#")
   if (nrow(db) == 0L) {
     attr(empty, "path") <- path
-    .gwas_supplementary_db <<- empty
+    .gwas_supplementary_cache$db <- empty
     return(empty)
   }
 
@@ -142,7 +144,7 @@ load_gwas_supplementary_db <- function(path = GWAS_SUPPLEMENTARY_DB_PATH) {
   db$gene <- toupper(trimws(db$gene))
 
   attr(db, "path") <- path
-  .gwas_supplementary_db <<- db
+  .gwas_supplementary_cache$db <- db
   db
 }
 

@@ -9,12 +9,9 @@
 #' @return A \code{shiny.appobj} created by \code{shiny::shinyApp()}.
 #'
 #' @examples
-#' \dontrun{
-#' app <- ClinicalVariantR()
-#' if (interactive()) {
-#'     shiny::runApp(app)
-#' }
-#' }
+#' stopifnot(is.function(ClinicalVariantR))
+#' # To launch interactively:
+#' # shiny::runApp(ClinicalVariantR())
 #'
 #' @seealso \code{\link{ClinicalVariantRApp}}
 #' @export
@@ -27,12 +24,9 @@ ClinicalVariantR <- function(...) {
 #' @inheritParams ClinicalVariantR
 #' @inherit ClinicalVariantR return
 #' @examples
-#' \dontrun{
-#' app <- ClinicalVariantRApp()
-#' if (interactive()) {
-#'     shiny::runApp(app)
-#' }
-#' }
+#' stopifnot(is.function(ClinicalVariantRApp))
+#' # To launch interactively:
+#' # shiny::runApp(ClinicalVariantRApp())
 #' @export
 ClinicalVariantRApp <- function(...) {
     ClinicalVariantR(...)

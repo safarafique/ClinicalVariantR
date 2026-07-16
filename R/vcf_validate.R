@@ -228,16 +228,94 @@ detect_csq_consequence <- function(sample_rows, header_cols) {
 }
 
 #' Validate uploaded VCF against app requirements.
+new_vcf_check_recorder <- function() {
+  checks_env <- new.env(parent = emptyenv())
+  checks_env$items <- list()
+
+  add <- function(category, requirement, status, detail) {
+    items <- checks_env$items
+    items[[length(items) + 1L]] <- list(
+      category = category, requirement = requirement, status = status, detail = detail
+    )
+    checks_env$items <- items
+    invisible(NULL)
+  }
+
+  to_df <- function() {
+    checks <- checks_env$items
+    if (length(checks) == 0) {
+      return(data.frame(
+        category = character(), requirement = character(),
+        status = character(), detail = character(), stringsAsFactors = FALSE
+      ))
+    }
+    df <- do.call(rbind, lapply(checks, as.data.frame, stringsAsFactors = FALSE))
+    rownames(df) <- NULL
+    df
+  }
+
+  list(add = add, to_df = to_df, items = function() checks_env$items)
+}
+
+unreadable_vcf_validation_result <- function(mode, checks_df) {
+  list(
+    valid = FALSE,
+    can_analyze = FALSE,
+    mode = mode,
+    checks = checks_df,
+    columns = character(),
+    info_declared = character(),
+    variant_count = 0L,
+    summary = "VCF validation failed: file could not be read."
+  )
+}
+
+detect_vcf_validation_annotation <- function(meta, vcf_path) {
+  has_csq_consequence <- detect_csq_consequence(meta$sample_rows, meta$columns)
+  has_ann_consequence <- detect_ann_consequence(meta$sample_rows, meta$columns)
+  has_annovar <- any(c("Func.refGene", "Gene.refGene", "ExonicFunc.refGene") %in% meta$info_declared) ||
+    any(grepl("Func\\.refGene=", meta$sample_rows, ignore.case = TRUE))
+
+  csq_format_fields <- extract_csq_format_fields(vcf_path)
+  csq_insilico <- detect_csq_insilico_in_rows(meta$sample_rows, meta$columns)
+  csq_plugins <- character()
+  if (length(csq_format_fields) > 0L) {
+    if ("REVEL" %in% csq_format_fields) csq_plugins <- c(csq_plugins, "REVEL (CSQ)")
+    if ("CADD_PHRED" %in% csq_format_fields || "CADD" %in% csq_format_fields) {
+      csq_plugins <- c(csq_plugins, "CADD (CSQ)")
+    }
+    if (any(grepl("SpliceAI", csq_format_fields))) csq_plugins <- c(csq_plugins, "SpliceAI (CSQ)")
+    if (any(grepl("am_pathogenicity|AlphaMissense", csq_format_fields))) {
+      csq_plugins <- c(csq_plugins, "AlphaMissense (CSQ)")
+    }
+    if ("SIFT" %in% csq_format_fields) csq_plugins <- c(csq_plugins, "SIFT (CSQ)")
+    if ("PolyPhen" %in% csq_format_fields) csq_plugins <- c(csq_plugins, "PolyPhen (CSQ)")
+  }
+
+  ann_info <- detect_vcf_annotation(meta$info_declared, character())
+  if (has_csq_consequence) ann_info <- list(source = "CSQ", build_hint = "GRCh38", label = "VEP CSQ")
+  if (has_ann_consequence && !has_csq_consequence) {
+    ann_info <- list(source = "ANN", build_hint = "GRCh37/hg19", label = "SnpEff ANN")
+  }
+  if (has_annovar && !has_csq_consequence && !has_ann_consequence) {
+    ann_info <- list(source = "ANNOVAR", build_hint = "unknown", label = "ANNOVAR")
+  }
+
+  list(
+    has_csq_consequence = has_csq_consequence,
+    has_ann_consequence = has_ann_consequence,
+    has_annovar = has_annovar,
+    has_consequence_annotation = has_csq_consequence || has_ann_consequence || has_annovar,
+    csq_plugins = unique(c(csq_plugins, csq_insilico)),
+    ann_info = ann_info
+  )
+}
+
 validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L) {
   mode <- match.arg(mode)
   reqs <- vcf_app_requirements(mode)
-  checks <- list()
-
-  add_check <- function(category, requirement, status, detail) {
-    checks[[length(checks) + 1L]] <<- list(
-      category = category, requirement = requirement, status = status, detail = detail
-    )
-  }
+  checks <- new_vcf_check_recorder()
+  add_check <- checks$add
 
   meta <- tryCatch(
     read_vcf_header_meta(
@@ -251,30 +329,8 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
     }
   )
 
-  to_df <- function() {
-    if (length(checks) == 0) {
-      return(data.frame(
-        category = character(), requirement = character(),
-        status = character(), detail = character(), stringsAsFactors = FALSE
-      ))
-    }
-    df <- do.call(rbind, lapply(checks, as.data.frame, stringsAsFactors = FALSE))
-    rownames(df) <- NULL
-    df
-  }
-
   if (is.null(meta)) {
-    checks_df <- to_df()
-    return(list(
-      valid = FALSE,
-      can_analyze = FALSE,
-      mode = mode,
-      checks = checks_df,
-      columns = character(),
-      info_declared = character(),
-      variant_count = 0L,
-      summary = "VCF validation failed: file could not be read."
-    ))
+    return(unreadable_vcf_validation_result(mode, checks$to_df()))
   }
 
   count_label <- format_variant_count_label(meta$variant_count, meta$count_truncated)
@@ -315,35 +371,12 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
 
   info_fields <- reqs$info_fields$field
   populated <- scan_info_fields_in_rows(meta$sample_rows, meta$columns, info_fields)
-  has_csq_consequence <- detect_csq_consequence(meta$sample_rows, meta$columns)
-  has_ann_consequence <- detect_ann_consequence(meta$sample_rows, meta$columns)
-  has_annovar <- any(c("Func.refGene", "Gene.refGene", "ExonicFunc.refGene") %in% meta$info_declared) ||
-    any(grepl("Func\\.refGene=", meta$sample_rows, ignore.case = TRUE))
-  has_consequence_annotation <- has_csq_consequence || has_ann_consequence || has_annovar
-  csq_format_fields <- extract_csq_format_fields(vcf_path)
-  csq_insilico <- detect_csq_insilico_in_rows(meta$sample_rows, meta$columns)
-  csq_plugins <- character()
-  if (length(csq_format_fields) > 0) {
-    if ("REVEL" %in% csq_format_fields) csq_plugins <- c(csq_plugins, "REVEL (CSQ)")
-    if ("CADD_PHRED" %in% csq_format_fields || "CADD" %in% csq_format_fields) {
-      csq_plugins <- c(csq_plugins, "CADD (CSQ)")
-    }
-    if (any(grepl("SpliceAI", csq_format_fields))) csq_plugins <- c(csq_plugins, "SpliceAI (CSQ)")
-    if (any(grepl("am_pathogenicity|AlphaMissense", csq_format_fields))) {
-      csq_plugins <- c(csq_plugins, "AlphaMissense (CSQ)")
-    }
-    if ("SIFT" %in% csq_format_fields) csq_plugins <- c(csq_plugins, "SIFT (CSQ)")
-    if ("PolyPhen" %in% csq_format_fields) csq_plugins <- c(csq_plugins, "PolyPhen (CSQ)")
-  }
-  csq_plugins <- unique(c(csq_plugins, csq_insilico))
-  ann_info <- detect_vcf_annotation(meta$info_declared, character())
-  if (has_csq_consequence) ann_info <- list(source = "CSQ", build_hint = "GRCh38", label = "VEP CSQ")
-  if (has_ann_consequence && !has_csq_consequence) {
-    ann_info <- list(source = "ANN", build_hint = "GRCh37/hg19", label = "SnpEff ANN")
-  }
-  if (has_annovar && !has_csq_consequence && !has_ann_consequence) {
-    ann_info <- list(source = "ANNOVAR", build_hint = "unknown", label = "ANNOVAR")
-  }
+  annotation <- detect_vcf_validation_annotation(meta, vcf_path)
+  has_csq_consequence <- annotation$has_csq_consequence
+  has_ann_consequence <- annotation$has_ann_consequence
+  has_consequence_annotation <- annotation$has_consequence_annotation
+  csq_plugins <- annotation$csq_plugins
+  ann_info <- annotation$ann_info
 
   for (i in seq_len(nrow(reqs$info_fields))) {
     fld <- reqs$info_fields$field[i]
@@ -458,10 +491,10 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
     add_check("Samples", "Genotype columns", "WARN", "No sample columns; variant-only VCF.")
   }
 
-  fail_n <- sum(vapply(checks, function(x) x$status == "FAIL", logical(1)))
-  warn_n <- sum(vapply(checks, function(x) x$status == "WARN", logical(1)))
-  pass_n <- sum(vapply(checks, function(x) x$status == "PASS", logical(1)))
-  checks_df <- to_df()
+  check_items <- checks$items()
+  fail_n <- sum(vapply(check_items, function(x) x$status == "FAIL", logical(1)))
+  warn_n <- sum(vapply(check_items, function(x) x$status == "WARN", logical(1)))
+  checks_df <- checks$to_df()
 
   can_analyze <- fail_n == 0 && meta$variant_count > 0 && length(missing_cols) == 0
 

@@ -72,7 +72,7 @@ parse_vcf_csq <- function(path, pass_only = TRUE) {
     row <- parse_variant_from_vcf_fields(
       chrom = parts[[1L]], pos = parts[[2L]], ref = parts[[4L]],
       alt = strsplit(parts[[5L]], ",")[[1L]][1L],
-      qual = suppressWarnings(as.numeric(parts[[6L]])),
+      qual = scalar_num(parts[[6L]]),
       filter = parts[[7L]],
       info = info
     )

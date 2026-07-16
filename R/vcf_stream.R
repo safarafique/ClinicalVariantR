@@ -19,7 +19,7 @@ extract_info_field <- function(info_string, key) {
   }
   val <- sub(pattern, "\\2", regmatches(info_string, m))
   if (key %in% c("AF", "REVEL")) {
-    num <- suppressWarnings(as.numeric(val))
+    num <- scalar_num(val)
     return(if (length(num) == 0 || is.na(num)) NA_real_ else num)
   }
   as.character(val)
@@ -54,7 +54,7 @@ parse_vcf_line <- function(line, header_cols) {
   pos <- fields[2]
   ref <- fields[4]
   alt_raw <- fields[5]
-  qual <- suppressWarnings(as.numeric(fields[6]))
+  qual <- scalar_num(fields[6])
   filter <- if (length(fields) >= 7) fields[7] else "."
   info <- if (length(fields) >= 8) fields[8] else "."
 
@@ -146,19 +146,20 @@ stream_vcf_chunks <- function(
   on.exit(close(con), add = TRUE)
 
   header_cols <- NULL
-  batch <- list()
-  chunk_id <- 0L
+  stream_state <- new.env(parent = emptyenv())
+  stream_state$batch <- list()
+  stream_state$chunk_id <- 0L
   read_total <- 0L
   kept_total <- 0L
   skipped_total <- 0L
 
   flush_batch <- function() {
-    if (length(batch) == 0) return(invisible(NULL))
-    chunk_id <<- chunk_id + 1L
-    chunk_df <- do.call(rbind, batch)
+    if (length(stream_state$batch) == 0) return(invisible(NULL))
+    stream_state$chunk_id <- stream_state$chunk_id + 1L
+    chunk_df <- do.call(rbind, stream_state$batch)
     rownames(chunk_df) <- NULL
-    processor(chunk_df, chunk_id)
-    batch <<- list()
+    processor(chunk_df, stream_state$chunk_id)
+    stream_state$batch <- list()
     invisible(NULL)
   }
 
@@ -202,7 +203,7 @@ stream_vcf_chunks <- function(
 
       row$qual <- NULL
       row$filter <- NULL
-      batch <- append_parsed_vcf_rows(batch, row)
+      stream_state$batch <- append_parsed_vcf_rows(stream_state$batch, row)
       kept_total <- kept_total + 1L
     }
 
@@ -210,7 +211,7 @@ stream_vcf_chunks <- function(
       progress_fn(read_total, kept_total, skipped_total)
     }
 
-    if (length(batch) >= chunk_size) flush_batch()
+    if (length(stream_state$batch) >= chunk_size) flush_batch()
   }
 
   flush_batch()
@@ -219,7 +220,7 @@ stream_vcf_chunks <- function(
     rows_read = read_total,
     rows_analyzed = kept_total,
     rows_skipped = skipped_total,
-    chunks = chunk_id
+    chunks = stream_state$chunk_id
   )
 }
 
@@ -270,18 +271,19 @@ bcftools_stream_chunks <- function(
   pipe <- pipe(cmd, "r")
   on.exit(close(pipe), add = TRUE)
 
-  batch <- list()
-  chunk_id <- 0L
+  stream_state <- new.env(parent = emptyenv())
+  stream_state$batch <- list()
+  stream_state$chunk_id <- 0L
   kept_total <- 0L
   read_total <- 0L
 
   flush_batch <- function() {
-    if (length(batch) == 0) return(invisible(NULL))
-    chunk_id <<- chunk_id + 1L
-    chunk_df <- do.call(rbind, batch)
+    if (length(stream_state$batch) == 0) return(invisible(NULL))
+    stream_state$chunk_id <- stream_state$chunk_id + 1L
+    chunk_df <- do.call(rbind, stream_state$batch)
     rownames(chunk_df) <- NULL
-    processor(chunk_df, chunk_id)
-    batch <<- list()
+    processor(chunk_df, stream_state$chunk_id)
+    stream_state$batch <- list()
     invisible(NULL)
   }
 
@@ -303,23 +305,96 @@ bcftools_stream_chunks <- function(
         pos = parts[2],
         ref = parts[3],
         alt = alt,
-        qual = suppressWarnings(as.numeric(parts[5])),
+        qual = scalar_num(parts[5]),
         filter = parts[6],
         info = if (length(parts) >= 7) parts[7] else "."
       )
 
-      batch[[length(batch) + 1L]] <- row
+      stream_state$batch[[length(stream_state$batch) + 1L]] <- row
       kept_total <- kept_total + 1L
     }
 
     if (!is.null(progress_fn) && read_total %% 50000L == 0L) {
       progress_fn(read_total, kept_total, 0L)
     }
-    if (length(batch) >= chunk_size) flush_batch()
+    if (length(stream_state$batch) >= chunk_size) flush_batch()
   }
   flush_batch()
 
-  list(rows_read = read_total, rows_analyzed = kept_total, rows_skipped = 0L, chunks = chunk_id)
+  list(rows_read = read_total, rows_analyzed = kept_total, rows_skipped = 0L, chunks = stream_state$chunk_id)
+}
+
+new_complete_analysis_state <- function() {
+  state <- new.env(parent = emptyenv())
+  state$first_write <- TRUE
+  state$preview_rows <- list()
+  state$preview_count <- 0L
+  state$classification_counts <- list()
+  state$rows_classified <- 0L
+  state$rows_gene_skipped <- 0L
+  state
+}
+
+record_analysis_report <- function(report, state, output_csv, preview_limit = 1000L) {
+  if (nrow(report) == 0L) return(invisible(NULL))
+
+  state$rows_classified <- state$rows_classified + nrow(report)
+  for (cl in unique(report$classification)) {
+    state$classification_counts[[cl]] <-
+      (state$classification_counts[[cl]] %||% 0L) + sum(report$classification == cl)
+  }
+
+  utils::write.table(
+    report, file = output_csv, sep = ",",
+    row.names = FALSE, col.names = state$first_write, append = !state$first_write
+  )
+  state$first_write <- FALSE
+
+  if (state$preview_count < preview_limit) {
+    n_take <- min(nrow(report), preview_limit - state$preview_count)
+    state$preview_rows[[length(state$preview_rows) + 1L]] <- report[seq_len(n_take), , drop = FALSE]
+    state$preview_count <- state$preview_count + n_take
+  }
+  invisible(NULL)
+}
+
+analysis_preview_df <- function(state) {
+  if (length(state$preview_rows) == 0L) return(empty_report())
+  df <- do.call(rbind, state$preview_rows)
+  rownames(df) <- NULL
+  df
+}
+
+select_vcf_streamer <- function(use_bcftools = TRUE) {
+  if (isTRUE(use_bcftools) && bcftools_available()) bcftools_stream_chunks else stream_vcf_chunks
+}
+
+run_vcf_stream_with_fallback <- function(stream_fun, vcf_path, chunk_size, pass_only,
+                                         min_qual, processor, progress_fn) {
+  tryCatch(
+    stream_fun(
+      vcf_path = vcf_path,
+      chunk_size = chunk_size,
+      pass_only = pass_only,
+      min_qual = min_qual,
+      max_variants = Inf,
+      processor = processor,
+      progress_fn = progress_fn
+    ),
+    error = function(e) {
+      if (!identical(stream_fun, bcftools_stream_chunks)) stop(e)
+      message("bcftools failed, falling back to R streaming: ", conditionMessage(e))
+      stream_vcf_chunks(
+        vcf_path = vcf_path,
+        chunk_size = chunk_size,
+        pass_only = pass_only,
+        min_qual = min_qual,
+        max_variants = Inf,
+        processor = processor,
+        progress_fn = progress_fn
+      )
+    }
+  )
 }
 
 #' Analyze complete VCF — all rows, chunked, results written to CSV on disk.
@@ -357,20 +432,14 @@ analyze_complete_vcf <- function(
   metadata_path <- sub("\\.csv$", ".metadata.json", output_csv)
   write_run_metadata_json(run_metadata, metadata_path)
 
-  first_write <- TRUE
-  preview_rows <- list()
-  preview_limit <- 1000L
-  preview_count <- 0L
-  classification_counts <- list()
-  rows_classified <- 0L
-  rows_gene_skipped <- 0L
+  analysis_state <- new_complete_analysis_state()
   gene_filter <- parse_gene_filter(gene_filter)
 
   process_chunk <- function(chunk_df, chunk_id) {
     if (length(gene_filter) > 0L) {
       n_before <- nrow(chunk_df)
       chunk_df <- filter_variants_by_genes(chunk_df, gene_filter)
-      rows_gene_skipped <<- rows_gene_skipped + (n_before - nrow(chunk_df))
+      analysis_state$rows_gene_skipped <- analysis_state$rows_gene_skipped + (n_before - nrow(chunk_df))
       if (nrow(chunk_df) == 0L) return(invisible(NULL))
     }
 
@@ -391,24 +460,7 @@ analyze_complete_vcf <- function(
       run_metadata = run_metadata,
       write_audit = write_audit
     )
-    if (nrow(report) > 0) {
-      rows_classified <<- rows_classified + nrow(report)
-      for (cl in unique(report$classification)) {
-        classification_counts[[cl]] <<- (classification_counts[[cl]] %||% 0L) + sum(report$classification == cl)
-      }
-      utils::write.table(
-        report, file = output_csv, sep = ",",
-        row.names = FALSE, col.names = first_write, append = !first_write
-      )
-      first_write <<- FALSE
-
-      display_report <- report
-      if (nrow(display_report) > 0 && preview_count < preview_limit) {
-        n_take <- min(nrow(display_report), preview_limit - preview_count)
-        preview_rows[[length(preview_rows) + 1L]] <<- display_report[seq_len(n_take), , drop = FALSE]
-        preview_count <<- preview_count + n_take
-      }
-    }
+    record_analysis_report(report, analysis_state, output_csv)
 
     if (!is.null(progress_fn)) {
       progress_fn(detail = sprintf("Chunk %d classified (%d variants)", chunk_id, nrow(chunk_df)))
@@ -416,38 +468,16 @@ analyze_complete_vcf <- function(
     invisible(NULL)
   }
 
-  stream_fun <- if (isTRUE(use_bcftools) && bcftools_available()) {
-    bcftools_stream_chunks
-  } else {
-    stream_vcf_chunks
-  }
+  stream_fun <- select_vcf_streamer(use_bcftools)
 
-  stats <- tryCatch(
-    stream_fun(
-      vcf_path = vcf_path,
-      chunk_size = chunk_size,
-      pass_only = pass_only,
-      min_qual = min_qual,
-      max_variants = Inf,
-      processor = process_chunk,
-      progress_fn = progress_fn
-    ),
-    error = function(e) {
-      if (identical(stream_fun, bcftools_stream_chunks)) {
-        message("bcftools failed, falling back to R streaming: ", conditionMessage(e))
-        stream_vcf_chunks(
-          vcf_path = vcf_path,
-          chunk_size = chunk_size,
-          pass_only = pass_only,
-          min_qual = min_qual,
-          max_variants = Inf,
-          processor = process_chunk,
-          progress_fn = progress_fn
-        )
-      } else {
-        stop(e)
-      }
-    }
+  stats <- run_vcf_stream_with_fallback(
+    stream_fun = stream_fun,
+    vcf_path = vcf_path,
+    chunk_size = chunk_size,
+    pass_only = pass_only,
+    min_qual = min_qual,
+    processor = process_chunk,
+    progress_fn = progress_fn
   )
 
   engine <- if (isTRUE(use_bcftools) && bcftools_available()) {
@@ -457,13 +487,7 @@ analyze_complete_vcf <- function(
   }
   if (!is.null(attr(stats, "fallback"))) engine <- "R-stream (bcftools fallback)"
 
-  preview_df <- if (length(preview_rows) > 0) {
-    df <- do.call(rbind, preview_rows)
-    rownames(df) <- NULL
-    df
-  } else {
-    empty_report()
-  }
+  preview_df <- analysis_preview_df(analysis_state)
 
   list(
     output_csv = output_csv,
@@ -471,13 +495,13 @@ analyze_complete_vcf <- function(
     run_metadata = run_metadata,
     preview = preview_df,
     stats = stats,
-    classification_counts = classification_counts,
+    classification_counts = analysis_state$classification_counts,
     engine = engine,
     rows_analyzed = stats$rows_analyzed,
     rows_skipped = stats$rows_skipped,
-    rows_classified = rows_classified,
+    rows_classified = analysis_state$rows_classified,
     rows_displayed = nrow(preview_df),
-    rows_gene_skipped = rows_gene_skipped,
+    rows_gene_skipped = analysis_state$rows_gene_skipped,
     gene_filter = gene_filter
   )
 }

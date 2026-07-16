@@ -9,7 +9,7 @@ register_analysis_server <- function(ctx) {
     pass_only <- isTRUE(input[[paste0("pass_only_", suffix)]])
     write_audit <- !isTRUE(input[[paste0("skip_audit_", suffix)]])
     chunk_raw <- input[[paste0("chunk_size_", suffix)]]
-    chunk_size <- suppressWarnings(as.integer(chunk_raw))
+    chunk_size <- scalar_int(chunk_raw)
     if (is.na(chunk_size) || chunk_size < 100L) chunk_size <- 10000L
 
     complete_val <- input[[paste0("complete_vcf_", suffix)]]
@@ -28,12 +28,13 @@ register_analysis_server <- function(ctx) {
     }
 
     r <- refs()
-    progress_count <- 0L
+    progress_state <- new.env(parent = emptyenv())
+    progress_state$count <- 0L
     profile_id <- input[[paste0("profile_", suffix)]] %||% DEFAULT_PROFILE_ID
     manual_map <- if (mode == "full") manual_evidence_a() else list()
 
     min_qual_raw <- input[[paste0("min_qual_", suffix)]]
-    min_qual <- suppressWarnings(as.numeric(min_qual_raw))
+    min_qual <- scalar_num(min_qual_raw)
     if (is.na(min_qual)) min_qual <- 0
 
     result <- analyze_complete_vcf(
@@ -52,9 +53,9 @@ register_analysis_server <- function(ctx) {
       write_audit = write_audit,
       gene_filter = gene_filter,
       progress_fn = function(detail = NULL, ...) {
-        progress_count <<- progress_count + 1L
+        progress_state$count <- progress_state$count + 1L
         # Cap progress increments so Shiny progress UI does not overflow
-        step <- if (progress_count <= 8L) 0.1 else 0.02
+        step <- if (progress_state$count <= 8L) 0.1 else 0.02
         incProgress(step, detail = detail)
       }
     )

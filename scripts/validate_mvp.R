@@ -10,15 +10,16 @@ data_root <- normalizePath(file.path(project_root, ".."), winslash = "/", mustWo
 setwd(project_root)
 source("global.R")
 
-pass_n <- 0L
-fail_n <- 0L
+state <- new.env(parent = emptyenv())
+state$pass_n <- 0L
+state$fail_n <- 0L
 
 check <- function(name, cond, msg = "") {
   if (isTRUE(cond)) {
-    pass_n <<- pass_n + 1L
+    state$pass_n <- state$pass_n + 1L
     cat("[PASS] ", name, "\n", sep = "")
   } else {
-    fail_n <<- fail_n + 1L
+    state$fail_n <- state$fail_n + 1L
     cat("[FAIL] ", name, if (nzchar(msg)) paste0(": ", msg) else "", "\n", sep = "")
   }
 }
@@ -104,5 +105,5 @@ if (file.exists(sample3_vcf)) {
   cat("[SKIP] Sample 3 VCF not found\n")
 }
 
-cat("\nSummary: ", pass_n, " passed, ", fail_n, " failed\n", sep = "")
-if (fail_n > 0) quit(status = 1)
+cat("\nSummary: ", state$pass_n, " passed, ", state$fail_n, " failed\n", sep = "")
+if (state$fail_n > 0) quit(status = 1)

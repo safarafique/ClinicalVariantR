@@ -4,7 +4,10 @@
 #' @return Character classification tier.
 safe_int <- function(x, default = 0L) {
   if (is.null(x) || length(x) == 0L) return(default)
-  val <- suppressWarnings(as.integer(x)[1L])
+  raw <- trimws(as.character(x)[1L])
+  if (is.na(raw) || !nzchar(raw)) return(default)
+  if (!grepl("^[+-]?[0-9]+$", raw)) return(default)
+  val <- as.integer(raw)
   if (length(val) == 0L || is.na(val)) default else val
 }
 
@@ -71,7 +74,23 @@ scalar_chr <- function(x, default = NA_character_) {
 scalar_num <- function(x, default = NA_real_) {
   if (is.null(x) || length(x) == 0L) return(default)
   if (is.list(x) && !is.data.frame(x)) x <- x[[1L]]
-  val <- suppressWarnings(as.numeric(x)[1L])
+  raw <- trimws(as.character(x)[1L])
+  if (is.na(raw) || !nzchar(raw)) return(default)
+  if (!grepl("^[+-]?([0-9]+\\.?[0-9]*|\\.[0-9]+)([eE][+-]?[0-9]+)?$", raw)) {
+    return(default)
+  }
+  val <- as.numeric(raw)
+  if (length(val) == 0L || is.na(val)) return(default)
+  val
+}
+
+scalar_int <- function(x, default = NA_integer_) {
+  if (is.null(x) || length(x) == 0L) return(default)
+  if (is.list(x) && !is.data.frame(x)) x <- x[[1L]]
+  raw <- trimws(as.character(x)[1L])
+  if (is.na(raw) || !nzchar(raw)) return(default)
+  if (!grepl("^[+-]?[0-9]+$", raw)) return(default)
+  val <- as.integer(raw)
   if (length(val) == 0L || is.na(val)) return(default)
   val
 }

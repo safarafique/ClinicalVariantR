@@ -29,7 +29,7 @@ DEFAULT_ACMG_THRESHOLDS <- list(
 threshold_num <- function(thresholds, key, default) {
   val <- thresholds[[key]]
   if (is.null(val) || length(val) == 0L) return(default)
-  num <- suppressWarnings(as.numeric(val)[1L])
+  num <- scalar_num(val)
   if (length(num) == 0L || is.na(num)) default else num
 }
 
@@ -109,7 +109,6 @@ best_population_af <- function(af_1000g = NA_real_, af_esp6500 = NA_real_,
     gnomad_af,
     population_af
   )
-  vals <- suppressWarnings(as.numeric(vals))
   vals <- vals[!is.na(vals)]
   if (length(vals) == 0L) return(NA_real_)
   max(vals)
@@ -125,7 +124,7 @@ VEP_POPMAX_AF_FIELDS <- c(
 )
 
 best_popmax_af <- function(popmax_af = NA_real_, row = NULL) {
-  vals <- suppressWarnings(as.numeric(popmax_af))
+  vals <- vapply(popmax_af, scalar_num, numeric(1L))
   vals <- vals[!is.na(vals)]
   if (!is.null(row)) {
     for (fld in VEP_POPMAX_AF_FIELDS) {
@@ -417,16 +416,17 @@ score_insilico_criteria <- function(
 
   ph_call <- parse_polyphen_call(polyphen, polyphen_score)
   sift_call <- parse_sift_call(sift)
-  tool_notes <- character()
-  damaging_hits <- 0L
-  benign_hits <- 0L
+  tool_state <- new.env(parent = emptyenv())
+  tool_state$notes <- character()
+  tool_state$damaging_hits <- 0L
+  tool_state$benign_hits <- 0L
   min_tools <- as.integer(thresholds$insilico_min_tools %||% 2)
   revel_solo <- isTRUE(thresholds$insilico_revel_solo %||% TRUE)
 
   add_tool <- function(name, value_text, damaging = FALSE, benign = FALSE) {
-    tool_notes <<- c(tool_notes, sprintf("%s=%s", name, value_text))
-    if (isTRUE(damaging)) damaging_hits <<- damaging_hits + 1L
-    if (isTRUE(benign)) benign_hits <<- benign_hits + 1L
+    tool_state$notes <- c(tool_state$notes, sprintf("%s=%s", name, value_text))
+    if (isTRUE(damaging)) tool_state$damaging_hits <- tool_state$damaging_hits + 1L
+    if (isTRUE(benign)) tool_state$benign_hits <- tool_state$benign_hits + 1L
   }
 
   if (!is.na(revel)) {
@@ -514,47 +514,47 @@ score_insilico_criteria <- function(
   }
 
   if (ph_call == "damaging") {
-    damaging_hits <- damaging_hits + 1L
+    tool_state$damaging_hits <- tool_state$damaging_hits + 1L
     add_tool("PolyPhen", "damaging", damaging = TRUE)
   } else if (ph_call == "benign") {
-    benign_hits <- benign_hits + 1L
+    tool_state$benign_hits <- tool_state$benign_hits + 1L
     add_tool("PolyPhen", "benign", benign = TRUE)
   }
 
   if (sift_call == "deleterious") {
-    damaging_hits <- damaging_hits + 1L
+    tool_state$damaging_hits <- tool_state$damaging_hits + 1L
     add_tool("SIFT", "deleterious", damaging = TRUE)
   } else if (sift_call == "tolerated") {
-    benign_hits <- benign_hits + 1L
+    tool_state$benign_hits <- tool_state$benign_hits + 1L
     add_tool("SIFT", "tolerated", benign = TRUE)
   }
 
   effective_min <- if (isTRUE(revel_solo)) 1L else min_tools
 
-  if (!isTRUE(out$PP3) && damaging_hits >= effective_min) {
+  if (!isTRUE(out$PP3) && tool_state$damaging_hits >= effective_min) {
     out$PP3 <- TRUE
     out$PP3_rationale <- sprintf(
       "%d in silico tools support damaging effect (threshold: >=%d). Evidence: PP3 (Supporting). Tools: %s.",
-      damaging_hits, effective_min, paste(tool_notes, collapse = "; ")
+      tool_state$damaging_hits, effective_min, paste(tool_state$notes, collapse = "; ")
     )
   }
-  if (!isTRUE(out$BP4) && benign_hits >= effective_min) {
+  if (!isTRUE(out$BP4) && tool_state$benign_hits >= effective_min) {
     out$BP4 <- TRUE
     out$BP4_rationale <- sprintf(
       "%d in silico tools support benign effect (threshold: >=%d). Evidence: BP4 (Supporting). Tools: %s.",
-      benign_hits, effective_min, paste(tool_notes, collapse = "; ")
+      tool_state$benign_hits, effective_min, paste(tool_state$notes, collapse = "; ")
     )
   }
 
   if (!isTRUE(out$PP3) && !isTRUE(out$BP4)) {
-    if (damaging_hits == 1L) {
-      out$PP3_rationale <- sprintf("Single-tool damaging signal (partial PP3 review): %s.", paste(tool_notes, collapse = "; "))
-    } else if (benign_hits == 1L) {
-      out$BP4_rationale <- sprintf("Single-tool benign signal (partial BP4 review): %s.", paste(tool_notes, collapse = "; "))
+    if (tool_state$damaging_hits == 1L) {
+      out$PP3_rationale <- sprintf("Single-tool damaging signal (partial PP3 review): %s.", paste(tool_state$notes, collapse = "; "))
+    } else if (tool_state$benign_hits == 1L) {
+      out$BP4_rationale <- sprintf("Single-tool benign signal (partial BP4 review): %s.", paste(tool_state$notes, collapse = "; "))
     }
   }
 
-  out$insilico_summary <- if (length(tool_notes) > 0) paste(tool_notes, collapse = "; ") else ""
+  out$insilico_summary <- if (length(tool_state$notes) > 0) paste(tool_state$notes, collapse = "; ") else ""
   out
 }
 

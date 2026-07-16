@@ -201,16 +201,20 @@ apply_pedigree_context_hints <- function(criteria, pedigree_context) {
 evaluate_acmg_full_28 <- function(variant, manual_inputs = list(), clinical_context = NULL,
                                   pedigree_context = NULL) {
   fields <- extract_variant_fields(variant)
-  criteria <- new_criteria_frame(FULL_CRITERIA)
+  criteria_env <- new.env(parent = emptyenv())
+  criteria_env$criteria <- new_criteria_frame(FULL_CRITERIA)
 
   mark <- function(code, rationale) {
+    criteria <- criteria_env$criteria
     idx <- match(code, criteria$criterion)
-    criteria$met[idx] <<- TRUE
-    criteria$rationale[idx] <<- rationale
+    criteria$met[idx] <- TRUE
+    criteria$rationale[idx] <- rationale
+    criteria_env$criteria <- criteria
   }
 
   apply_automated_acmg_rules(fields, mark, mode = "full")
   apply_manual_acmg_rules(manual_inputs, mark)
+  criteria <- criteria_env$criteria
   criteria <- apply_clinical_context_hints(criteria, clinical_context)
   criteria <- apply_pedigree_context_hints(criteria, pedigree_context)
 
@@ -222,15 +226,19 @@ evaluate_acmg_full_28 <- function(variant, manual_inputs = list(), clinical_cont
 
 evaluate_acmg_automated_18 <- function(variant) {
   fields <- extract_variant_fields(variant)
-  criteria <- new_criteria_frame(AUTOMATED_CRITERIA)
+  criteria_env <- new.env(parent = emptyenv())
+  criteria_env$criteria <- new_criteria_frame(AUTOMATED_CRITERIA)
 
   mark <- function(code, rationale) {
+    criteria <- criteria_env$criteria
     idx <- match(code, criteria$criterion)
-    criteria$met[idx] <<- TRUE
-    criteria$rationale[idx] <<- rationale
+    criteria$met[idx] <- TRUE
+    criteria$rationale[idx] <- rationale
+    criteria_env$criteria <- criteria
   }
 
   apply_automated_acmg_rules(fields, mark, mode = "rapid")
+  criteria <- criteria_env$criteria
 
   evidence <- summarize_evidence(criteria)
   classification <- combine_acmg_evidence(evidence)

@@ -22,7 +22,7 @@ Official guides:
 | Namespace | `NAMESPACE` | ✅ minimal exports (`ClinicalVariantR`, `ClinicalVariantRApp`) |
 | License | `LICENSE`, `LICENSE.md` | ✅ MIT |
 | News | `NEWS.md` | ✅ |
-| Citation | `inst/CITATION` | ✅ update author ORCID/email before submit |
+| Citation | `inst/CITATION` | ✅ maintainer ORCID/email recorded |
 | Package man page | `man/ClinicalVariantR-package.Rd` | ✅ |
 | Exported function man pages | `man/ClinicalVariantR.Rd` | ✅ |
 | Vignette | `vignettes/ClinicalVariantR.Rmd` | ✅ draft (needs BiocStyle) |
@@ -32,8 +32,9 @@ Official guides:
 | Conversion plan | `inst/Bioconductor/PACKAGE_CONVERSION.md` | ✅ |
 
 **Maintainer (current):** Safa Rafique `<safa.sandhu@gmail.com>`.
+**Maintainer ORCID:** <https://orcid.org/0000-0003-2646-8106>.
 **Authors:** Safa Rafique, Naeem Mahmood, Muhammad Farooq Sabar.
-Add ORCID and affiliations in `DESCRIPTION` / vignette if available before submit.
+Add remaining author ORCID IDs and affiliations in `DESCRIPTION` / vignette if available before submit.
 
 ---
 

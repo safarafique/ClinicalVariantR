@@ -43,7 +43,7 @@ parse_info_tag <- function(info, tag) {
 parse_info_num_max <- function(info, tag, scale_esp = FALSE) {
   raw <- parse_info_tag(info, tag)
   if (is.na(raw) || !nzchar(raw)) return(NA_real_)
-  nums <- suppressWarnings(as.numeric(unlist(strsplit(raw, "[,|:&]"))))
+  nums <- vapply(unlist(strsplit(raw, "[,|:&]")), scalar_num, numeric(1L))
   nums <- nums[!is.na(nums)]
   if (length(nums) == 0L) return(NA_real_)
   val <- max(nums)
@@ -53,7 +53,7 @@ parse_info_num_max <- function(info, tag, scale_esp = FALSE) {
 
 parse_spliceai_max <- function(raw) {
   if (is.na(raw) || !nzchar(raw)) return(NA_real_)
-  nums <- suppressWarnings(as.numeric(unlist(strsplit(raw, "[|,&:]"))))
+  nums <- vapply(unlist(strsplit(raw, "[|,&:]")), scalar_num, numeric(1L))
   nums <- nums[!is.na(nums)]
   if (length(nums) == 0L) return(NA_real_)
   max(nums)
@@ -86,7 +86,7 @@ parse_vep_prediction_field <- function(raw) {
   score <- NA_real_
   m <- regexpr("\\(([0-9.]+)\\)", text, perl = TRUE)
   if (m[1L] != -1L) {
-    score <- suppressWarnings(as.numeric(sub(".*\\(([^)]+)\\).*", "\\1", regmatches(text, m)[[1L]])))
+    score <- scalar_num(sub(".*\\(([^)]+)\\).*", "\\1", regmatches(text, m)[[1L]]))
   }
   list(text = text, score = score)
 }
@@ -103,7 +103,7 @@ csq_numeric_max <- function(parts, names, column_names = VEP_CSQ_COLUMN_NAMES) {
   vals <- vapply(names, function(nm) {
     raw <- csq_get_part(parts, nm, column_names)
     if (is.na(raw)) return(NA_real_)
-    suppressWarnings(as.numeric(raw))
+    scalar_num(raw)
   }, numeric(1))
   vals <- vals[!is.na(vals)]
   if (length(vals) == 0L) NA_real_ else max(vals)
@@ -367,7 +367,7 @@ parse_polyphen_from_esp <- function(ph) {
   first <- strsplit(ph, ",")[[1L]][1L]
   score <- NA_real_
   if (grepl(":", first, fixed = TRUE)) {
-    score <- suppressWarnings(as.numeric(sub(".*:", "", first)))
+    score <- scalar_num(sub(".*:", "", first))
   }
   list(text = first, score = score)
 }
@@ -387,14 +387,13 @@ population_af_from_annotation <- function(
     csq_af,
     gnomad_info
   )
-  vals <- suppressWarnings(as.numeric(vals))
   vals <- vals[!is.na(vals)]
   if (length(vals) == 0L) NA_real_ else max(vals)
 }
 
 parse_variant_from_vcf_fields <- function(chrom, pos, ref, alt, qual = NA_real_, filter = ".", info = ".") {
   chrom <- scalar_chr(chrom)
-  pos <- suppressWarnings(as.integer(scalar_chr(pos)))
+  pos <- scalar_int(scalar_chr(pos))
   ref <- scalar_chr(ref)
   alt <- scalar_chr(alt)
   qual <- scalar_num(qual)

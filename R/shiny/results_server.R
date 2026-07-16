@@ -369,7 +369,7 @@ register_results_server <- function(ctx) {
   output$download_c <- downloadHandler(
     filename = function() {
       genes <- parse_gene_filter(isolate(input$genes_c))
-      tag <- if (length(genes) > 0L) paste(genes[1:min(3, length(genes))], collapse = "_") else "genes"
+      tag <- if (length(genes) > 0L) paste(genes[seq_len(min(3L, length(genes)))], collapse = "_") else "genes"
       paste0("Gene_Panel_", tag, "_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv")
     },
     content = function(file) {

@@ -3,8 +3,10 @@
 HPO_GENE_MAP_PATH <- file.path("data", "reference", "hpo_gene_associations.tsv")
 OMIM_GENE_MAP_PATH <- file.path("data", "reference", "omim_gene_map.tsv")
 
-.hpo_gene_db <- NULL
-.omim_gene_db <- NULL
+.hpo_gene_cache <- new.env(parent = emptyenv())
+.hpo_gene_cache$db <- NULL
+.omim_gene_cache <- new.env(parent = emptyenv())
+.omim_gene_cache$db <- NULL
 
 normalize_hpo_id <- function(x) {
   x <- toupper(trimws(as.character(x)))
@@ -18,8 +20,8 @@ normalize_hpo_id <- function(x) {
 }
 
 load_hpo_gene_map <- function(path = HPO_GENE_MAP_PATH) {
-  if (!is.null(.hpo_gene_db) && identical(attr(.hpo_gene_db, "path"), path)) {
-    return(.hpo_gene_db)
+  if (!is.null(.hpo_gene_cache$db) && identical(attr(.hpo_gene_cache$db, "path"), path)) {
+    return(.hpo_gene_cache$db)
   }
   if (!file.exists(path)) return(data.frame())
   df <- utils::read.delim(path, stringsAsFactors = FALSE, comment.char = "#")
@@ -27,20 +29,20 @@ load_hpo_gene_map <- function(path = HPO_GENE_MAP_PATH) {
   df$hpo_id <- vapply(df$hpo_id, normalize_hpo_id, character(1L))
   df$gene <- toupper(trimws(df$gene))
   attr(df, "path") <- path
-  .hpo_gene_db <<- df
+  .hpo_gene_cache$db <- df
   df
 }
 
 load_omim_gene_map <- function(path = OMIM_GENE_MAP_PATH) {
-  if (!is.null(.omim_gene_db) && identical(attr(.omim_gene_db, "path"), path)) {
-    return(.omim_gene_db)
+  if (!is.null(.omim_gene_cache$db) && identical(attr(.omim_gene_cache$db, "path"), path)) {
+    return(.omim_gene_cache$db)
   }
   if (!file.exists(path)) return(data.frame())
   df <- utils::read.delim(path, stringsAsFactors = FALSE, comment.char = "#")
   if (nrow(df) == 0L) return(df)
   df$gene <- toupper(trimws(df$gene))
   attr(df, "path") <- path
-  .omim_gene_db <<- df
+  .omim_gene_cache$db <- df
   df
 }
 

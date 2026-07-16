@@ -35,7 +35,7 @@ thresholds_table_to_list <- function(tbl) {
   )
   if (nrow(tbl) == 0L) return(fallback)
   keys <- tbl$threshold_key
-  vals <- suppressWarnings(as.numeric(tbl$value))
+  vals <- vapply(tbl$value, scalar_num, numeric(1L))
   out <- as.list(setNames(vals, keys))
   out[!is.na(vals)]
 }
@@ -51,7 +51,7 @@ load_rule_config <- function(profile_id = DEFAULT_PROFILE_ID) {
     prof <- profiles_tbl[profiles_tbl$profile_id == profile_id, , drop = FALSE][1, , drop = FALSE]
     for (col in c("ba1_af", "bs1_af", "pm2_af", "pm2_strict_af")) {
       if (col %in% names(prof) && !is.na(prof[[col]])) {
-        num <- suppressWarnings(as.numeric(prof[[col]]))
+        num <- scalar_num(prof[[col]])
         if (!is.na(num)) thresholds[[col]] <- num
       }
     }
