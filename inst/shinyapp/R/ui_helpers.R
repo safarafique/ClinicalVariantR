@@ -52,7 +52,7 @@ readiness_indicator_ui <- function(validation, label = "Analysis readiness", pro
   dot_class <- if (ready) "readiness-dot-green" else "readiness-dot-red"
   icon_name <- if (ready) "check-circle" else "times-circle"
   status_text <- if (ready) {
-    "Ready for analysis — click Run Analysis"
+    "Ready for analysis - click Run Analysis"
   } else {
     "Not ready for analysis"
   }
@@ -310,7 +310,7 @@ category_selection_hint_ui <- function(selected_category, report_df) {
   n <- if (is.null(report_df)) 0L else nrow(report_df)
   div(
     class = "alert alert-light border mb-2 py-2",
-    tags$b(selected_category), " — ",
+    tags$b(selected_category), " - ",
     format(n, big.mark = ","), " variant(s). ",
     tags$span(class = "text-muted", "Select a variant row below to view all 18 automated criteria.")
   )
@@ -545,7 +545,7 @@ resolve_explorer_export_df <- function(
 export_evidence_summary_pdf <- function(
     summary_df,
     file,
-    title = "ClinicalVariantR Evidence Report — Summary",
+    title = "ClinicalVariantR Evidence Report - Summary",
     subtitle = "",
     total_variants = NA_integer_) {
 
@@ -684,9 +684,9 @@ render_reference_readiness_banner <- function() {
 
 explorer_source_label <- function(source_id) {
   switch(source_id,
-    a = "Group A — Clinical prediction",
-    b = "Group B — Automated prediction",
-    c = "Group C — Gene panel prediction",
+    a = "Group A - Clinical prediction",
+    b = "Group B - Automated prediction",
+    c = "Group C - Gene panel prediction",
     "Evidence Explorer"
   )
 }

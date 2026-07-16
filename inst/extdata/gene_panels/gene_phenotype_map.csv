@@ -1,0 +1,12 @@
+gene,phenotype_keywords,source
+MECP2,Rett|developmental delay|intellectual disability|neurodevelopmental,ClinGen
+TP53,cancer|tumor|Li-Fraumeni|sarcoma|breast cancer,ClinGen
+BRCA1,breast|ovarian|hereditary cancer|BRCA,ClinGen
+BRCA2,breast|ovarian|hereditary cancer|BRCA,ClinGen
+CFTR,cystic fibrosis|CF|pulmonary|pancreatic,CFTR2
+HBB,sickle|thalassemia|hemoglobin|anemia,HbVar
+RUNX1,leukemia|myeloid|AML|MDS|hematologic,ClinGen
+GATA2,leukemia|myelodysplastic|immunodeficiency|MDS,ClinGen
+BCR,CML|chronic myeloid|leukemia|Philadelphia,CML
+ABL1,CML|chronic myeloid|leukemia|Philadelphia,CML
+TCF4,Pitt-Hopkins|intellectual disability|neurodevelopmental,ClinGen

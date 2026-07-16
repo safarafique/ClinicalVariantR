@@ -16,3 +16,51 @@ AUTOMATED_ACMG_CRITERIA <- c(
 
 CONTEXT_ASSISTED_CRITERIA <- c("PS2", "PP1", "PP4")
 MANUAL_ONLY_CRITERIA <- c("PS3", "PM3", "PM6", "BS3", "BS4", "BP2", "BP5")
+
+APP_VERSION <- "2.7.0"
+ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v2.7.0"
+ACMG_GUIDELINE_VERSION <- "ACMG/AMP 2015 + ClinGen refinements"
+
+ACMG_CLASSIFICATIONS <- c(
+  "Pathogenic", "Likely Pathogenic", "VUS", "Likely Benign", "Benign"
+)
+
+REFERENCE_PATHS <- list(
+  gnomad_v41 = file.path("data", "reference", "gnomad_v41_placeholder.tsv"),
+  clinvar    = file.path("data", "reference", "clinvar_placeholder.tsv"),
+  revel      = file.path("data", "reference", "revel_placeholder.tsv")
+)
+
+AUDIT_LOG_PATH <- file.path("logs", "analysis_log.csv")
+
+REPORT_COLUMNS <- c(
+  "variant_id", "chrom", "pos", "ref", "alt", "gene", "consequence",
+  "annotation_source", "genome_build_hint",
+  "gnomad_af", "revel_score", "cadd_score", "spliceai_max", "alphamissense_score",
+  "prediction_scores", "clinvar_classification",
+  "criteria_met", "criteria_rationale", "evidence_summary",
+  "classification", "confidence_score", "confidence_label",
+  "evidence_strength", "pathogenic_evidence_count", "benign_evidence_count",
+  "prediction_limitations",
+  "disease_profile",
+  "pipeline_mode", "classified_at", "analyst_session", "engine",
+  "app_version", "acmg_guideline_version", "input_vcf_checksum"
+)
+
+EVIDENCE_DETAIL_COLUMNS <- c(
+  "variant_id", "gene", "classification", "confidence_score", "confidence_label",
+  "criteria_met", "evidence_summary", "prediction_scores", "gnomad_af",
+  "disease_profile", "annotation_source", "genome_build_hint"
+)
+
+PDF_EXPORT_COLUMNS <- c(
+  "variant_id", "gene", "classification", "confidence_score", "confidence_label",
+  "criteria_met", "gnomad_af", "disease_profile", "evidence_summary"
+)
+
+VARIANT_DETAIL_COLUMNS <- c(
+  "variant_id", "chrom", "pos", "gene", "consequence", "classification",
+  "evidence_strength", "criteria_met", "confidence_score", "confidence_label",
+  "prediction_scores", "prediction_limitations",
+  "gnomad_af", "revel_score", "cadd_score", "clinvar_classification"
+)

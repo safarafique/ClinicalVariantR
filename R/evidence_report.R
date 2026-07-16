@@ -138,7 +138,7 @@ build_variant_evidence_table <- function(scores, thresholds, criteria_meta = lis
       if (isTRUE(scores$PS4)) {
         scores$PS4_rationale %||% ""
       } else if (isTRUE(scores$gwas_supplementary)) {
-        paste0(scores$gwas_supplementary_note %||% "", " [Supplementary — PS4 not auto-applied]")
+        paste0(scores$gwas_supplementary_note %||% "", " [Supplementary - PS4 not auto-applied]")
       } else {
         scores$PS4_rationale %||% ""
       },

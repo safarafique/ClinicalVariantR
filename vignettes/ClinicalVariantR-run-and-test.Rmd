@@ -51,28 +51,19 @@ If `ClinicalVariantR` is already loaded, RStudio will refuse to overwrite it
 **Session → Restart R** first.
 
 ```r
-# 0. Session -> Restart R
+# 0. Session -> Restart R, then:
 
-# 1. Install from the local package folder
-if (!requireNamespace("remotes", quietly = TRUE)) {
-    install.packages("remotes")
-}
-remotes::install_local(
-    "E:/ACGM/ClinicalVariantR",
-    force = TRUE,
-    upgrade = "never"
-)
-
-# 2. Open the app (Bioconductor-style API)
+if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
+remotes::install_local("E:/ACGM/ClinicalVariantR", force = TRUE, upgrade = "never")
 library(ClinicalVariantR)
-app <- ClinicalVariantR()   # or ClinicalVariantRApp()
-if (interactive()) {
-    shiny::runApp(app, launch.browser = TRUE)
-}
+app <- ClinicalVariantR()
+shiny::runApp(app, launch.browser = TRUE)
 ```
 
 After a successful install, `ClinicalVariantR()` uses the bundled app in
 `inst/shinyapp/` (`global.R`, `ui.R`, `server.R`, `config/`, `data/`, `www/`).
+See the **Introduction to ClinicalVariantR** vignette for the GExPipe-style
+install/launch guide and Home / Group A–C walkthrough.
 
 ## Install from GitHub
 

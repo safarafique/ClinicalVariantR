@@ -1,7 +1,7 @@
-#' Group A — clinical prediction tab UI.
+#' Group A - clinical prediction tab UI.
 group_a_nav_panel <- function() {
   bslib::nav_panel(
-    title = "Group A — Clinical Prediction",
+    title = "Group A - Clinical Prediction",
     value = "group_a",
     icon = icon("layer-group"),
     div(
@@ -23,7 +23,7 @@ group_a_nav_panel <- function() {
               checkboxInput("complete_vcf_a", "Analyze entire VCF (no row limit)", TRUE),
               checkboxInput("pass_only_a", "Load passing-filter rows only (PASS or .)", FALSE),
               numericInput("min_qual_a", "Minimum QUAL", value = 0, min = 0, step = 1),
-              checkboxInput("use_bcftools_a", "Use bcftools (Ubuntu/WSL — faster)", bcftools_available()),
+              checkboxInput("use_bcftools_a", "Use bcftools (Ubuntu/WSL - faster)", bcftools_available()),
               checkboxInput("skip_audit_a", "Skip audit log (faster analysis)", FALSE),
               numericInput("chunk_size_a", "Chunk size (variants per batch)", value = 10000, min = 1000, step = 1000),
               helpText(textOutput("engine_status_a", inline = TRUE)),
@@ -77,13 +77,13 @@ group_a_nav_panel <- function() {
                     class = "border rounded p-3 mb-3 bg-light",
                     h6("Per-variant curator evidence"),
                     p(class = "text-muted small", "Select a variant row above, set criteria, then apply to reclassify that variant only."),
-                    checkboxInput("cur_ps3", "PS3 — Functional studies support damaging effect", FALSE),
-                    checkboxInput("cur_pp4", "PP4 — Phenotype matches gene/disease", FALSE),
-                    checkboxInput("cur_ps4", "PS4 — Case-control enrichment", FALSE),
-                    checkboxInput("cur_ps2", "PS2 — De novo (confirmed)", FALSE),
-                    checkboxInput("cur_pm6", "PM6 — De novo (assumed)", FALSE),
-                    checkboxInput("cur_pp1", "PP1 — Co-segregation", FALSE),
-                    checkboxInput("cur_pp2", "PP2 — Missense mechanism", FALSE),
+                    checkboxInput("cur_ps3", "PS3 - Functional studies support damaging effect", FALSE),
+                    checkboxInput("cur_pp4", "PP4 - Phenotype matches gene/disease", FALSE),
+                    checkboxInput("cur_ps4", "PS4 - Case-control enrichment", FALSE),
+                    checkboxInput("cur_ps2", "PS2 - De novo (confirmed)", FALSE),
+                    checkboxInput("cur_pm6", "PM6 - De novo (assumed)", FALSE),
+                    checkboxInput("cur_pp1", "PP1 - Co-segregation", FALSE),
+                    checkboxInput("cur_pp2", "PP2 - Missense mechanism", FALSE),
                     actionButton("apply_curation_a", "Apply curation & reclassify", class = "btn-primary btn-sm"),
                     uiOutput("curation_status_a")
                   ),
@@ -110,7 +110,7 @@ group_a_nav_panel <- function() {
                   ),
                   p(
                     class = "text-muted small mt-2 mb-0",
-                    "Worklist = Pathogenic/Likely Pathogenic plus VUS with ≥2 pathogenic evidence; excludes PM2-only VUS."
+                    "Worklist = Pathogenic/Likely Pathogenic plus VUS with >=2 pathogenic evidence; excludes PM2-only VUS."
                   )
                 ),
                 bslib::accordion_panel(

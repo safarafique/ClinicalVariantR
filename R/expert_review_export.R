@@ -98,12 +98,12 @@ expert_review_checklist_static_ui <- function(show_curation = FALSE) {
     ),
     tags$ol(
       class = "small mb-3 ps-3",
-      tags$li(tags$strong("Triage:"), " start with Pathogenic / Likely Pathogenic; review VUS with ≥2 pathogenic evidence points."),
-      tags$li(tags$strong("Technical QC:"), " confirm in IGV — coverage, zygosity, mapping, genome build, canonical transcript."),
+      tags$li(tags$strong("Triage:"), " start with Pathogenic / Likely Pathogenic; review VUS with >=2 pathogenic evidence points."),
+      tags$li(tags$strong("Technical QC:"), " confirm in IGV - coverage, zygosity, mapping, genome build, canonical transcript."),
       tags$li(tags$strong("Population:"), " verify gnomAD/ClinVar independently; do not rely on PM2 when AF is missing."),
       tags$li(tags$strong("ACMG evidence:"), " open evidence detail and confirm each triggered criterion (PVS1, PS1, PM5, PP3, PP5/BP6, etc.)."),
       tags$li(tags$strong("Clinical fit:"), " phenotype matches gene (PP4), inheritance mode, gene on panel/indication."),
-      tags$li(tags$strong("Limitations:"), " read ", tags$code("prediction_limitations"), " — resolve or document before sign-out."),
+      tags$li(tags$strong("Limitations:"), " read ", tags$code("prediction_limitations"), " - resolve or document before sign-out."),
       tags$li(tags$strong("Exclude:"), " Benign/Likely Benign and PM2-only VUS unless lab policy says otherwise."),
       curation_block,
       tags$li(tags$strong("Sign-out:"), " second reviewer per laboratory SOP; document final class and report text.")
@@ -122,7 +122,7 @@ expert_csv_handoff_ui <- function() {
       tags$li(
         "Download ",
         tags$strong("Export expert worklist (CSV)"),
-        " to start sign-out review — or ",
+        " to start sign-out review - or ",
         tags$strong("Download full prediction report (CSV)"),
         " for audit and LIMS import."
       ),
@@ -162,10 +162,10 @@ render_expert_worklist_stats_ui <- function(df) {
         tags$span(class = "text-danger", stats$lp_plus, " Pathogenic / Likely Pathogenic"),
         " (priority review)"
       ),
-      tags$li(stats$vus, " VUS (", stats$pm2_only_vus, " PM2-only — usually deprioritize)"),
+      tags$li(stats$vus, " VUS (", stats$pm2_only_vus, " PM2-only - usually deprioritize)"),
       tags$li(
         tags$strong(stats$worklist), " expert worklist candidates ",
-        "(LP+ plus VUS with ≥2 pathogenic evidence; PM2-only VUS excluded)"
+        "(LP+ plus VUS with >=2 pathogenic evidence; PM2-only VUS excluded)"
       )
     )
   )

@@ -230,7 +230,7 @@ register_results_server <- function(ctx) {
       return(div(
         class = "alert alert-warning",
         "No variants loaded. ",
-        "If ", tags$strong("passing-filter only"), " is enabled, GATK/VEP VCFs often use FILTER='.' instead of PASS — this is now accepted. ",
+        "If ", tags$strong("passing-filter only"), " is enabled, GATK/VEP VCFs often use FILTER='.' instead of PASS - this is now accepted. ",
         "Otherwise check that the uploaded VCF contains variant rows."
       ))
     }

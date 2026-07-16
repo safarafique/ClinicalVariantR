@@ -1,0 +1,16 @@
+# OMIM morbid gene map (seed; replace with full morbidmap download)
+gene	omim_id	disease_name
+MECP2	300005	Rett syndrome
+TCF4	610954	Pitt-Hopkins syndrome
+TP53	191170	Li-Fraumeni syndrome
+BRCA1	604370	Breast-ovarian cancer familial
+BRCA2	612555	Breast-ovarian cancer familial
+CFTR	602421	Cystic fibrosis
+RUNX1	601626	Familial platelet disorder / AML
+GATA2	614038	MonoMAC syndrome
+SCN8A	607208	Epileptic encephalopathy
+DMD	310200	Duchenne muscular dystrophy
+PKD1	173900	Polycystic kidney disease
+MYH7	192600	Hypertrophic cardiomyopathy
+BCR	608232	Chronic myeloid leukemia
+ABL1	608232	Chronic myeloid leukemia

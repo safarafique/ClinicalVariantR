@@ -397,7 +397,7 @@ run_vcf_stream_with_fallback <- function(stream_fun, vcf_path, chunk_size, pass_
   )
 }
 
-#' Analyze complete VCF — all rows, chunked, results written to CSV on disk.
+#' Analyze complete VCF - all rows, chunked, results written to CSV on disk.
 analyze_complete_vcf <- function(
     vcf_path,
     mode = c("full", "rapid"),

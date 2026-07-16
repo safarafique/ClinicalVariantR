@@ -1,0 +1,29 @@
+# HPO term ID to gene associations (expand from HPO/jax or PanelApp exports)
+hpo_id	hpo_label	gene
+HP:0001250	Maternal seizure	SCN1A
+HP:0001250	Maternal seizure	SCN8A
+HP:0001250	Maternal seizure	MECP2
+HP:0002188	Delayed CNS myelination	MECP2
+HP:0000729	Autistic behavior	MECP2
+HP:0000729	Autistic behavior	TCF4
+HP:0000729	Autistic behavior	SHANK3
+HP:0002664	Neoplasm	TP53
+HP:0002664	Neoplasm	BRCA1
+HP:0002664	Neoplasm	BRCA2
+HP:0002664	Neoplasm	PALB2
+HP:0001909	Leukemia	RUNX1
+HP:0001909	Leukemia	GATA2
+HP:0001909	Leukemia	CEBPA
+HP:0000083	Renal insufficiency	PKD1
+HP:0000083	Renal insufficiency	PKD2
+HP:0001639	Hypertrophic cardiomyopathy	MYBPC3
+HP:0001639	Hypertrophic cardiomyopathy	MYH7
+HP:0001639	Hypertrophic cardiomyopathy	TTN
+HP:0001252	Muscular hypotonia	DMD
+HP:0001252	Muscular hypotonia	SMN1
+HP:0002093	Respiratory insufficiency	CFTR
+HP:0002093	Respiratory insufficiency	SFTPC
+HP:0005506	Chronic myeloid leukemia	BCR
+HP:0005506	Chronic myeloid leukemia	ABL1
+HP:0005516	Accelerated phase chronic myeloid leukemia	BCR
+HP:0005516	Accelerated phase chronic myeloid leukemia	ABL1

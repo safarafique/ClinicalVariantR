@@ -26,3 +26,17 @@
 #'
 #' @keywords internal
 "_PACKAGE"
+
+# Shiny app symbols assigned in inst/shinyapp/global.R and cross-file helpers.
+utils::globalVariables(c(
+    "ACMG_CLASSIFICATIONS",
+    "ACMG_GUIDELINE_VERSION",
+    "ACMG_PRO_ENGINE",
+    "APP_VERSION",
+    "AUDIT_LOG_PATH",
+    "EVIDENCE_DETAIL_COLUMNS",
+    "PDF_EXPORT_COLUMNS",
+    "REFERENCE_PATHS",
+    "REPORT_COLUMNS",
+    "VARIANT_DETAIL_COLUMNS"
+))

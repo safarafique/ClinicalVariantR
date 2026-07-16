@@ -37,24 +37,26 @@ ClinicalVariantRApp <- function(...) {
 #' @keywords internal
 #' @noRd
 .ClinicalVariantR_app_dir <- function() {
-    candidates <- c(
-        system.file("shinyapp", package = "ClinicalVariantR"),
-        system.file(package = "ClinicalVariantR"),
-        normalizePath(getwd(), winslash = "/", mustWork = FALSE)
-    )
-
-    # When running from a source checkout of this repo, also try typical roots.
+    env_root <- Sys.getenv("CLINICALVARIANTR_APP_ROOT", unset = "")
     pkg_path <- tryCatch(
         find.package("ClinicalVariantR", quiet = TRUE),
         error = function(e) character()
     )
-    if (length(pkg_path) == 1L && nzchar(pkg_path)) {
-        candidates <- c(
-            file.path(pkg_path, "shinyapp"),
-            pkg_path,
-            candidates
-        )
-    }
+    if (!length(pkg_path)) pkg_path <- ""
+
+    candidates <- c(
+        env_root,
+        system.file("shinyapp", package = "ClinicalVariantR"),
+        if (nzchar(pkg_path)) file.path(pkg_path, "shinyapp") else "",
+        system.file(package = "ClinicalVariantR"),
+        pkg_path,
+        normalizePath(getwd(), winslash = "/", mustWork = FALSE),
+        # Common local checkout paths (development fallback)
+        "E:/ACGM/ClinicalVariantR/inst/shinyapp",
+        "E:/ACGM/ClinicalVariantR",
+        "e:/ACGM/ClinicalVariantR/inst/shinyapp",
+        "e:/ACGM/ClinicalVariantR"
+    )
 
     for (root in unique(candidates[nzchar(candidates)])) {
         if (!dir.exists(root)) next
@@ -75,13 +77,35 @@ ClinicalVariantRApp <- function(...) {
     app_dir <- .ClinicalVariantR_app_dir()
     if (is.null(app_dir)) {
         stop(
-            "Unable to locate ClinicalVariantR Shiny sources (global.R / ui.R / server.R). ",
-            "Reinstall with a package that includes inst/shinyapp/, or set the working ",
-            "directory to the package source root and run shiny::runApp('.').",
+            "Unable to locate ClinicalVariantR Shiny sources (global.R / ui.R / server.R).\n",
+            "The package was likely not reinstalled (it was still loaded).\n",
+            "Fix:\n",
+            "  1) Session -> Restart R\n",
+            "  2) remotes::install_local('E:/ACGM/ClinicalVariantR', force = TRUE, upgrade = 'never')\n",
+            "  3) library(ClinicalVariantR); shiny::runApp(ClinicalVariantR(), launch.browser = TRUE)\n",
+            "Or launch from the source tree without reinstalling:\n",
+            "  shiny::runApp('E:/ACGM/ClinicalVariantR', launch.browser = TRUE)",
             call. = FALSE
         )
     }
 
     Sys.setenv(CLINICALVARIANTR_APP_ROOT = app_dir)
     shiny::shinyAppDir(app_dir)
+}
+
+#' Read a VCF header via VariantAnnotation (keeps the Import wired for checks).
+#'
+#' @param path Character path to a VCF / VCF.gz file.
+#' @return A \code{VCFHeader} object, or \code{NULL} on failure.
+#' @keywords internal
+#' @noRd
+.ClinicalVariantR_scan_vcf_header <- function(path) {
+    if (!is.character(path) || length(path) != 1L || !nzchar(path) || !file.exists(path)) {
+        return(NULL)
+    }
+    hdr <- try(VariantAnnotation::scanVcfHeader(path), silent = TRUE)
+    if (inherits(hdr, "try-error") || !methods::is(hdr, "VCFHeader")) {
+        return(NULL)
+    }
+    hdr
 }

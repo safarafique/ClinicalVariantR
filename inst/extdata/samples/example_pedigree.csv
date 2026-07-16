@@ -1,0 +1,4 @@
+sample_id,relation,affected_status,vcf_sample
+CML-001,proband,affected,PROBAND
+CML-001,mother,unaffected,MOTHER
+CML-001,father,unaffected,FATHER

@@ -123,7 +123,7 @@ score_trio_genotype_criteria <- function(
     if (parents_present && parents_ref) {
       out$PS2 <- TRUE
       out$PS2_rationale <- sprintf(
-        "Trio GT: proband %s with unaffected parents (%s/%s) — de novo supported (PS2; confirm phasing).",
+        "Trio GT: proband %s with unaffected parents (%s/%s) - de novo supported (PS2; confirm phasing).",
         gt_prob,
         if (is.na(gt_mom)) "NA" else gt_mom,
         if (is.na(gt_dad)) "NA" else gt_dad
@@ -134,12 +134,12 @@ score_trio_genotype_criteria <- function(
   if (!is.na(gt_prob) && gt_is_het(gt_prob) && !is.na(gt_mom) && !is.na(gt_dad)) {
     if (gt_is_het(gt_mom) && gt_is_hom_ref(gt_dad)) {
       out$PM3_rationale <- sprintf(
-        "Trio GT: proband %s, mother %s, father %s — review PM3/compound het with second pathogenic variant in %s.",
+        "Trio GT: proband %s, mother %s, father %s - review PM3/compound het with second pathogenic variant in %s.",
         gt_prob, gt_mom, gt_dad, gene
       )
     } else if (gt_is_het(gt_dad) && gt_is_hom_ref(gt_mom)) {
       out$PM3_rationale <- sprintf(
-        "Trio GT: proband %s, mother %s, father %s — review PM3/compound het with second pathogenic variant in %s.",
+        "Trio GT: proband %s, mother %s, father %s - review PM3/compound het with second pathogenic variant in %s.",
         gt_prob, gt_mom, gt_dad, gene
       )
     }

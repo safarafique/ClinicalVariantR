@@ -1,7 +1,7 @@
-#' Group C — gene panel prediction tab UI.
+#' Group C - gene panel prediction tab UI.
 group_c_nav_panel <- function() {
   bslib::nav_panel(
-    title = "Group C — Gene Panel Prediction",
+    title = "Group C - Gene Panel Prediction",
     value = "group_c",
     icon = icon("filter"),
     div(
@@ -29,7 +29,7 @@ group_c_nav_panel <- function() {
               checkboxInput("complete_vcf_c", "Analyze entire VCF (no row limit)", TRUE),
               checkboxInput("pass_only_c", "Load passing-filter rows only (PASS or .)", FALSE),
               numericInput("min_qual_c", "Minimum QUAL", value = 0, min = 0, step = 1),
-              checkboxInput("use_bcftools_c", "Use bcftools (Ubuntu/WSL — faster)", bcftools_available()),
+              checkboxInput("use_bcftools_c", "Use bcftools (Ubuntu/WSL - faster)", bcftools_available()),
               checkboxInput("skip_audit_c", "Skip audit log (faster analysis)", FALSE),
               numericInput("chunk_size_c", "Chunk size (variants per batch)", value = 10000, min = 1000, step = 1000),
               helpText(textOutput("engine_status_c", inline = TRUE)),
@@ -102,7 +102,7 @@ group_c_nav_panel <- function() {
                   ),
                   p(
                     class = "text-muted small mt-2 mb-0",
-                    "Worklist = Pathogenic/Likely Pathogenic plus VUS with ≥2 pathogenic evidence; excludes PM2-only VUS."
+                    "Worklist = Pathogenic/Likely Pathogenic plus VUS with >=2 pathogenic evidence; excludes PM2-only VUS."
                   )
                 ),
                 bslib::accordion_panel(

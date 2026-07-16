@@ -1,4 +1,4 @@
-#' Group B — automated VCF-only prediction tab.
+#' Group B - automated VCF-only prediction tab.
 register_group_b_server <- function(ctx) {
   input <- ctx$input
   output <- ctx$output
@@ -33,7 +33,7 @@ register_group_b_server <- function(ctx) {
     !is.null(v) && isTRUE(v$can_analyze)
   })
 
-  # Keep static button label/state in sync (do NOT recreate button in renderUI — clicks get lost).
+  # Keep static button label/state in sync (do NOT recreate button in renderUI - clicks get lost).
   observe({
     ready <- can_run_b()
     running <- isTRUE(run_b_running())
@@ -68,7 +68,7 @@ register_group_b_server <- function(ctx) {
             style = "width: 100%"
           )
         ),
-        tags$p(class = "text-muted small mt-2 mb-0", "Please wait — classifying variants now.")
+        tags$p(class = "text-muted small mt-2 mb-0", "Please wait - classifying variants now.")
       ))
     }
     feedback <- run_b_feedback()
@@ -155,7 +155,7 @@ register_group_b_server <- function(ctx) {
   # Critical: ignoreInit so startup does not fire a fake run; ignoreNULL so clicks always register.
   observeEvent(input$run_b, {
     message(sprintf("[Group B] Run clicked at %s", format(Sys.time(), "%H:%M:%S")))
-    run_b_feedback(list(type = "info", message = "Run clicked — checking input..."))
+    run_b_feedback(list(type = "info", message = "Run clicked - checking input..."))
 
     if (isTRUE(run_b_running())) {
       run_b_feedback(list(type = "error", message = "Analysis already running. Please wait."))

@@ -1,4 +1,4 @@
-#' Evidence explorer tab — full report browse, PDF/CSV export.
+#' Evidence explorer tab - full report browse, PDF/CSV export.
 register_explorer_server <- function(ctx) {
   input <- ctx$input
   output <- ctx$output
@@ -115,7 +115,7 @@ register_explorer_server <- function(ctx) {
         export_evidence_summary_pdf(
           summary_df,
           file,
-          title = "ClinicalVariantR Evidence Report — Summary",
+          title = "ClinicalVariantR Evidence Report - Summary",
           subtitle = subtitle,
           total_variants = nrow(full)
         )

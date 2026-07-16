@@ -1,4 +1,4 @@
-#' PS4 — variant-specific case-control enrichment (ACMG Strong).
+#' PS4 - variant-specific case-control enrichment (ACMG Strong).
 #'
 #' Professional germline interpretation policy:
 #'   - PS4 is awarded ONLY from curated case-control / cohort frequency data
@@ -207,7 +207,7 @@ format_gwas_supplementary_note <- function(hit) {
   )
   paste0(
     paste(parts, collapse = "; "),
-    ". Not applied as automated PS4 — requires variant-specific case-control enrichment review."
+    ". Not applied as automated PS4 - requires variant-specific case-control enrichment review."
   )
 }
 

@@ -8,7 +8,7 @@ home_nav_panel <- function() {
       class = "container-fluid py-4",
       div(
         class = "text-center mb-4",
-        h2("ClinicalVariantR — Variant Prediction Platform"),
+        h2("ClinicalVariantR - Variant Prediction Platform"),
         p(
           class = "lead text-muted",
           "ACMG/AMP evidence-based variant classification with streaming VCF analysis, ",
@@ -23,12 +23,12 @@ home_nav_panel <- function() {
         div(class = "col-lg-10", expert_csv_handoff_ui())
       ),
       fluidRow(
-        column(4, landing_card("group_a", "Group A — Clinical Prediction",
+        column(4, landing_card("group_a", "Group A - Clinical Prediction",
           "VCF + clinical + pedigree. All 28 criteria evaluated; per-variant curator overrides. Best for sign-out workflows.", "primary")),
-        column(4, landing_card("group_b", "Group B — Automated Prediction",
+        column(4, landing_card("group_b", "Group B - Automated Prediction",
           "VCF-only batch prediction with 18 automated criteria and full evidence per variant.", "success")),
-        column(4, landing_card("group_c", "Group C — Gene Panel Prediction",
-          "Same automated engine scoped to your gene panel — ideal for targeted NGS panels.", "warning"))
+        column(4, landing_card("group_c", "Group C - Gene Panel Prediction",
+          "Same automated engine scoped to your gene panel - ideal for targeted NGS panels.", "warning"))
       )
     )
   )

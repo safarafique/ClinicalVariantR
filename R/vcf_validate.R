@@ -20,7 +20,7 @@ vcf_app_requirements <- function(mode = c("full", "rapid")) {
     notes = if (mode == "full") {
       c(
         "Group A also requires Clinical Logs CSV and Pedigree CSV before analysis.",
-        "Manual ACMG criteria (PS2–PS4, PP1–PP2, PP4, PM6) need curator input regardless of VCF content."
+        "Manual ACMG criteria (PS2-PS4, PP1-PP2, PP4, PM6) need curator input regardless of VCF content."
       )
     } else {
       c(
@@ -476,7 +476,7 @@ validate_vcf <- function(vcf_path, mode = c("full", "rapid"), sample_rows = 100L
   } else {
     add_check(
       "INFO", "ClinicalVariantR Pro engine", "PASS",
-      sprintf("%s detected — InterVar-style automated criteria enabled.", ann_info$label)
+      sprintf("%s detected - InterVar-style automated criteria enabled.", ann_info$label)
     )
   }
 
@@ -669,7 +669,7 @@ validate_group_a_inputs <- function(vcf_path, clinical_path, pedigree_path, vcf_
   } else if (warn_n > 0) {
     sprintf("Ready with %d warning(s). Click Run Analysis.", warn_n)
   } else {
-    "All inputs validated. Ready for analysis — click Run Analysis."
+    "All inputs validated. Ready for analysis - click Run Analysis."
   }
 
   list(

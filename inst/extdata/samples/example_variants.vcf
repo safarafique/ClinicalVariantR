@@ -1,0 +1,6 @@
+##fileformat=VCFv4.2
+##source=CML_Variant_Interpreter_Example
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr22	23631806	.	A	G	.	PASS	GENE=BCR;CSQ=missense_variant;AF=0.00012;REVEL=0.82
+chr22	23632600	.	C	T	.	PASS	GENE=ABL1;CSQ=missense_variant;AF=0.0;REVEL=0.22
+chr9	133738352	.	G	A	.	PASS	GENE=ABL1;CSQ=stop_gained;AF=0.00045;REVEL=0.91

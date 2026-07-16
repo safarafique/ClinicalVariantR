@@ -83,7 +83,7 @@ score_clinical_pedigree_criteria <- function(
     if (!isTRUE(out$PP4) && phenotype_matches_gene(gene, pheno_text, gene_phenotype_map)) {
       out$PP4 <- TRUE
       out$PP4_rationale <- sprintf(
-        "Patient phenotype (%s) matches curated gene–disease association for %s (PP4).",
+        "Patient phenotype (%s) matches curated gene-disease association for %s (PP4).",
         pheno_text, gene
       )
     } else if (!isTRUE(out$PP4) &&
@@ -91,7 +91,7 @@ score_clinical_pedigree_criteria <- function(
                toupper(gene) %in% c("BCR", "ABL1", "RUNX1", "GATA2")) {
       out$PP4 <- TRUE
       out$PP4_rationale <- sprintf(
-        "Advanced CML phase with variant in %s — phenotype consistent with hematologic disease context (PP4).",
+        "Advanced CML phase with variant in %s - phenotype consistent with hematologic disease context (PP4).",
         gene
       )
     }
@@ -107,12 +107,12 @@ score_clinical_pedigree_criteria <- function(
     if (ped$n_affected >= 2L) {
       out$PP1 <- TRUE
       out$PP1_rationale <- sprintf(
-        "Pedigree shows %d affected member(s) — co-segregation with disease supported (PP1).", ped$n_affected
+        "Pedigree shows %d affected member(s) - co-segregation with disease supported (PP1).", ped$n_affected
       )
     }
     if (ped$proband_affected && ped$parents_unaffected) {
       out$PS2 <- TRUE
-      out$PS2_rationale <- "Proband affected with unaffected parents — de novo occurrence supported (PS2; confirm phasing)."
+      out$PS2_rationale <- "Proband affected with unaffected parents - de novo occurrence supported (PS2; confirm phasing)."
     }
     if (ped$proband_affected && !ped$has_parent) {
       out$PM6_rationale <- paste(

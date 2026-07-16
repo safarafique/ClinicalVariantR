@@ -1,3 +1,13 @@
+# ClinicalVariantR 0.99.1 (2026-07-17)
+
+* R CMD check / R-universe WARNING cleanup:
+  - Ship non-R assets under `inst/extdata/` (and ignore package-root `data/`).
+  - ASCII-only package `R/` sources (em/en dashes and similar replaced).
+  - Declare `digest` / `openssl` Imports used by auth storage.
+  - Wire `NAMESPACE` imports for `bslib`, `VariantAnnotation`, and `methods`.
+  - Declare optional `shinyjs` in Suggests (Group B run-button enable/disable).
+  - Add `.Rbuildignore` for development-only root Shiny/config/scripts trees.
+
 # ClinicalVariantR 0.99.0 (2026-07-08)
 
 * Initial Bioconductor submission scaffold (`x.99.y` versioning).

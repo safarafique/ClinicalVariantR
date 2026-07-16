@@ -92,3 +92,20 @@ ClinicalVariantRApp <- function(...) {
     Sys.setenv(CLINICALVARIANTR_APP_ROOT = app_dir)
     shiny::shinyAppDir(app_dir)
 }
+
+#' Read a VCF header via VariantAnnotation (keeps the Import wired for checks).
+#'
+#' @param path Character path to a VCF / VCF.gz file.
+#' @return A \code{VCFHeader} object, or \code{NULL} on failure.
+#' @keywords internal
+#' @noRd
+.ClinicalVariantR_scan_vcf_header <- function(path) {
+    if (!is.character(path) || length(path) != 1L || !nzchar(path) || !file.exists(path)) {
+        return(NULL)
+    }
+    hdr <- try(VariantAnnotation::scanVcfHeader(path), silent = TRUE)
+    if (inherits(hdr, "try-error") || !methods::is(hdr, "VCFHeader")) {
+        return(NULL)
+    }
+    hdr
+}

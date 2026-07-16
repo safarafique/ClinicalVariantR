@@ -1,7 +1,7 @@
-#' Group B — automated prediction tab UI.
+#' Group B - automated prediction tab UI.
 group_b_nav_panel <- function() {
   bslib::nav_panel(
-    title = "Group B — Automated Prediction",
+    title = "Group B - Automated Prediction",
     value = "group_b",
     icon = icon("bolt"),
     div(
@@ -32,7 +32,7 @@ group_b_nav_panel <- function() {
               checkboxInput("complete_vcf_b", "Analyze entire VCF (no row limit)", TRUE),
               checkboxInput("pass_only_b", "Load passing-filter rows only (PASS or .)", FALSE),
               numericInput("min_qual_b", "Minimum QUAL", value = 0, min = 0, step = 1),
-              checkboxInput("use_bcftools_b", "Use bcftools (Ubuntu/WSL — faster)", bcftools_available()),
+              checkboxInput("use_bcftools_b", "Use bcftools (Ubuntu/WSL - faster)", bcftools_available()),
               checkboxInput("skip_audit_b", "Skip audit log (faster analysis)", FALSE),
               numericInput("chunk_size_b", "Chunk size (variants per batch)", value = 10000, min = 1000, step = 1000),
               helpText(textOutput("engine_status_b", inline = TRUE)),

@@ -1,0 +1,21 @@
+benchmark_id	benchmark_category	chr	pos	ref	alt	gene_symbol_base	effect_base	acmg_classification_base	acmg_criteria_base	benchmark_note	expert_source
+TCF4_stop_gained	pathogenic_anchor	chr18	55631301	G	A	TCF4	stop_gained	Likely Pathogenic	PVS1,PM2	LoF on canonical TCF4; false negative if VUS or Benign	ClinGen_SVI_curated
+MECP2_missense	pathogenic_anchor	chrX	154030906	T	C	MECP2	missense_variant	Pathogenic	PS4,PM1,PM2,PM5,PP3	Rett hotspot missense; false negative if LP- or below	ClinGen_SVI_curated
+EGR2_stop_gained	pathogenic_anchor	chr10	62813296	G	A	EGR2	stop_gained	Likely Pathogenic	PVS1,PM2	Rare stop_gained; false negative if VUS	ClinGen_SVI_curated
+ALDH7A1_common	benign_trap	chr5	126544289	G	A	ALDH7A1	3_prime_UTR_variant	Benign	BA1,BP4,BP6	AF ~100%; false positive if Pathogenic	gnomAD_common
+SCN8A_synonymous	benign_trap	chr12	51687181	C	T	SCN8A	synonymous_variant	Benign	BA1,BP6,BP7	Common synonymous; false positive if Pathogenic	gnomAD_common
+TSC1_common	benign_trap	chr9	132892556	C	T	TSC1	3_prime_UTR_variant	Benign	BA1,BP6	Common TSC1 UTR; false positive if Pathogenic	gnomAD_common
+TWNK_common_splice	benign_trap	chr10	100990864	C	T	TWNK	splice_region_variant	Benign	BA1,BP6	AF >50% splice region; false positive if Pathogenic	gnomAD_common
+ATM_synonymous	benign_trap	chr11	108292760	C	T	ATM	synonymous_variant	Benign	BA1,BP6,BP7	Borderline AF ~5%; must stay Benign	gnomAD_common
+NPC1_splice_synonymous	splice_trap	chr18	23539813	G	A	NPC1	synonymous_variant	Benign	BA1,BP7	High AF splice-region synonymous; must stay Benign	gnomAD_common
+PSEN2_synonymous	benign_trap	chr1	226881976	T	C	PSEN2	synonymous_variant	Benign	BA1,BP6,BP7	Common Alzheimer-gene SNP; false positive if Pathogenic	gnomAD_common
+OPA1_synonymous_rare	likely_benign	chr3	193614765	A	G	OPA1	synonymous_variant	Likely Benign	PM2,BP4,BP7	Rare synonymous with benign predictors	laboratory_curated
+TCF4_UTR_BS2	likely_benign	chr18	55224052	G	GT	TCF4	3_prime_UTR_variant	Likely Benign	BS2,BP6	Observed in population with ClinVar benign support	laboratory_curated
+BSCL2_rare_missense	vus_pm2	chr11	62694680	G	T	BSCL2	missense_variant	VUS	PM2	Rare missense PM2 only	laboratory_curated
+PSEN1_UTR_indel	vus_pm2	chr14	73223597	TA	T	PSEN1	3_prime_UTR_variant	VUS	PM2	Rare UTR indel PM2 only	laboratory_curated
+COL4A1_rare_intron	vus_pm2	chr13	110155271	C	T	COL4A1	intron_variant	VUS	PM2	Rare intronic PM2 only	laboratory_curated
+TK2_rare_UTR	vus_pm2	chr16	66508138	G	GA	TK2	3_prime_UTR_variant	VUS	PM2	Rare UTR insertion PM2 only	laboratory_curated
+G6PC1_BS1	vus_mixed	chr17	42914099	CTT	C	G6PC1	3_prime_UTR_variant	VUS	BS1	BS1 only — elevated but not BA1	laboratory_curated
+TCF4_missense_conflicting	overcall_trap	chr18	55631298	C	T	TCF4	missense_variant	VUS	PM1,PM2,PP3,BP4	Conflicting in silico; must NOT call Pathogenic	ClinGen_SVI_curated
+SPAST_BS2	vus_mixed	chr2	32156037	T	TG	SPAST	3_prime_UTR_variant	VUS	BS2	BS2 only in population	laboratory_curated
+ARSA_rare_UTR	vus_pm2	chr22	50623471	A	G	ARSA	3_prime_UTR_variant	VUS	PM2	Rare UTR SNV PM2 only	laboratory_curated

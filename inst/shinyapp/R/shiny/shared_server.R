@@ -74,7 +74,7 @@ register_shared_server <- function(ctx) {
     }
     div(
       class = "alert alert-light border",
-      tags$b(file_name), " — ",
+      tags$b(file_name), " - ",
       preview$file_size_mb, " MB | ",
       "Total variants in file: ", preview$total_display %||% format(preview$total_variants, big.mark = ","), " | ",
       "Preview: first ", preview$preview_rows, " row(s)."
@@ -85,7 +85,7 @@ register_shared_server <- function(ctx) {
     if (is.null(row) || nrow(row) == 0) {
       return(div(class = "alert alert-light border", "No variant selected."))
     }
-    strength <- row$evidence_strength[1] %||% row$confidence_label[1] %||% "—"
+    strength <- row$evidence_strength[1] %||% row$confidence_label[1] %||% "-"
     div(
       class = "alert alert-light border",
       tags$b(row$variant_id[1]), " | Gene: ", row$gene[1], " | ",
@@ -123,9 +123,9 @@ register_shared_server <- function(ctx) {
   ctx$engine_status_text <- function() {
     engine <- ACMG_PRO_ENGINE
     bcftools_msg <- if (bcftools_available()) {
-      "bcftools detected — recommended for large VCFs on Ubuntu/WSL."
+      "bcftools detected - recommended for large VCFs on Ubuntu/WSL."
     } else {
-      "bcftools not found — using R streaming (install: bash scripts/ubuntu_setup.sh)."
+      "bcftools not found - using R streaming (install: bash scripts/ubuntu_setup.sh)."
     }
     paste(engine, "|", bcftools_msg)
   }
