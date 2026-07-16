@@ -1,0 +1,14 @@
+profile_id,profile_name,ba1_af,bs1_af,pm2_af,pm2_strict_af,description
+
+general_germline,General germline,0.05,0.01,0.01,0.0001,Default ACMG population thresholds; BA1 (AF>5%) and PM2 (rare) shared across presets
+
+hematologic_predisposition,Hematologic predisposition,0.05,0.005,0.01,0.0001,Stricter BS1 (0.5%) for myeloid predisposition; BA1 and PM2 same as general
+
+hereditary_cancer,Hereditary cancer,0.05,0.01,0.01,0.0001,Cancer predisposition panel; BA1 and PM2 same as general
+
+cardiomyopathy,Cardiomyopathy,0.05,0.005,0.01,0.0001,Stricter BS1 (0.5%); BA1 and PM2 same as general
+
+neurological,Neurological disorders,0.05,0.005,0.01,0.0001,Stricter BS1 (0.5%); BA1 and PM2 same as general
+
+hearing_loss,Hearing loss,0.05,0.01,0.01,0.0001,Hearing loss gene panel; BA1 and PM2 same as general
+

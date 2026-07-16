@@ -1,0 +1,13 @@
+gene,mechanism
+TP53,missense_mechanism
+BRCA1,missense_mechanism
+BRCA2,missense_mechanism
+RUNX1,missense_mechanism
+GATA2,missense_mechanism
+ETV6,missense_mechanism
+CEBPA,missense_mechanism
+KIT,missense_mechanism
+FLT3,missense_mechanism
+PTEN,missense_mechanism
+NF1,missense_mechanism
+RB1,missense_mechanism

@@ -1,0 +1,95 @@
+.pipeline-card {
+  transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.pipeline-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12);
+}
+
+.run-action-panel {
+  border-radius: 8px;
+  padding: 10px 0;
+}
+
+.run-action-ready {
+  background-color: #f8fff9;
+  border: 2px solid #28a745;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.run-action-blocked {
+  padding: 4px 0;
+}
+
+.readiness-badge {
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border: 2px solid transparent;
+}
+
+.readiness-ready {
+  background-color: #d4edda;
+  border-color: #28a745;
+}
+
+.readiness-not-ready {
+  background-color: #f8d7da;
+  border-color: #dc3545;
+}
+
+.readiness-neutral {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.classification-summary-table tbody tr:hover {
+  outline: 2px solid #0d6efd;
+  outline-offset: -2px;
+}
+
+.readiness-dot {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.readiness-dot-green {
+  background-color: #28a745;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25);
+}
+
+.readiness-dot-red {
+  background-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
+.readiness-dot-grey {
+  background-color: #6c757d;
+}
+
+.readiness-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #495057;
+}
+
+.readiness-text {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.readiness-missing {
+  font-size: 0.9rem;
+  color: #842029;
+}
+
+.readiness-ready .readiness-missing {
+  color: #155724;
+}

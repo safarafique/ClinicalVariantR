@@ -1,0 +1,10 @@
+# Critical exon ranges for AutoPVS1 / PM1 (gene start_exon end_exon domain)
+gene	start_exon	end_exon	domain	source
+TP53	4	8	DNA_binding	ClinGen
+BRCA1	1	8	RING_BRCT	ClinGen
+BRCA2	10	27	DNA_binding	ClinGen
+MECP2	2	4	Methyl_CpG_binding	ClinGen
+DMD	1	79	Full_transcript	ClinGen
+CFTR	1	27	Full_transcript	ClinGen
+SCN8A	1	27	Full_transcript	ClinGen
+TCF4	1	18	bHLH	ClinGen

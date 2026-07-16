@@ -7,12 +7,16 @@
 #' rapid, and gene-panel) plus streaming analysis for large call sets.
 #'
 #' @details
-#' Launch the app with:
+#' Install (restart R first on Windows if the package is loaded) and launch:
 #' \preformatted{
+#' remotes::install_local("E:/ACGM/ClinicalVariantR", force = TRUE, upgrade = "never")
+#' # or: remotes::install_github("safarafique/ClinicalVariantR")
+#' library(ClinicalVariantR)
 #' app <- ClinicalVariantR()
 #' if (interactive()) {
-#'   shiny::runApp(app)
+#'   shiny::runApp(app, launch.browser = TRUE)
 #' }
+#' # Fast path: shiny::runApp("E:/ACGM/ClinicalVariantR", launch.browser = TRUE)
 #' }
 #'
 #' See the package vignette for workflows, input requirements, and Bioconductor

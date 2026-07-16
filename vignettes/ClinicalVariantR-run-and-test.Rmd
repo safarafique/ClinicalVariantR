@@ -33,20 +33,75 @@ knitr::opts_chunk$set(
 
 This vignette explains how to:
 
-1. Launch the ClinicalVariantR Shiny app for interactive testing
+1. Install ClinicalVariantR and open the Shiny app
 2. Choose sample / benchmark VCFs for each workflow (Groups A-C)
 3. Run automated logic checks and unit tests
 
 It complements the [Introduction to ClinicalVariantR](ClinicalVariantR.html) vignette.
 
-# Prerequisites
+Repository:
+[https://github.com/safarafique/ClinicalVariantR](https://github.com/safarafique/ClinicalVariantR)
 
-Install CRAN dependencies used by the app:
+# Install and open the Shiny app
+
+## Working Windows workflow (verified)
+
+If `ClinicalVariantR` is already loaded, RStudio will refuse to overwrite it
+(`package 'ClinicalVariantR' is in use and will not be installed`). Always
+**Session → Restart R** first.
+
+```r
+# 0. Session -> Restart R
+
+# 1. Install from the local package folder
+if (!requireNamespace("remotes", quietly = TRUE)) {
+    install.packages("remotes")
+}
+remotes::install_local(
+    "E:/ACGM/ClinicalVariantR",
+    force = TRUE,
+    upgrade = "never"
+)
+
+# 2. Open the app (Bioconductor-style API)
+library(ClinicalVariantR)
+app <- ClinicalVariantR()   # or ClinicalVariantRApp()
+if (interactive()) {
+    shiny::runApp(app, launch.browser = TRUE)
+}
+```
+
+After a successful install, `ClinicalVariantR()` uses the bundled app in
+`inst/shinyapp/` (`global.R`, `ui.R`, `server.R`, `config/`, `data/`, `www/`).
+
+## Install from GitHub
+
+```r
+# Session -> Restart R first if the package is already loaded
+if (!requireNamespace("remotes", quietly = TRUE)) {
+    install.packages("remotes")
+}
+remotes::install_github("safarafique/ClinicalVariantR")
+
+library(ClinicalVariantR)
+app <- ClinicalVariantR()
+if (interactive()) {
+    shiny::runApp(app, launch.browser = TRUE)
+}
+```
+
+## Fast path: source-tree launch (no reinstall)
+
+```r
+shiny::runApp("E:/ACGM/ClinicalVariantR", launch.browser = TRUE)
+```
+
+Optional CRAN / Bioconductor dependencies used by the app and docs:
 
 ```r
 install.packages(c(
     "shiny", "bslib", "DT", "data.table", "readr", "jsonlite",
-    "knitr", "rmarkdown", "testthat", "BiocManager"
+    "knitr", "rmarkdown", "testthat", "BiocManager", "remotes"
 ))
 BiocManager::install(c("BiocStyle", "VariantAnnotation"))
 ```
@@ -54,47 +109,43 @@ BiocManager::install(c("BiocStyle", "VariantAnnotation"))
 Optional (large VCF speed-up on Linux/WSL): install **bcftools** and ensure it is
 on `PATH`.
 
-Confirm the package (or source tree) is available:
+Confirm the package is available after install:
 
 ```{r pkg-check}
 pkg_ok <- requireNamespace("ClinicalVariantR", quietly = TRUE)
 pkg_ok
 ```
 
-If you are developing from the Git clone (not yet installed), set the working
-directory to the package root (the folder that contains `DESCRIPTION`,
-`app.R`, `global.R`, `ui.R`, and `server.R`).
+## Preferred Bioconductor API (sanity check)
+
+Package functions **return** a Shiny app; you launch it yourself. This chunk
+only checks that the constructor exists during vignette builds:
+
+```{r launch-api}
+if (requireNamespace("ClinicalVariantR", quietly = TRUE)) {
+    stopifnot(is.function(ClinicalVariantR::ClinicalVariantR))
+    stopifnot(is.function(ClinicalVariantR::ClinicalVariantRApp))
+}
+# Interactive launch (copy into an R console):
+# library(ClinicalVariantR)
+# shiny::runApp(ClinicalVariantR(), launch.browser = TRUE)
+```
+
+## Source-tree / clone launch (development)
+
+If you are already inside the package root (folder with `DESCRIPTION`,
+`app.R`, `global.R`, `ui.R`, and `server.R`):
 
 ```{r find-root}
 normalizePath(getwd(), winslash = "/", mustWork = FALSE)
 ```
 
-# Launch the Shiny app
-
-## Preferred Bioconductor API
-
-Package functions **return** a Shiny app; you launch it yourself:
-
-```{r launch-api}
-if (requireNamespace("ClinicalVariantR", quietly = TRUE)) {
-    stopifnot(is.function(ClinicalVariantR::ClinicalVariantR))
-}
-# To launch interactively:
-# shiny::runApp(ClinicalVariantR(), launch.browser = TRUE)
-```
-
-## Source-tree launch (development)
-
-From the package root, either:
-
 ```r
-# Option 1 - classic Shiny entry
+# Classic Shiny entry from the package root
 shiny::runApp(".", launch.browser = TRUE)
 
-# Option 2 - after sourcing the package constructor from R/
-# (works once ClinicalVariantR is installed or attached)
-app <- ClinicalVariantR::ClinicalVariantR()
-shiny::runApp(app, launch.browser = TRUE)
+# Or absolute path (works from any working directory)
+shiny::runApp("E:/ACGM/ClinicalVariantR", launch.browser = TRUE)
 ```
 
 On Ubuntu/WSL (recommended for large VCFs):
@@ -315,7 +366,10 @@ if (requireNamespace("ClinicalVariantR", quietly = TRUE) && has_entry) {
 
 # Recommended smoke sequence (15 minutes)
 
-1. `shiny::runApp(".")`
+1. Restart R, then
+   `remotes::install_local("E:/ACGM/ClinicalVariantR", force = TRUE, upgrade = "never")`
+   and `shiny::runApp(ClinicalVariantR(), launch.browser = TRUE)`
+   (or `shiny::runApp("E:/ACGM/ClinicalVariantR", launch.browser = TRUE)`)
 2. Group B + `clinicalvariantr_group_b_benchmark.vcf` -> Run -> download CSV
 3. Group C with `TCF4,MECP2,EGR2` -> confirm filtered genes
 4. Group A with example CSV companions -> Run

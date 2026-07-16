@@ -35,6 +35,9 @@ knitr::opts_chunk$set(
 sequence variants under the ACMG/AMP 2015 framework from pre-annotated VCF
 files (VEP CSQ, SnpEff ANN, or ANNOVAR-style INFO fields).
 
+Source code:
+[https://github.com/safarafique/ClinicalVariantR](https://github.com/safarafique/ClinicalVariantR)
+
 The package exposes an interactive Shiny application with three workflows:
 
 | Workflow | Inputs | Purpose |
@@ -43,40 +46,101 @@ The package exposes an interactive Shiny application with three workflows:
 | Group B (rapid) | VCF only | High-throughput automated classification |
 | Group C (gene panel) | VCF + gene list | Panel-restricted automated classification |
 
-# Installation
+# Install and open the Shiny app
+
+The package ships a complete Shiny app under `inst/shinyapp/`
+(`global.R`, `ui.R`, `server.R`, plus `config/`, `data/`, and `www/`).
+`ClinicalVariantR()` locates that directory after a successful install.
+
+## Recommended: install from local clone (Windows)
+
+On Windows, **restart R before installing** if `ClinicalVariantR` is already
+loaded. Otherwise you may see
+`package 'ClinicalVariantR' is in use and will not be installed` and keep the
+old launcher.
+
+```r
+# 0. Session -> Restart R  (required if the package is already loaded)
+
+# 1. Install from the local package folder
+if (!requireNamespace("remotes", quietly = TRUE)) {
+    install.packages("remotes")
+}
+remotes::install_local(
+    "E:/ACGM/ClinicalVariantR",
+    force = TRUE,
+    upgrade = "never"
+)
+
+# 2. Load and open the app
+library(ClinicalVariantR)
+app <- ClinicalVariantR()   # or ClinicalVariantRApp()
+if (interactive()) {
+    shiny::runApp(app, launch.browser = TRUE)
+}
+```
+
+## Install from GitHub
+
+Until the package is accepted on Bioconductor, you can also install from GitHub
+(use this after the fixed launcher has been pushed):
+
+```r
+# Session -> Restart R first if ClinicalVariantR is already loaded
+if (!requireNamespace("remotes", quietly = TRUE)) {
+    install.packages("remotes")
+}
+remotes::install_github("safarafique/ClinicalVariantR")
+
+library(ClinicalVariantR)
+app <- ClinicalVariantR()
+if (interactive()) {
+    shiny::runApp(app, launch.browser = TRUE)
+}
+```
+
+## Fast path: run the source tree (no reinstall)
+
+If you only need to open the app from a local checkout:
+
+```r
+shiny::runApp("E:/ACGM/ClinicalVariantR", launch.browser = TRUE)
+```
+
+Following Bioconductor Shiny guidelines, package functions **return** a Shiny
+app object; you call `shiny::runApp()` yourself. Do not expect
+`ClinicalVariantR()` alone to open a browser window.
+
+## Optional Bioconductor install (after acceptance)
 
 ```r
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
 }
 BiocManager::install("ClinicalVariantR")
+library(ClinicalVariantR)
+app <- ClinicalVariantR()
+if (interactive()) {
+    shiny::runApp(app, launch.browser = TRUE)
+}
 ```
 
-Until the package is accepted on Bioconductor, install from GitHub:
+## Sanity check (evaluated in this vignette)
 
-```r
-# install.packages("remotes")
-remotes::install_github("safarafique/ClinicalVariantR")
-```
-
-# Launching the Shiny app
-
-Following Bioconductor Shiny guidelines, package functions **return** a Shiny
-app object; the user launches it:
+This chunk confirms the constructor is available when the package is installed.
+It does **not** launch the browser during vignette building.
 
 ```{r launch}
 if (requireNamespace("ClinicalVariantR", quietly = TRUE)) {
     stopifnot(is.function(ClinicalVariantR::ClinicalVariantR))
+    stopifnot(is.function(ClinicalVariantR::ClinicalVariantRApp))
+    # Interactive use (not run during vignette builds):
+    # shiny::runApp(ClinicalVariantR::ClinicalVariantR(), launch.browser = TRUE)
 }
-# To launch interactively:
-# shiny::runApp(ClinicalVariantR())
 ```
 
-`ClinicalVariantRApp()` is an alias of `ClinicalVariantR()`.
-
-For a full walkthrough of launching the app, choosing sample VCFs, Group A/B/C
-UI checks, and command-line tests, see the companion vignette
-**Running and testing ClinicalVariantR** (`vignettes/ClinicalVariantR-run-and-test.Rmd`).
+For sample VCFs, Group A/B/C UI checks, and command-line tests, see the
+companion vignette **Running and testing ClinicalVariantR**.
 
 # Input requirements
 

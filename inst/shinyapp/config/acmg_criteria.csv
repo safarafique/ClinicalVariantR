@@ -1,0 +1,29 @@
+criterion,strength,description,automated,reference
+PVS1,Very Strong,Null variant in gene where loss of function is a known disease mechanism,yes,Richards et al. 2015; ClinGen PVS1
+PS1,Strong,Same amino acid change as known pathogenic variant,yes,Richards et al. 2015; InterVar
+PS2,Strong,De novo in patient with disease and no family history,context,Richards et al. 2015; clinical/pedigree
+PS3,Strong,Well-established functional studies show damaging effect,manual,Richards et al. 2015; curator
+PS4,Strong,Prevalence in affected individuals greater than controls,yes,Richards et al. 2015; InterVar
+PM1,Moderate,Missense in mutational hot spot or critical functional domain,yes,Richards et al. 2015; InterVar
+PM2,Moderate,Absent or extremely low frequency in population databases,yes,Richards et al. 2015
+PM3,Moderate,Detected in trans with pathogenic variant for recessive disorder,context,Richards et al. 2015; phased genotype
+PM4,Moderate,Protein length changes due to in-frame indels or stop-loss,yes,Richards et al. 2015
+PM5,Moderate,Novel missense at residue with known pathogenic missense,yes,Richards et al. 2015; InterVar
+PM6,Moderate,Assumed de novo without parental confirmation,manual,Richards et al. 2015; curator
+PP2,Supporting,Missense in gene where missense is common disease mechanism,yes,Richards et al. 2015
+PP1,Supporting,Co-segregation with disease in multiple affected family members,context,Richards et al. 2015; pedigree
+PP4,Supporting,Patient phenotype highly specific for gene/disease,context,Richards et al. 2015; clinical log
+PP3,Supporting,Multiple computational lines support deleterious effect,yes,Richards et al. 2015; InterVar
+PP5,Supporting,Reputable source reports variant as pathogenic,yes,Richards et al. 2015
+BA1,Stand-alone,Allele frequency greater than 5%,yes,Richards et al. 2015
+BS1,Strong,Allele frequency greater than expected for disorder,yes,Richards et al. 2015
+BP1,Supporting,Missense in gene where truncating is primary mechanism,yes,Richards et al. 2015
+BP3,Supporting,In-frame indels in repetitive region without function,yes,Richards et al. 2015
+BP4,Supporting,Multiple computational lines support benign effect,yes,Richards et al. 2015; InterVar
+BP6,Supporting,Reputable source reports variant as benign,yes,Richards et al. 2015
+BP7,Supporting,Synonymous with no predicted splice impact,yes,Richards et al. 2015
+BS2,Strong,Observed in healthy adult individuals for disease inheritance,yes,Richards et al. 2015
+BS3,Strong,Well-established functional studies show no damaging effect,manual,Richards et al. 2015; curator
+BS4,Strong,Lack of segregation in affected family members,context,Richards et al. 2015; pedigree
+BP2,Supporting,Observed in trans with pathogenic variant in dominant/recessive context,context,Richards et al. 2015; phased genotype
+BP5,Supporting,Reputable source reports variant as benign (non-ClinVar),manual,Richards et al. 2015; literature

@@ -16,12 +16,21 @@ Package metadata and submission guides live under `inst/Bioconductor/`:
 
 Core package files: `DESCRIPTION` (version `0.99.0`), `NAMESPACE`, `LICENSE`, `NEWS.md`, `man/`, `vignettes/ClinicalVariantR.Rmd`, `tests/`, `inst/CITATION`.
 
-Launch API (Bioconductor Shiny style — return app, user runs it):
+Install and launch (Bioconductor Shiny style — return app, user runs it).
+On Windows, **restart R first** if the package is already loaded:
 
 ```r
+# install.packages("remotes")
+# Preferred while developing from this clone:
+remotes::install_local("E:/ACGM/ClinicalVariantR", force = TRUE, upgrade = "never")
+# Or from GitHub after the latest launcher is pushed:
+# remotes::install_github("safarafique/ClinicalVariantR")
 library(ClinicalVariantR)
 app <- ClinicalVariantR()
-if (interactive()) shiny::runApp(app)
+if (interactive()) shiny::runApp(app, launch.browser = TRUE)
+
+# Fast path without reinstall:
+# shiny::runApp("E:/ACGM/ClinicalVariantR", launch.browser = TRUE)
 ```
 
 **Important:** documentation scaffold is ready; full package conversion (paths to `inst/`, remove `source()` chains, clean `R CMD check` / `BiocCheck`) must finish before opening a BiocContributions issue.
@@ -60,16 +69,21 @@ Features include VCF requirement validation (green/red readiness), variant previ
 
 ## Quick start
 
-### Install R packages
+### Install and open the app
 
 ```r
-install.packages(c("shiny", "bslib", "DT", "data.table", "readr"))
+install.packages(c("shiny", "bslib", "DT", "data.table", "readr", "remotes"))
+# Session -> Restart R if ClinicalVariantR is already loaded
+remotes::install_local("E:/ACGM/ClinicalVariantR", force = TRUE, upgrade = "never")
+library(ClinicalVariantR)
+app <- ClinicalVariantR()
+if (interactive()) shiny::runApp(app, launch.browser = TRUE)
 ```
 
-### Run the app
+### Run from a local clone (no reinstall)
 
 ```r
-shiny::runApp("path/to/ClinicalVariantR")
+shiny::runApp("E:/ACGM/ClinicalVariantR", launch.browser = TRUE)
 ```
 
 ### Ubuntu / WSL (recommended for large VEP VCFs)

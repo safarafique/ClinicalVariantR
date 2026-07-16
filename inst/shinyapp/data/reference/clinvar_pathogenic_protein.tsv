@@ -1,0 +1,9 @@
+# ClinVar protein-level pathogenic reference for PS1 / PM5 (expand with full ClinVar export)
+gene	protein_position	ref_aa	alt_aa	hgvs_p	clinical_significance	source
+MECP2	320	Thr	Pro	p.Thr320Pro	Pathogenic	ClinVar_seed
+MECP2	320	Thr	Arg	p.Thr320Arg	Likely pathogenic	ClinVar_seed
+MECP2	306	Arg	Cys	p.Arg306Cys	Pathogenic	ClinVar_seed
+MECP2	255	Pro	Leu	p.Pro255Leu	Pathogenic	ClinVar_seed
+TP53	175	Arg	His	p.Arg175His	Pathogenic	ClinVar_seed
+TP53	248	Arg	Gln	p.Arg248Gln	Pathogenic	ClinVar_seed
+BRCA1	61	Thr	Ala	p.Thr61Ala	Pathogenic	ClinVar_seed

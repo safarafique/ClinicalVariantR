@@ -1,0 +1,5 @@
+chrom	pos	ref	alt	REVEL
+chr22	23631806	A	G	0.82
+chr22	23632600	C	T	0.22
+chr9	133738352	G	A	0.91
+TEST	1	A	G	0.80

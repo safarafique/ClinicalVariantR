@@ -1,0 +1,16 @@
+gene,mechanism
+BRCA1,truncating_mechanism
+BRCA2,truncating_mechanism
+APC,truncating_mechanism
+MLH1,truncating_mechanism
+MSH2,truncating_mechanism
+MSH6,truncating_mechanism
+PMS2,truncating_mechanism
+NF1,truncating_mechanism
+RB1,truncating_mechanism
+PTEN,truncating_mechanism
+VHL,truncating_mechanism
+ATM,truncating_mechanism
+PALB2,truncating_mechanism
+RUNX1,truncating_mechanism
+DDX41,truncating_mechanism

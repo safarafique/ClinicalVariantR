@@ -1,0 +1,20 @@
+threshold_key,operator,value,description,criterion
+ba1_af,>,0.05,Allele frequency above 5% in population databases,BA1
+bs1_af,>,0.01,Allele frequency above 1% for rare disorder context,BS1
+pm2_af,<,0.01,Allele frequency below 1% supports rarity,PM2
+pm2_strict_af,<,0.0001,Strict absence threshold for PM2,PM2
+revel_pp3,>=,0.75,REVEL pathogenic threshold,PP3
+revel_bp4,<=,0.15,REVEL benign threshold,BP4
+cadd_pp3,>=,20,CADD Phred pathogenic threshold,PP3
+cadd_bp4,<=,10,CADD Phred benign threshold,BP4
+spliceai_pp3,>=,0.5,SpliceAI max delta score pathogenic threshold,PP3
+spliceai_bp4,<=,0.1,SpliceAI max delta score benign threshold,BP4
+alphamissense_pp3,>=,0.564,AlphaMissense likely pathogenic threshold,PP3
+alphamissense_bp4,<=,0.34,AlphaMissense likely benign threshold,BP4
+polyphen_damaging,>=,0.85,PolyPhen damaging score threshold,PP3
+polyphen_benign,<=,0.15,PolyPhen benign score threshold,BP4
+bs2_af,>=,0.001,Minimum AF for BS2 healthy-carrier proxy,BS2
+insilico_min_tools,>=,2,Minimum agreeing in silico tools when REVEL absent,PP3
+confidence_base,=,50,Base confidence score before evidence weighting,confidence
+confidence_per_criterion,=,8,Points added per triggered criterion,confidence
+confidence_conflict_penalty,=,15,Penalty when pathogenic and benign criteria conflict,confidence

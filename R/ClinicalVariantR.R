@@ -32,34 +32,63 @@ ClinicalVariantRApp <- function(...) {
     ClinicalVariantR(...)
 }
 
-#' Internal: construct shinyApp from existing ui/server sources
+#' Locate Shiny app directory (installed inst/shinyapp or source tree).
+#'
+#' @keywords internal
+#' @noRd
+.ClinicalVariantR_app_dir <- function() {
+    env_root <- Sys.getenv("CLINICALVARIANTR_APP_ROOT", unset = "")
+    pkg_path <- tryCatch(
+        find.package("ClinicalVariantR", quiet = TRUE),
+        error = function(e) character()
+    )
+    if (!length(pkg_path)) pkg_path <- ""
+
+    candidates <- c(
+        env_root,
+        system.file("shinyapp", package = "ClinicalVariantR"),
+        if (nzchar(pkg_path)) file.path(pkg_path, "shinyapp") else "",
+        system.file(package = "ClinicalVariantR"),
+        pkg_path,
+        normalizePath(getwd(), winslash = "/", mustWork = FALSE),
+        # Common local checkout paths (development fallback)
+        "E:/ACGM/ClinicalVariantR/inst/shinyapp",
+        "E:/ACGM/ClinicalVariantR",
+        "e:/ACGM/ClinicalVariantR/inst/shinyapp",
+        "e:/ACGM/ClinicalVariantR"
+    )
+
+    for (root in unique(candidates[nzchar(candidates)])) {
+        if (!dir.exists(root)) next
+        if (file.exists(file.path(root, "global.R")) &&
+            file.exists(file.path(root, "ui.R")) &&
+            file.exists(file.path(root, "server.R"))) {
+            return(normalizePath(root, winslash = "/", mustWork = FALSE))
+        }
+    }
+    NULL
+}
+
+#' Internal: construct shinyApp from installed shinyapp/ or source tree.
 #'
 #' @keywords internal
 #' @noRd
 .ClinicalVariantR_shiny_app <- function() {
-    pkg_root <- system.file(package = "ClinicalVariantR")
-    # During development before install, fall back to source tree.
-    if (!nzchar(pkg_root) || !dir.exists(file.path(pkg_root, "R"))) {
-        pkg_root <- normalizePath(getwd(), winslash = "/", mustWork = FALSE)
+    app_dir <- .ClinicalVariantR_app_dir()
+    if (is.null(app_dir)) {
+        stop(
+            "Unable to locate ClinicalVariantR Shiny sources (global.R / ui.R / server.R).\n",
+            "The package was likely not reinstalled (it was still loaded).\n",
+            "Fix:\n",
+            "  1) Session -> Restart R\n",
+            "  2) remotes::install_local('E:/ACGM/ClinicalVariantR', force = TRUE, upgrade = 'never')\n",
+            "  3) library(ClinicalVariantR); shiny::runApp(ClinicalVariantR(), launch.browser = TRUE)\n",
+            "Or launch from the source tree without reinstalling:\n",
+            "  shiny::runApp('E:/ACGM/ClinicalVariantR', launch.browser = TRUE)",
+            call. = FALSE
+        )
     }
 
-    # Prefer installed layout: UI/server live as package sources; for the
-    # transitional Shiny-app repo, source app entry files from package root.
-    global_file <- file.path(pkg_root, "global.R")
-    ui_file <- file.path(pkg_root, "ui.R")
-    server_file <- file.path(pkg_root, "server.R")
-
-    if (file.exists(global_file) && file.exists(ui_file) && file.exists(server_file)) {
-        env <- new.env(parent = globalenv())
-        sys.source(global_file, envir = env)
-        sys.source(ui_file, envir = env)
-        sys.source(server_file, envir = env)
-        return(shiny::shinyApp(ui = env$ui, server = env$server))
-    }
-
-    stop(
-        "Unable to locate ClinicalVariantR Shiny sources (global.R / ui.R / server.R). ",
-        "Install the package or set the working directory to the package root.",
-        call. = FALSE
-    )
+    Sys.setenv(CLINICALVARIANTR_APP_ROOT = app_dir)
+    shiny::shinyAppDir(app_dir)
 }

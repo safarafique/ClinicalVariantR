@@ -1,0 +1,4 @@
+# GWAS Catalog supplementary evidence — NOT used for automated PS4.
+# Import via scripts/import_gwas_supplementary.R (review before clinical use).
+# PS4 requires variant-specific case-control enrichment in ps4_case_control_enrichment.tsv.
+chrom	pos	ref	alt	rsid	gene	trait	pvalue	odds_ratio	maf	source
