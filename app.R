@@ -9,3 +9,5 @@ source("server.R", local = TRUE)
 options(shiny.http.timeout = if (exists("SESSION_IDLE_TIMEOUT_SEC")) SESSION_IDLE_TIMEOUT_SEC else 3600L)
 
 shinyApp(ui = ui, server = server)
+
+
