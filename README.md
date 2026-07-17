@@ -29,8 +29,16 @@ library(ClinicalVariantR)
 app <- ClinicalVariantR()
 if (interactive()) shiny::runApp(app, launch.browser = TRUE)
 
-# Fast path without reinstall:
+# Fast path without reinstall (avoids package R/ auto-load warning):
+# shiny::runApp("E:/ACGM/ClinicalVariantR/inst/shinyapp", launch.browser = TRUE)
+# Or from package root (app.R delegates to inst/shinyapp):
 # shiny::runApp("E:/ACGM/ClinicalVariantR", launch.browser = TRUE)
+```
+
+On Windows with **R 4.6**, install [Rtools 4.5+](https://cran.r-project.org/bin/windows/Rtools/) before `devtools::check()` / package builds. Rtools 4.4 is not compatible. Until Rtools is fixed, you can still check without compiling:
+
+```r
+devtools::check(vignettes = FALSE, args = "--no-manual", error_on = "never")
 ```
 
 **Important:** documentation scaffold is ready; full package conversion (paths to `inst/`, remove `source()` chains, clean `R CMD check` / `BiocCheck`) must finish before opening a BiocContributions issue.
