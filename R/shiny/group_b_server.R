@@ -33,7 +33,7 @@ register_group_b_server <- function(ctx) {
     !is.null(v) && isTRUE(v$can_analyze)
   })
 
-  # Keep static button label/state in sync (do NOT recreate button in renderUI - clicks get lost).
+  # Keep static button label/state in sync (do NOT recreate button in renderUI; clicks get lost).
   observe({
     ready <- can_run_b()
     running <- isTRUE(run_b_running())

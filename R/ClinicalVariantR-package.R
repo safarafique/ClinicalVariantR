@@ -1,22 +1,18 @@
 #' @title ClinicalVariantR: ACMG/AMP germline variant interpretation
 #'
 #' @description
-#' ClinicalVariantR classifies germline sequence variants under ACMG/AMP 2015 guidelines
-#' from VEP-, SnpEff-, or ANNOVAR-annotated VCF files. The package provides an
-#' interactive Shiny application with three workflows (full clinical, automated
-#' rapid, and gene-panel) plus streaming analysis for large call sets.
+#' ClinicalVariantR classifies germline sequence variants under ACMG/AMP 2015
+#' guidelines from VEP-, SnpEff-, or ANNOVAR-annotated VCF files. The package
+#' provides an interactive Shiny application with three workflows (full clinical,
+#' automated rapid, and gene-panel) plus streaming analysis for large call sets.
 #'
 #' @details
-#' Install (restart R first on Windows if the package is loaded) and launch:
+#' Launch the app with:
 #' \preformatted{
-#' remotes::install_local("E:/ACGM/ClinicalVariantR", force = TRUE, upgrade = "never")
-#' # or: remotes::install_github("safarafique/ClinicalVariantR")
-#' library(ClinicalVariantR)
 #' app <- ClinicalVariantR()
 #' if (interactive()) {
-#'   shiny::runApp(app, launch.browser = TRUE)
+#'   shiny::runApp(app)
 #' }
-#' # Fast path: shiny::runApp("E:/ACGM/ClinicalVariantR", launch.browser = TRUE)
 #' }
 #'
 #' See the package vignette for workflows, input requirements, and Bioconductor

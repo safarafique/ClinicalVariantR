@@ -28,6 +28,5 @@
 * Structured criterion-level evidence export and reproducibility metadata.
 * Package entry points: `ClinicalVariantR()` / `ClinicalVariantRApp()` return a Shiny app object
   (user launches with `shiny::runApp()`).
-* Vignettes: introduction (`ClinicalVariantR.Rmd`) and run/test guide
-  (`ClinicalVariantR-run-and-test.Rmd`) covering app launch, sample data, UI checks, and
-  CLI/unit tests.
+* Vignettes: introduction and run/test guide covering app launch, sample data,
+  UI checks, and CLI/unit tests.

@@ -1,0 +1,341 @@
+---
+title: "Running and testing ClinicalVariantR"
+author:
+  - name: Safa Rafique
+    email: safa.sandhu@gmail.com
+package: ClinicalVariantR
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Running and testing ClinicalVariantR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>",
+    eval = TRUE,
+    message = FALSE,
+    warning = FALSE
+)
+```
+
+# Purpose
+
+This vignette explains how to:
+
+1. Launch the ClinicalVariantR Shiny app for interactive testing
+2. Choose sample / benchmark VCFs for each workflow (Groups A–C)  
+3. Run automated logic checks and unit tests  
+
+It complements the [Introduction to ClinicalVariantR](ACMGamp.html) vignette.
+
+# Prerequisites
+
+ClinicalVariantR dependencies are declared in `DESCRIPTION` and are installed by
+the standard package build/check workflow. The chunk below verifies that the
+main runtime dependencies are available in the current build environment:
+
+```{r dependency-check}
+deps <- c("shiny", "bslib", "DT", "data.table", "readr", "jsonlite", "VariantAnnotation")
+vapply(deps, requireNamespace, quietly = TRUE, FUN.VALUE = logical(1))
+```
+
+Optional (large VCF speed-up on Linux/WSL): install **bcftools** and ensure it is
+on `PATH`.
+
+Confirm the package (or source tree) is available:
+
+```{r pkg-check}
+pkg_ok <- requireNamespace("ClinicalVariantR", quietly = TRUE)
+pkg_ok
+```
+
+If you are developing from the Git clone (not yet installed), set the working
+directory to the package root (the folder that contains `DESCRIPTION`,
+`app.R`, `global.R`, `ui.R`, and `server.R`).
+
+```{r find-root}
+if (FALSE) {
+# Example after cloning:
+# setwd("path/to/ClinicalVariantR")
+}
+```
+
+# Launch the Shiny app
+
+## Preferred Bioconductor API
+
+Package functions **return** a Shiny app; you launch it yourself:
+
+```{r launch-api}
+if (FALSE) {
+library(ClinicalVariantR)
+
+app <- ClinicalVariantR() # or ClinicalVariantRApp()
+if (interactive()) {
+    shiny::runApp(app, launch.browser = TRUE)
+}
+}
+```
+
+## Source-tree launch (development)
+
+From the package root, either:
+
+```{r launch-source}
+if (FALSE) {
+# Option 1 — classic Shiny entry
+shiny::runApp(".", launch.browser = TRUE)
+
+# Option 2 — after sourcing the package constructor from R/
+# (works once ClinicalVariantR is installed or attached)
+app <- ClinicalVariantR::ClinicalVariantR()
+shiny::runApp(app, launch.browser = TRUE)
+}
+```
+
+On Ubuntu/WSL (recommended for large VCFs):
+
+```bash
+cd /path/to/ClinicalVariantR
+R -e "shiny::runApp('.', host='0.0.0.0', port=3838)"
+```
+
+Then open `http://127.0.0.1:3838` in a browser.
+
+## Session settings useful for testing
+
+| Setting | Default | Notes |
+|---------|---------|--------|
+| Max upload | 1 GiB | Set in `global.R` via `shiny.maxRequestSize` |
+| Idle timeout | 1 hour | Override with env `ACMGAMP_IDLE_TIMEOUT_SEC` |
+| Auth | Off in local scaffolds when `AUTH_ENABLED <- FALSE` | Re-enable only for secured demos |
+
+```{r env-tips}
+if (FALSE) {
+Sys.setenv(ACMGAMP_IDLE_TIMEOUT_SEC = "3600")
+# Optional encryption key for secure uploads (32 characters):
+# Sys.setenv(ACMGAMP_ENCRYPTION_KEY = "0123456789abcdef0123456789abcdef")
+}
+```
+
+# Test data locations
+
+Paths below assume the **development** repository layout. After full Bioconductor
+conversion they will move under `inst/extdata/` and should be loaded with
+`system.file()`.
+
+```{r locate-samples}
+.root_candidates <- c(
+    getwd(),
+    file.path(getwd(), "cml_variant_interpreter"),
+    system.file(package = "ClinicalVariantR")
+)
+.root <- .root_candidates[dir.exists(.root_candidates)][1]
+
+sample_vcf <- file.path(.root, "data", "samples", "example_variants.vcf")
+clinical_csv <- file.path(.root, "data", "samples", "example_clinical_logs.csv")
+pedigree_csv <- file.path(.root, "data", "samples", "example_pedigree.csv")
+
+bench_dir <- normalizePath(
+    file.path(.root, "..", "testig", "acmgamp_benchmark"),
+    winslash = "/",
+    mustWork = FALSE
+)
+group_b_vcf <- file.path(bench_dir, "acmgamp_group_b_benchmark.vcf")
+group_b_key <- file.path(bench_dir, "acmgamp_group_b_benchmark.key.csv")
+
+data.frame(
+    resource = c(
+        "example_variants.vcf",
+        "example_clinical_logs.csv",
+        "example_pedigree.csv",
+        "group_b_benchmark.vcf",
+        "group_b_benchmark.key.csv"
+    ),
+    path = c(sample_vcf, clinical_csv, pedigree_csv, group_b_vcf, group_b_key),
+    exists = file.exists(c(
+        sample_vcf, clinical_csv, pedigree_csv, group_b_vcf, group_b_key
+    ))
+)
+```
+
+| File | Use for |
+|------|---------|
+| `data/samples/example_variants.vcf` | Quick smoke test (few variants) |
+| `data/samples/example_clinical_logs.csv` + `example_pedigree.csv` | Group A companion inputs |
+| `testig/acmgamp_benchmark/acmgamp_group_b_benchmark.vcf` | Group B accuracy / traps (20 variants) |
+| Matching `*.key.csv` / `*.acmg.tsv` | Expected labels for CLI scoring |
+
+# Interactive testing checklist (UI)
+
+## Group B — Automated prediction (start here)
+
+1. Open **Group B — Rapid / Automated**.  
+2. Upload `acmgamp_group_b_benchmark.vcf` (preferred) or `example_variants.vcf`.  
+3. Confirm readiness checks turn green (CSQ/ANN present).  
+4. Preview rows appear; **Run Analysis** is enabled.  
+5. Watch the progress bar / status under Run.  
+6. Open **Results**: classifications, criteria, confidence.  
+7. Download CSV (full report and/or expert worklist).  
+
+**Pass criteria for the 20-variant Group B benchmark** (see
+`testig/acmgamp_benchmark/GROUP_B_BENCHMARK.md`):
+
+- Exact accuracy **20/20**  
+- All pathogenic anchors detected (TCF4, MECP2, EGR2)  
+- No false Pathogenic on benign traps  
+
+## Group C — Gene panel
+
+1. Open **Group C**.  
+2. Upload the same VCF as Group B.  
+3. Enter a gene list that intersects the call set, for example:
+
+```{r gene-list-example}
+# Paste into the Group C gene box:
+c("TCF4", "MECP2", "EGR2", "ATM", "TSC1")
+```
+
+4. Run analysis — only nominated genes should appear in results.  
+
+## Group A — Full clinical
+
+1. Open **Group A**.  
+2. Upload VCF + `example_clinical_logs.csv` + `example_pedigree.csv`.  
+3. Optionally enable curator toggles (PS2, PS3, PS4, PM6, PP1, PP4).  
+4. Run and confirm criteria appear in evidence export.  
+
+# Automated testing (command line)
+
+Run these from the package root (`DESCRIPTION` present).
+
+## Unit tests (testthat)
+
+```{r unit-tests}
+if (FALSE) {
+# After local installation or during development:
+devtools::test()           # development
+# or:
+testthat::test_package("ClinicalVariantR")
+}
+```
+
+Minimal checks included in `tests/testthat/test-ClinicalVariantR.R` verify that
+`ClinicalVariantR()` / `ClinicalVariantRApp()` exist and return a `shiny.appobj` when Shiny entry
+files are present.
+
+## Engine / pipeline scripts
+
+```{r cli-scripts}
+if (FALSE) {
+# Rules combining + criterion logic audit
+system2("Rscript", "scripts/audit_acmg_rules.R")
+
+# Group B/C coverage and gene-filter parity
+system2("Rscript", "scripts/verify_group_b_c.R")
+
+# Group A 28-criterion catalog check
+system2("Rscript", "scripts/verify_group_a_28.R")
+
+# Score the Group B benchmark VCF vs expected labels
+system2("Rscript", "scripts/run_group_b_benchmark.R")
+
+# Smaller accuracy fixture
+system2("Rscript", "scripts/run_accuracy_benchmark.R")
+
+# Formal validation report (expert set)
+system2("Rscript", "scripts/generate_validation_report.R")
+}
+```
+
+Quick existence check for key scripts (does not execute them in the vignette
+build):
+
+```{r script-list}
+scripts <- c(
+    "audit_acmg_rules.R",
+    "verify_group_b_c.R",
+    "verify_group_a_28.R",
+    "run_group_b_benchmark.R",
+    "run_accuracy_benchmark.R",
+    "generate_validation_report.R",
+    "test_upload_flow.R"
+)
+script_paths <- file.path(.root, "scripts", scripts)
+data.frame(script = scripts, exists = file.exists(script_paths))
+```
+
+## Optional upload-flow smoke script
+
+```{r upload-flow}
+if (FALSE) {
+system2("Rscript", "scripts/test_upload_flow.R")
+}
+```
+
+## Optional Bioconductor / style checks (before submission)
+
+```{r bioc-check}
+if (FALSE) {
+# From the parent of the package directory:
+# R CMD build ClinicalVariantR
+# R CMD check ClinicalVariantR_0.99.0.tar.gz
+# BiocCheck::BiocCheck("ClinicalVariantR_0.99.0.tar.gz", `new-package` = TRUE)
+# BiocCheck::BiocCheckGitClone("ClinicalVariantR")
+}
+```
+
+# Expected app object (non-interactive sanity check)
+
+This chunk verifies that the constructor returns a Shiny app when package
+sources are on the search path or the working directory is the package root:
+
+```{r app-object}
+has_entry <- file.exists(file.path(.root, "global.R")) &&
+    file.exists(file.path(.root, "ui.R")) &&
+    file.exists(file.path(.root, "server.R"))
+
+if (requireNamespace("ClinicalVariantR", quietly = TRUE) && has_entry) {
+    old <- getwd()
+    on.exit(setwd(old), add = TRUE)
+    setwd(.root)
+    app <- ClinicalVariantR::ClinicalVariantR()
+    inherits(app, "shiny.appobj")
+} else if (has_entry) {
+    "# Install/attach ClinicalVariantR or run shiny::runApp('.') from package root"
+} else {
+    "# Shiny entry files not found — setwd() to package root first"
+}
+```
+
+# Troubleshooting while testing
+
+| Symptom | What to check |
+|---------|----------------|
+| Upload stuck / empty validation | Restart app; confirm VCF has `CSQ` or `ANN`; wait for readiness UI |
+| Run does nothing | Use Group B static Run button; look for status / progress under button; check R console for `[Group B] Run clicked` |
+| Auth modal blocks use | Set `AUTH_ENABLED <- FALSE` in `R/auth_storage.R` for local testing |
+| AES-GCM encrypt error | Use 12-byte IV build; set `ACMGAMP_ENCRYPTION_KEY` (32 chars) if encryption on |
+| High VUS rate on WGS | Expected without gene filter — try Group C |
+| Package not found | `setwd()` to package root or `devtools::load_all()` / install |
+
+# Recommended smoke sequence (15 minutes)
+
+1. `shiny::runApp(".")`  
+2. Group B + `acmgamp_group_b_benchmark.vcf` → Run → download CSV  
+3. Group C with `TCF4,MECP2,EGR2` → confirm filtered genes  
+4. Group A with example CSV companions → Run  
+5. `Rscript scripts/audit_acmg_rules.R`  
+6. `Rscript scripts/run_group_b_benchmark.R`  
+
+# Session info
+
+```{r sessionInfo}
+sessionInfo()
+```

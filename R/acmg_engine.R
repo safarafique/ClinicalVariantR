@@ -1,4 +1,4 @@
-#' ClinicalVariantR Pro engine - structured evidence + streaming integration.
+#' ClinicalVariantR engine: structured evidence and streaming integration.
 
 acmg_pro_to_report <- function(
     scored_df,

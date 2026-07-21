@@ -2,6 +2,7 @@
 ^\.Rproj\.user$
 ^\.Rhistory$
 ^\.cursorignore$
+^\.gitignore$
 # Development trees (non-R assets ship via inst/extdata and inst/shinyapp).
 # Use trailing "/" so paths like data/foo.tsv match; "^data$" only matches the dir name.
 ^data/
@@ -9,6 +10,7 @@
 ^www/
 ^scripts/
 ^logs/
+^results/
 ^standalone/
 ^ClinicalVariantR$
 ^ClinicalVariantR\.Rcheck$
@@ -25,3 +27,5 @@
 ^R/shiny/
 ^inst/Bioconductor/
 ^vignettes/images/
+^renv/library$
+^renv/staging$

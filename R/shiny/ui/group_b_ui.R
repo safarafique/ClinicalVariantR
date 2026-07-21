@@ -37,7 +37,7 @@ group_b_nav_panel <- function() {
               numericInput("chunk_size_b", "Chunk size (variants per batch)", value = 10000, min = 1000, step = 1000),
               helpText(textOutput("engine_status_b", inline = TRUE)),
               p(class = "text-muted small",
-                "Runs ClinicalVariantR Pro automated criteria from VEP CSQ or SnpEff ANN fields."),
+                "Runs ClinicalVariantR automated criteria from VEP CSQ or SnpEff ANN fields."),
               p(class = "text-muted small",
                 tags$strong("Prediction v2.7:"),
                 " sensitivity rules upgrade strong VUS to Likely Pathogenic when PVS1/PM/PP evidence supports it.",

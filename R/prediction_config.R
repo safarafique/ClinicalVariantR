@@ -1,4 +1,4 @@
-#' ClinicalVariantR clinical prediction mode - stricter rules and report metadata.
+#' ClinicalVariantR clinical prediction mode: stricter rules and report metadata.
 
 PREDICTION_MODE <- TRUE
 

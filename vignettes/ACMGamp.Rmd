@@ -1,0 +1,96 @@
+---
+title: "Introduction to ClinicalVariantR"
+author:
+  - name: Safa Rafique
+    email: safa.sandhu@gmail.com
+package: ClinicalVariantR
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Introduction to ClinicalVariantR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>",
+    eval = TRUE,
+    message = FALSE,
+    warning = FALSE
+)
+```
+
+# Overview
+
+**ClinicalVariantR** is an R / Bioconductor software package that classifies germline
+sequence variants under the ACMG/AMP 2015 framework from pre-annotated VCF
+files (VEP CSQ, SnpEff ANN, or ANNOVAR-style INFO fields).
+
+The package exposes an interactive Shiny application with three workflows:
+
+| Workflow | Inputs | Purpose |
+|----------|--------|---------|
+| Group A (full clinical) | VCF + clinical log + pedigree | Automated criteria plus curator toggles |
+| Group B (rapid) | VCF only | High-throughput automated classification |
+| Group C (gene panel) | VCF + gene list | Panel-restricted automated classification |
+
+# Installation
+
+ClinicalVariantR declares its required packages in `DESCRIPTION`. During
+Bioconductor checks and installation, these dependencies are resolved by the
+standard package installation workflow. The source repository is available at
+<https://github.com/safarafique/ClinicalVariantR>.
+
+# Launching the Shiny app
+
+Following Bioconductor Shiny guidelines, package functions **return** a Shiny
+app object; the user launches it:
+
+```{r launch}
+if (FALSE) {
+library(ClinicalVariantR)
+
+app <- ClinicalVariantR()
+if (interactive()) {
+    shiny::runApp(app)
+}
+}
+```
+
+`ClinicalVariantRApp()` is an alias of `ClinicalVariantR()`.
+
+For a full walkthrough of launching the app, choosing sample VCFs, Group A/B/C
+UI checks, and command-line tests, see the companion vignette
+**Running and testing ClinicalVariantR** (`vignettes/ACMGamp-run-and-test.Rmd`).
+
+# Input requirements
+
+- **VCF** (`.vcf` or `.vcf.gz`) with VEP `CSQ`, SnpEff `ANN`, or ANNOVAR-style
+  annotation for consequence, gene symbol, transcript, population AF, ClinVar,
+  and in silico scores when available.
+- Optional **clinical log** and **pedigree** CSV files for Group A.
+- Optional **gene symbol list** for Group C.
+
+Default reference tables under `inst/extdata/reference/` are placeholders;
+population and prediction evidence primarily use annotation embedded in the
+VCF unless curated references are installed (see package `README`).
+
+# Scope and limitations
+
+ClinicalVariantR targets **germline SNV and small-indel** interpretation. It does not
+classify somatic variants, structural variants, CNVs, or mitochondrial genomes.
+Several ACMG criteria require external data (functional assays, phasing,
+matched pathogenic variants) and are registered as manual or not automated.
+
+See the package `NEWS` file and GitHub README for version-specific criterion
+coverage and validation notes.
+
+# Session info
+
+```{r sessionInfo}
+sessionInfo()
+```

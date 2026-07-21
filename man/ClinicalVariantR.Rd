@@ -20,8 +20,7 @@ A \code{shiny.appobj} created by \code{shiny::shinyApp()}.
 }
 \examples{
 stopifnot(is.function(ClinicalVariantR))
-# To launch interactively:
-# shiny::runApp(ClinicalVariantR())
+stopifnot(is.function(ClinicalVariantRApp))
 }
 \seealso{
 \code{\link{ClinicalVariantRApp}}

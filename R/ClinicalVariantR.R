@@ -10,8 +10,7 @@
 #'
 #' @examples
 #' stopifnot(is.function(ClinicalVariantR))
-#' # To launch interactively:
-#' # shiny::runApp(ClinicalVariantR())
+#' stopifnot(is.function(ClinicalVariantRApp))
 #'
 #' @seealso \code{\link{ClinicalVariantRApp}}
 #' @export
@@ -25,8 +24,6 @@ ClinicalVariantR <- function(...) {
 #' @inherit ClinicalVariantR return
 #' @examples
 #' stopifnot(is.function(ClinicalVariantRApp))
-#' # To launch interactively:
-#' # shiny::runApp(ClinicalVariantRApp())
 #' @export
 ClinicalVariantRApp <- function(...) {
     ClinicalVariantR(...)
@@ -50,12 +47,7 @@ ClinicalVariantRApp <- function(...) {
         if (nzchar(pkg_path)) file.path(pkg_path, "shinyapp") else "",
         system.file(package = "ClinicalVariantR"),
         pkg_path,
-        normalizePath(getwd(), winslash = "/", mustWork = FALSE),
-        # Common local checkout paths (development fallback)
-        "E:/ACGM/ClinicalVariantR/inst/shinyapp",
-        "E:/ACGM/ClinicalVariantR",
-        "e:/ACGM/ClinicalVariantR/inst/shinyapp",
-        "e:/ACGM/ClinicalVariantR"
+        normalizePath(getwd(), winslash = "/", mustWork = FALSE)
     )
 
     for (root in unique(candidates[nzchar(candidates)])) {
@@ -77,14 +69,9 @@ ClinicalVariantRApp <- function(...) {
     app_dir <- .ClinicalVariantR_app_dir()
     if (is.null(app_dir)) {
         stop(
-            "Unable to locate ClinicalVariantR Shiny sources (global.R / ui.R / server.R).\n",
-            "The package was likely not reinstalled (it was still loaded).\n",
-            "Fix:\n",
-            "  1) Session -> Restart R\n",
-            "  2) remotes::install_local('E:/ACGM/ClinicalVariantR', force = TRUE, upgrade = 'never')\n",
-            "  3) library(ClinicalVariantR); shiny::runApp(ClinicalVariantR(), launch.browser = TRUE)\n",
-            "Or launch from the source tree without reinstalling:\n",
-            "  shiny::runApp('E:/ACGM/ClinicalVariantR', launch.browser = TRUE)",
+            "Unable to locate ClinicalVariantR Shiny sources (global.R / ui.R / server.R). ",
+            "Install the package or set CLINICALVARIANTR_APP_ROOT / working directory ",
+            "to the package root (or inst/shinyapp).",
             call. = FALSE
         )
     }

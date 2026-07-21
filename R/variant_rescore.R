@@ -1,4 +1,4 @@
-#' Parse one variant from VCF and re-run ClinicalVariantR Pro scoring (prediction curation).
+#' Parse one variant from VCF and re-run ClinicalVariantR scoring (prediction curation).
 
 parse_single_variant_from_vcf <- function(vcf_path, chrom, pos, ref, alt, pass_only = FALSE) {
   if (!file.exists(vcf_path)) stop("VCF not found: ", vcf_path)
