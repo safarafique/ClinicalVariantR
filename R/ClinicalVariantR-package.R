@@ -24,6 +24,15 @@
 #'
 #' @seealso \code{\link{ClinicalVariantR}}, \code{\link{ClinicalVariantRApp}}
 #'
+#' @import shiny
+#' @importFrom bslib bs_theme page_navbar
+#' @importFrom VariantAnnotation scanVcfHeader
+#' @importFrom methods is
+#' @importFrom digest digest
+#' @importFrom openssl aes_gcm_encrypt aes_gcm_decrypt rand_bytes
+#' @importFrom stats setNames
+#' @importFrom utils packageVersion installed.packages modifyList read.csv read.delim write.csv
+#'
 #' @keywords internal
 "_PACKAGE"
 

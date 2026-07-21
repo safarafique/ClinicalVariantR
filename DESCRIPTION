@@ -1,7 +1,7 @@
 Package: ClinicalVariantR
 Title: ACMG/AMP Germline Variant Interpretation from Annotated VCF Files
-Version: 0.99.1
-Date: 2026-07-17
+Version: 0.99.2
+Date: 2026-07-20
 Authors@R: c(
     person(
         given = "Safa",

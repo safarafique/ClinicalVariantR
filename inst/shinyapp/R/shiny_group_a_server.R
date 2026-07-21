@@ -552,6 +552,8 @@ register_group_a_server <- function(ctx) {
 
         )
 
+        play_analysis_complete_sound(session)
+
       })
 
     }, error = function(e) {

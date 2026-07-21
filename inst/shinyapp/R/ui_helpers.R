@@ -299,6 +299,16 @@ format_analysis_notification <- function(result) {
   paste0(msg, " Click a classification in the summary table to view variant details.")
 }
 
+#' Play a short browser chime when analysis finishes successfully.
+play_analysis_complete_sound <- function(session = shiny::getDefaultReactiveDomain()) {
+  if (is.null(session)) return(invisible(FALSE))
+  try(
+    session$sendCustomMessage("clinicalvariantrCompleteSound", list(play = TRUE)),
+    silent = TRUE
+  )
+  invisible(TRUE)
+}
+
 category_selection_hint_ui <- function(selected_category, report_df) {
   if (is.null(selected_category) || !nzchar(selected_category)) {
     return(div(

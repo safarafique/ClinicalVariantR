@@ -2,12 +2,14 @@
 ^\.Rproj\.user$
 ^\.Rhistory$
 ^\.cursorignore$
-^data$
-^config$
-^www$
-^scripts$
-^logs$
-^standalone$
+# Development trees (non-R assets ship via inst/extdata and inst/shinyapp).
+# Use trailing "/" so paths like data/foo.tsv match; "^data$" only matches the dir name.
+^data/
+^config/
+^www/
+^scripts/
+^logs/
+^standalone/
 ^ClinicalVariantR$
 ^ClinicalVariantR\.Rcheck$
 ^ClinicalVariantR\.BiocCheck$
@@ -20,6 +22,6 @@
 ^global_cli\.R$
 ^server\.R$
 ^ui\.R$
-^R/shiny$
-^inst/Bioconductor$
-^vignettes/images$
+^R/shiny/
+^inst/Bioconductor/
+^vignettes/images/

@@ -1,3 +1,12 @@
+# ClinicalVariantR 0.99.2 (2026-07-20)
+
+* Fix analysis crash on variants with pathogenic VEP `CLIN_SIG` in CSQ:
+  `rbind` failed when merging ClinVar protein DB (extra `source` column) with
+  the CSQ catalog (`numbers of columns of arguments do not match`).
+* R CMD check: `.Rbuildignore` now uses `^data/` (and similar) so development
+  non-R assets under `data/` are excluded; package samples remain in
+  `inst/extdata/`. Roxygen `@importFrom` tags keep NAMESPACE Imports wired.
+
 # ClinicalVariantR 0.99.1 (2026-07-17)
 
 * R CMD check / R-universe WARNING cleanup:

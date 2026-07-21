@@ -462,6 +462,8 @@ register_group_c_server <- function(ctx) {
 
         }
 
+        play_analysis_complete_sound(session)
+
       })
 
     }, error = function(e) {
