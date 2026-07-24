@@ -15,12 +15,22 @@ results/
 # R package build artifacts
 *.tar.gz
 *.Rcheck/
+*.BiocCheck/
+ClinicalVariantR.BiocCheck/
 src/*.o
 src/*.so
 src/*.dll
 
+# Accidental nested clone / install tree
+/^ClinicalVariantR$/
+/ClinicalVariantR/
+
+# Local helper scripts (not part of the package)
+/tools/
+
 # Vignette build / knitr cache
 vignettes/*.html
+vignettes/*.R
 vignettes/*_cache/
 vignettes/*_files/
 Meta/
