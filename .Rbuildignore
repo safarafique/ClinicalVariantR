@@ -19,12 +19,22 @@
 ^GExPipe\.Rmd$
 ^CODEBASE_MAP\.md$
 ^BIOCONDUCTOR\.md$
+^LICENSE\.md$
+# Legacy vignette sources (renamed to ClinicalVariantR*.Rmd).
+^vignettes/ACMGamp\.Rmd$
+^vignettes/ACMGamp-run-and-test\.Rmd$
 ^app\.R$
 ^global\.R$
 ^global_cli\.R$
 ^server\.R$
 ^ui\.R$
 ^R/shiny/
+# Shiny UI/server helpers ship via inst/shinyapp/ (sourced at app runtime).
+# Excluding them from the package namespace avoids shiny/DT/jsonlite import clashes.
+^R/shiny_
+^R/ui_
+^R/expert_review_export\.R$
+^tools/
 ^inst/Bioconductor/
 ^vignettes/images/
 ^renv/library$

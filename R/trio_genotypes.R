@@ -1,4 +1,5 @@
 #' Trio VCF genotype parsing for PS2, PM3, and BP2 prediction.
+#' @noRd
 
 parse_vcf_genotypes <- function(format_str, sample_fields, sample_names) {
   if (length(sample_fields) == 0L || length(sample_names) == 0L) {

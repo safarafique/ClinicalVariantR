@@ -1,4 +1,5 @@
 #' App requirements for VCF and companion files.
+#' @noRd
 vcf_app_requirements <- function(mode = c("full", "rapid")) {
   mode <- match.arg(mode)
   list(
@@ -41,6 +42,7 @@ open_vcf_connection <- function(path) {
 
 #' Read VCF meta-header: column names, declared INFO/FORMAT fields, sample count.
 #' When max_scan_variants is set, stops after that many variant rows (fast upload path).
+#' @noRd
 read_vcf_header_meta <- function(vcf_path, max_data_rows = 100L, max_scan_variants = NULL,
                                  max_header_lines = 100000L) {
   if (!file.exists(vcf_path)) stop("VCF file not found.")
@@ -60,40 +62,47 @@ read_vcf_header_meta <- function(vcf_path, max_data_rows = 100L, max_scan_varian
   variant_count <- 0L
   count_truncated <- FALSE
   line_count <- 0L
+  buffer_n <- if (exists("VCF_LINE_BUFFER", inherits = TRUE)) VCF_LINE_BUFFER else 50000L
+  done <- FALSE
 
   repeat {
-    line <- readLines(con, n = 1L, warn = FALSE)
-    if (length(line) == 0) break
-    line_count <- line_count + 1L
+    if (done) break
+    lines <- readLines(con, n = buffer_n, warn = FALSE)
+    if (length(lines) == 0L) break
 
-    if (is.null(header_cols) && line_count > max_header_lines) {
-      stop(sprintf(
-        "Invalid VCF: no #CHROM header found within the first %s lines.",
-        format(max_header_lines, big.mark = ",")
-      ))
-    }
+    for (line in lines) {
+      line_count <- line_count + 1L
 
-    if (grepl("^##INFO=<ID=([^,]+)", line, perl = TRUE)) {
-      id <- sub("^##INFO=<ID=([^,]+).*$", "\\1", line)
-      info_meta <- c(info_meta, id)
-    } else if (grepl("^##FORMAT=<ID=([^,]+)", line, perl = TRUE)) {
-      id <- sub("^##FORMAT=<ID=([^,]+).*$", "\\1", line)
-      format_meta <- c(format_meta, id)
-    } else if (grepl("^#CHROM\t", line)) {
-      header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
-      if (length(header_cols) > 8) {
-        sample_cols <- header_cols[9:length(header_cols)]
+      if (is.null(header_cols) && line_count > max_header_lines) {
+        stop(sprintf(
+          "Invalid VCF: no #CHROM header found within the first %s lines.",
+          format(max_header_lines, big.mark = ",")
+        ))
       }
-    } else if (!grepl("^#", line)) {
-      variant_count <- variant_count + 1L
-      if (length(data_rows) < max_data_rows) {
-        data_rows[length(data_rows) + 1L] <- line
-      }
-      if (!is.null(max_scan_variants) && is.finite(max_scan_variants) &&
-          variant_count >= max_scan_variants &&
-          length(data_rows) >= min(max_data_rows, variant_count)) {
-        count_truncated <- TRUE
-        break
+
+      if (grepl("^##INFO=<ID=([^,]+)", line, perl = TRUE)) {
+        id <- sub("^##INFO=<ID=([^,]+).*$", "\\1", line)
+        info_meta <- c(info_meta, id)
+      } else if (grepl("^##FORMAT=<ID=([^,]+)", line, perl = TRUE)) {
+        id <- sub("^##FORMAT=<ID=([^,]+).*$", "\\1", line)
+        format_meta <- c(format_meta, id)
+      } else if (grepl("^#CHROM\t", line)) {
+        header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
+        if (length(header_cols) > 8) {
+          sample_cols <- header_cols[9:length(header_cols)]
+        }
+      } else if (!grepl("^#", line)) {
+        variant_count <- variant_count + 1L
+        if (length(data_rows) < max_data_rows) {
+          data_rows[length(data_rows) + 1L] <- line
+        }
+        if (!is.null(max_scan_variants) && is.finite(max_scan_variants) &&
+            variant_count >= max_scan_variants &&
+            length(data_rows) >= min(max_data_rows, variant_count)) {
+          count_truncated <- TRUE
+          done <- TRUE
+          break
+        }
       }
     }
   }
@@ -119,6 +128,7 @@ format_variant_count_label <- function(count, truncated = FALSE) {
 }
 
 #' Scan sample variant rows for populated INFO keys.
+#' @noRd
 scan_info_fields_in_rows <- function(sample_rows, header_cols, fields) {
   if (length(sample_rows) == 0 || is.null(header_cols)) {
     return(setNames(rep(0L, length(fields)), fields))
@@ -145,6 +155,7 @@ scan_info_fields_in_rows <- function(sample_rows, header_cols, fields) {
 }
 
 #' Extract VEP CSQ subfield names from ##INFO CSQ header line.
+#' @noRd
 extract_csq_format_fields <- function(vcf_path) {
   if (!file.exists(vcf_path)) return(character())
   con <- open_vcf_connection(vcf_path)
@@ -188,6 +199,7 @@ detect_csq_insilico_in_rows <- function(sample_rows, header_cols) {
 }
 
 #' Detect SnpEff-style ANN in INFO (Consequence subfield).
+#' @noRd
 detect_ann_consequence <- function(sample_rows, header_cols) {
   if (length(sample_rows) == 0) return(FALSE)
   info_idx <- match("INFO", header_cols)
@@ -208,6 +220,7 @@ detect_ann_consequence <- function(sample_rows, header_cols) {
 }
 
 #' Detect VEP-style CSQ in INFO (Consequence subfield).
+#' @noRd
 detect_csq_consequence <- function(sample_rows, header_cols) {
   if (length(sample_rows) == 0) return(FALSE)
   info_idx <- match("INFO", header_cols)
@@ -228,6 +241,7 @@ detect_csq_consequence <- function(sample_rows, header_cols) {
 }
 
 #' Validate uploaded VCF against app requirements.
+#' @noRd
 new_vcf_check_recorder <- function() {
   checks_env <- new.env(parent = emptyenv())
   checks_env$items <- list()
@@ -640,6 +654,7 @@ validate_pedigree_csv <- function(path) {
 }
 
 #' Combined Group A readiness across VCF + clinical + pedigree.
+#' @noRd
 validate_group_a_inputs <- function(vcf_path, clinical_path, pedigree_path, vcf_val = NULL) {
   if (is.null(vcf_val)) {
     vcf_val <- validate_vcf(vcf_path, mode = "full")

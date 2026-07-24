@@ -1,4 +1,5 @@
 #' Audit log tab and shared load_audit helper.
+#' @noRd
 register_audit_server <- function(ctx) {
   input <- ctx$input
   output <- ctx$output

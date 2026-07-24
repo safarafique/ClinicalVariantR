@@ -1,4 +1,5 @@
 #' PP4, PP1, PS2, and Group A context criteria from clinical logs and pedigree.
+#' @noRd
 
 GENE_PHENOTYPE_MAP_PATH <- file.path("data", "gene_panels", "gene_phenotype_map.csv")
 

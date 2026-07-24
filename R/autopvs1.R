@@ -1,6 +1,7 @@
 #' ClinGen AutoPVS1-style loss-of-function evaluation (simplified implementation).
 #'
 #' Reference: Abou Tayoun et al., Genetics in Medicine 2018; ClinGen SVI PVS1 specification.
+#' @noRd
 
 CRITICAL_EXON_DOMAINS_PATH <- file.path("data", "reference", "critical_exon_domains.tsv")
 .critical_exon_domains_cache <- new.env(parent = emptyenv())

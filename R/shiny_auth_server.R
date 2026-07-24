@@ -1,4 +1,5 @@
 #' Login modal and authentication observers.
+#' @noRd
 register_auth_server <- function(ctx) {
   input <- ctx$input
   session <- ctx$session

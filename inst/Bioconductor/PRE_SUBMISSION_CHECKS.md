@@ -15,7 +15,7 @@ cd /d E:\ACGM\ClinicalVariantR
 Remove old tarballs and check folders so results come from the current source:
 
 ```cmd
-del ClinicalVariantR_0.99.0.tar.gz
+del ClinicalVariantR_0.99.3.tar.gz
 rmdir /s /q ClinicalVariantR.Rcheck
 rmdir /s /q ClinicalVariantR.BiocCheck
 ```
@@ -47,13 +47,13 @@ One skipped Shiny layout test is acceptable if it says the Shiny entry files are
 Expected output:
 
 ```text
-* building 'ClinicalVariantR_0.99.0.tar.gz'
+* building 'ClinicalVariantR_0.99.3.tar.gz'
 ```
 
 ## 5. Run R CMD Check
 
 ```cmd
-"C:\Program Files\R\R-4.6.0\bin\x64\R.exe" CMD check ClinicalVariantR_0.99.0.tar.gz
+"C:\Program Files\R\R-4.6.0\bin\x64\R.exe" CMD check ClinicalVariantR_0.99.3.tar.gz
 ```
 
 Review the final summary. Submission target:
@@ -67,7 +67,7 @@ If there are ERRORs or WARNINGs, fix them before submission. NOTES may be accept
 ## 6. Run BiocCheck
 
 ```cmd
-"C:\Program Files\R\R-4.6.0\bin\x64\Rscript.exe" -e "BiocCheck::BiocCheck('ClinicalVariantR_0.99.0.tar.gz', newPackage=TRUE)"
+"C:\Program Files\R\R-4.6.0\bin\x64\Rscript.exe" -e "BiocCheck::BiocCheck('ClinicalVariantR_0.99.3.tar.gz', newPackage=TRUE)"
 ```
 
 Submission target:
@@ -110,7 +110,7 @@ Confirm `DESCRIPTION` contains:
 
 ```text
 Package: ClinicalVariantR
-Version: 0.99.0
+Version: 0.99.3
 URL: https://github.com/safarafique/ClinicalVariantR
 BugReports: https://github.com/safarafique/ClinicalVariantR/issues
 ```
@@ -156,7 +156,7 @@ When reviewers comment:
 - Bump the package version for each new review build, for example:
 
 ```text
-0.99.0 -> 0.99.1 -> 0.99.2
+0.99.0 -> 0.99.1 -> 0.99.2 -> 0.99.3
 ```
 
 - Rebuild and rerun `R CMD check` and `BiocCheck` after every change.

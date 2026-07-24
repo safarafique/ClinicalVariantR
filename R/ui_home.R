@@ -1,4 +1,5 @@
 #' Home / landing tab UI.
+#' @noRd
 home_nav_panel <- function() {
   bslib::nav_panel(
     title = "Home",

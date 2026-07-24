@@ -1,25 +1,46 @@
 # Global configuration and module loading for ClinicalVariantR
+#
+# Runtime dependencies are declared in DESCRIPTION Imports. After installing
+# ClinicalVariantR with dependencies = TRUE, users only need:
+#   library(ClinicalVariantR)
+#   shiny::runApp(ClinicalVariantR())
+# Do not install packages from app code (forbidden for Bioconductor packages).
 
-suppressPackageStartupMessages({
-  library(shiny)
-  library(bslib)
-  library(DT)
-  library(data.table)
-  library(readr)
-})
+.clinicalvariantr_require_deps <- function() {
+  deps <- c("shiny", "bslib", "DT", "data.table", "readr", "jsonlite")
+  missing <- deps[!vapply(deps, requireNamespace, quietly = TRUE, FUN.VALUE = logical(1))]
+  if (length(missing) > 0L) {
+    stop(
+      "Missing required package(s): ", paste(missing, collapse = ", "), ".\n",
+      "Reinstall ClinicalVariantR with dependencies = TRUE ",
+      "(BiocManager from Bioconductor, or remotes from GitHub/local clone).",
+      call. = FALSE
+    )
+  }
+  # Attach only shiny + bslib. Attaching DT/jsonlite with shiny masks
+  # renderDataTable, dataTableOutput, and validate. Other Imports are used
+  # via DT:: / jsonlite:: / data.table:: / readr:: in application code.
+  suppressPackageStartupMessages({
+    library(shiny, quietly = TRUE, warn.conflicts = FALSE)
+    library(bslib, quietly = TRUE, warn.conflicts = FALSE)
+  })
+  invisible(TRUE)
+}
 
-# VariantAnnotation is optional at startup; loaded when VCF is parsed
+.clinicalvariantr_require_deps()
+
+# VariantAnnotation is an Import; confirm availability (fallback parser if absent).
 .va_available <- requireNamespace("VariantAnnotation", quietly = TRUE)
 if (!.va_available) {
   message(
-    "VariantAnnotation not installed. VCF parsing will use a lightweight fallback. ",
-    "Install with: BiocManager::install('VariantAnnotation')"
+    "VariantAnnotation not available. VCF parsing will use a lightweight fallback. ",
+    "Reinstall ClinicalVariantR with dependencies = TRUE to restore full VCF support."
   )
 }
 
 APP_TITLE <- "ClinicalVariantR"
-APP_VERSION <- "2.7.0"
-ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v2.7.0"
+APP_VERSION <- "0.99.3"
+ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v0.99.3"
 ACMG_GUIDELINE_VERSION <- "ACMG/AMP 2015 + ClinGen refinements"
 
 # Maximum upload size for VCF and companion files (1 GiB)

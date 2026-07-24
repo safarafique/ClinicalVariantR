@@ -1,4 +1,5 @@
 #' Evidence Explorer tab UI.
+#' @noRd
 explorer_nav_panel <- function() {
   bslib::nav_panel(
     title = "Evidence Explorer",

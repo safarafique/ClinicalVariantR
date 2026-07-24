@@ -3,6 +3,7 @@
 #' Production deployments should replace placeholder TSV files with curated
 #' reference snapshots (gnomAD v4.1 allele frequencies, ClinVar submissions,
 #' REVEL transcript scores).
+#' @noRd
 load_reference_data <- function(paths = REFERENCE_PATHS) {
   refs <- list(
     gnomad = data.table::fread(paths$gnomad_v41, showProgress = FALSE),
@@ -47,6 +48,7 @@ coalesce_dt_col <- function(dt, target, sources) {
 }
 
 #' Annotate variant table with reference placeholders via data.table joins.
+#' @noRd
 annotate_variants <- function(variants_dt, refs) {
   dt <- data.table::as.data.table(variants_dt)
   if ("chrom" %in% names(dt)) {

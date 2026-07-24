@@ -1,4 +1,5 @@
 #' Shiny UI theme and reusable layout components.
+#' @noRd
 clinical_theme <- bslib::bs_theme(
   version = 5,
   bootswatch = "flatly",

@@ -1,4 +1,5 @@
 #' Compare ClinicalVariantR classifications with InterVar or InterVar-style reference files.
+#' @noRd
 
 ACMG_CLASS_LABELS <- c(
   "Pathogenic", "Likely Pathogenic", "VUS", "Likely Benign", "Benign"

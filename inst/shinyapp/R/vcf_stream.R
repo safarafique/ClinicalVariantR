@@ -1,9 +1,15 @@
 #' Open VCF connection (plain or gzip).
+#' @noRd
 open_vcf_connection <- function(path) {
   if (grepl("\\.gz$", path, ignore.case = TRUE)) gzfile(path, "r") else file(path, "r")
 }
 
+#' Buffered line reads for large VCF / pipe streams (much faster than n = 1).
+#' @noRd
+VCF_LINE_BUFFER <- 50000L
+
 #' GATK and many callers use FILTER="." for passing variants; VCF spec also allows PASS.
+#' @noRd
 vcf_filter_is_pass <- function(filter) {
   is.na(filter) || filter %in% c("PASS", ".")
 }
@@ -26,6 +32,7 @@ extract_info_field <- function(info_string, key) {
 }
 
 #' Extract first VEP CSQ consequence token without retaining full CSQ string.
+#' @noRd
 extract_vep_consequence <- function(csq_value) {
   if (is.na(csq_value) || csq_value == ".") return(NA_character_)
   first <- strsplit(csq_value, ",")[[1]][1]
@@ -35,6 +42,7 @@ extract_vep_consequence <- function(csq_value) {
 }
 
 #' Extract GENE from VEP CSQ (SYMBOL field) or INFO/GENE.
+#' @noRd
 extract_gene_from_info <- function(info_string) {
   gene <- extract_info_field(info_string, "GENE")
   if (!is.na(gene) && nzchar(gene)) return(gene)
@@ -45,7 +53,18 @@ extract_gene_from_info <- function(info_string) {
   if (length(parts) >= 4) parts[4] else NA_character_
 }
 
+#' Bind list of 1-row (or multi-row) data.frames efficiently.
+#' @noRd
+rbind_parsed_rows <- function(batch) {
+  if (length(batch) == 0L) return(NULL)
+  df <- data.table::rbindlist(batch, use.names = TRUE, fill = TRUE)
+  data.table::setDF(df)
+  rownames(df) <- NULL
+  df
+}
+
 #' Parse one VCF data line into variant row(s); multi-allelic records expand to one row per ALT.
+#' @noRd
 parse_vcf_line <- function(line, header_cols) {
   fields <- strsplit(line, "\t", fixed = TRUE)[[1]]
   if (length(fields) < 8) return(NULL)
@@ -78,12 +97,12 @@ parse_vcf_line <- function(line, header_cols) {
 
   if (length(rows) == 0L) return(NULL)
   if (length(rows) == 1L) return(rows[[1L]])
-  do.call(rbind, rows)
+  rbind_parsed_rows(rows)
 }
 
 append_parsed_vcf_rows <- function(batch, parsed_rows) {
   if (is.null(parsed_rows)) return(batch)
-  if (is.data.frame(parsed_rows)) {
+  if (is.data.frame(parsed_rows) && nrow(parsed_rows) > 1L) {
     for (i in seq_len(nrow(parsed_rows))) {
       batch[[length(batch) + 1L]] <- parsed_rows[i, , drop = FALSE]
     }
@@ -94,6 +113,7 @@ append_parsed_vcf_rows <- function(batch, parsed_rows) {
 }
 
 #' Count all variant rows in a VCF (streaming, no memory load).
+#' @noRd
 count_vcf_variants <- function(vcf_path, pass_only = FALSE, min_qual = 0) {
   con <- open_vcf_connection(vcf_path)
   on.exit(close(con), add = TRUE)
@@ -103,24 +123,27 @@ count_vcf_variants <- function(vcf_path, pass_only = FALSE, min_qual = 0) {
   pass_n <- 0L
 
   repeat {
-    line <- readLines(con, n = 1L, warn = FALSE)
-    if (length(line) == 0) break
-    if (grepl("^#CHROM\t", line)) {
-      header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
-      next
-    }
-    if (grepl("^#", line)) next
+    lines <- readLines(con, n = VCF_LINE_BUFFER, warn = FALSE)
+    if (length(lines) == 0L) break
 
-    total <- total + 1L
-    if (pass_only || min_qual > 0) {
-      rows_df <- parse_vcf_line(line, header_cols)
-      if (is.null(rows_df)) next
-      n_rows <- if (is.data.frame(rows_df)) nrow(rows_df) else 1L
-      for (i in seq_len(n_rows)) {
-        row <- if (is.data.frame(rows_df)) rows_df[i, , drop = FALSE] else rows_df
-        if (pass_only && !vcf_filter_is_pass(row$filter)) next
-        if (min_qual > 0 && (is.na(row$qual) || row$qual < min_qual)) next
-        pass_n <- pass_n + 1L
+    for (line in lines) {
+      if (grepl("^#CHROM\t", line)) {
+        header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
+        next
+      }
+      if (grepl("^#", line)) next
+
+      total <- total + 1L
+      if (pass_only || min_qual > 0) {
+        rows_df <- parse_vcf_line(line, header_cols)
+        if (is.null(rows_df)) next
+        n_rows <- if (is.data.frame(rows_df)) nrow(rows_df) else 1L
+        for (i in seq_len(n_rows)) {
+          row <- if (is.data.frame(rows_df)) rows_df[i, , drop = FALSE] else rows_df
+          if (pass_only && !vcf_filter_is_pass(row$filter)) next
+          if (min_qual > 0 && (is.na(row$qual) || row$qual < min_qual)) next
+          pass_n <- pass_n + 1L
+        }
       }
     }
   }
@@ -133,6 +156,7 @@ count_vcf_variants <- function(vcf_path, pass_only = FALSE, min_qual = 0) {
 }
 
 #' Stream VCF variants in chunks; call processor(chunk_df, chunk_id) per batch.
+#' @noRd
 stream_vcf_chunks <- function(
     vcf_path,
     chunk_size = 10000L,
@@ -156,62 +180,63 @@ stream_vcf_chunks <- function(
   flush_batch <- function() {
     if (length(stream_state$batch) == 0) return(invisible(NULL))
     stream_state$chunk_id <- stream_state$chunk_id + 1L
-    chunk_df <- do.call(rbind, stream_state$batch)
-    rownames(chunk_df) <- NULL
+    chunk_df <- rbind_parsed_rows(stream_state$batch)
     processor(chunk_df, stream_state$chunk_id)
     stream_state$batch <- list()
     invisible(NULL)
   }
 
   repeat {
-    line <- readLines(con, n = 1L, warn = FALSE)
-    if (length(line) == 0) break
+    lines <- readLines(con, n = VCF_LINE_BUFFER, warn = FALSE)
+    if (length(lines) == 0L) break
 
-    if (grepl("^#CHROM\t", line)) {
-      header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
-      next
-    }
-    if (grepl("^#", line)) next
+    for (line in lines) {
+      if (grepl("^#CHROM\t", line)) {
+        header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
+        next
+      }
+      if (grepl("^#", line)) next
 
-    read_total <- read_total + 1L
+      read_total <- read_total + 1L
 
-    if (kept_total >= max_variants) {
-      skipped_total <- skipped_total + 1L
-      next
-    }
-
-    rows_df <- parse_vcf_line(line, header_cols)
-    if (is.null(rows_df)) {
-      skipped_total <- skipped_total + 1L
-      next
-    }
-    n_rows <- if (is.data.frame(rows_df)) nrow(rows_df) else 1L
-    for (i in seq_len(n_rows)) {
       if (kept_total >= max_variants) {
-        skipped_total <- skipped_total + (n_rows - i + 1L)
-        break
-      }
-      row <- if (is.data.frame(rows_df)) rows_df[i, , drop = FALSE] else rows_df
-      if (pass_only && !vcf_filter_is_pass(row$filter)) {
-        skipped_total <- skipped_total + 1L
-        next
-      }
-      if (min_qual > 0 && (is.na(row$qual) || row$qual < min_qual)) {
         skipped_total <- skipped_total + 1L
         next
       }
 
-      row$qual <- NULL
-      row$filter <- NULL
-      stream_state$batch <- append_parsed_vcf_rows(stream_state$batch, row)
-      kept_total <- kept_total + 1L
-    }
+      rows_df <- parse_vcf_line(line, header_cols)
+      if (is.null(rows_df)) {
+        skipped_total <- skipped_total + 1L
+        next
+      }
+      n_rows <- if (is.data.frame(rows_df)) nrow(rows_df) else 1L
+      for (i in seq_len(n_rows)) {
+        if (kept_total >= max_variants) {
+          skipped_total <- skipped_total + (n_rows - i + 1L)
+          break
+        }
+        row <- if (is.data.frame(rows_df)) rows_df[i, , drop = FALSE] else rows_df
+        if (pass_only && !vcf_filter_is_pass(row$filter)) {
+          skipped_total <- skipped_total + 1L
+          next
+        }
+        if (min_qual > 0 && (is.na(row$qual) || row$qual < min_qual)) {
+          skipped_total <- skipped_total + 1L
+          next
+        }
 
-    if (!is.null(progress_fn) && read_total %% 50000L == 0L) {
-      progress_fn(read_total, kept_total, skipped_total)
-    }
+        row$qual <- NULL
+        row$filter <- NULL
+        stream_state$batch <- append_parsed_vcf_rows(stream_state$batch, row)
+        kept_total <- kept_total + 1L
+      }
 
-    if (length(stream_state$batch) >= chunk_size) flush_batch()
+      if (!is.null(progress_fn) && read_total %% 50000L == 0L) {
+        progress_fn(read_total, kept_total, skipped_total)
+      }
+
+      if (length(stream_state$batch) >= chunk_size) flush_batch()
+    }
   }
 
   flush_batch()
@@ -229,6 +254,7 @@ bcftools_available <- function() {
 }
 
 #' Run bcftools query on Ubuntu/WSL/Linux for faster VCF field extraction.
+#' @noRd
 bcftools_stream_chunks <- function(
     vcf_path,
     chunk_size = 10000L,
@@ -280,44 +306,46 @@ bcftools_stream_chunks <- function(
   flush_batch <- function() {
     if (length(stream_state$batch) == 0) return(invisible(NULL))
     stream_state$chunk_id <- stream_state$chunk_id + 1L
-    chunk_df <- do.call(rbind, stream_state$batch)
-    rownames(chunk_df) <- NULL
+    chunk_df <- rbind_parsed_rows(stream_state$batch)
     processor(chunk_df, stream_state$chunk_id)
     stream_state$batch <- list()
     invisible(NULL)
   }
 
   repeat {
-  line <- readLines(pipe, n = 1L, warn = FALSE)
-    if (length(line) == 0) break
-    read_total <- read_total + 1L
-    if (kept_total >= max_variants) next
+    lines <- readLines(pipe, n = VCF_LINE_BUFFER, warn = FALSE)
+    if (length(lines) == 0L) break
 
-    parts <- strsplit(line, "\t")[[1]]
-    if (length(parts) < 7) next
+    for (line in lines) {
+      read_total <- read_total + 1L
+      if (kept_total >= max_variants) next
 
-    alts <- split_vcf_alt_alleles(parts[4])
-    for (alt in alts) {
-      if (kept_total >= max_variants) break
+      parts <- strsplit(line, "\t")[[1]]
+      if (length(parts) < 7) next
 
-      row <- parse_variant_from_vcf_fields(
-        chrom = parts[1],
-        pos = parts[2],
-        ref = parts[3],
-        alt = alt,
-        qual = scalar_num(parts[5]),
-        filter = parts[6],
-        info = if (length(parts) >= 7) parts[7] else "."
-      )
+      alts <- split_vcf_alt_alleles(parts[4])
+      for (alt in alts) {
+        if (kept_total >= max_variants) break
 
-      stream_state$batch[[length(stream_state$batch) + 1L]] <- row
-      kept_total <- kept_total + 1L
+        row <- parse_variant_from_vcf_fields(
+          chrom = parts[1],
+          pos = parts[2],
+          ref = parts[3],
+          alt = alt,
+          qual = scalar_num(parts[5]),
+          filter = parts[6],
+          info = if (length(parts) >= 7) parts[7] else "."
+        )
+
+        stream_state$batch[[length(stream_state$batch) + 1L]] <- row
+        kept_total <- kept_total + 1L
+      }
+
+      if (!is.null(progress_fn) && read_total %% 50000L == 0L) {
+        progress_fn(read_total, kept_total, 0L)
+      }
+      if (length(stream_state$batch) >= chunk_size) flush_batch()
     }
-
-    if (!is.null(progress_fn) && read_total %% 50000L == 0L) {
-      progress_fn(read_total, kept_total, 0L)
-    }
-    if (length(stream_state$batch) >= chunk_size) flush_batch()
   }
   flush_batch()
 
@@ -344,9 +372,12 @@ record_analysis_report <- function(report, state, output_csv, preview_limit = 10
       (state$classification_counts[[cl]] %||% 0L) + sum(report$classification == cl)
   }
 
-  utils::write.table(
-    report, file = output_csv, sep = ",",
-    row.names = FALSE, col.names = state$first_write, append = !state$first_write
+  data.table::fwrite(
+    report,
+    file = output_csv,
+    sep = ",",
+    append = !state$first_write,
+    col.names = state$first_write
   )
   state$first_write <- FALSE
 
@@ -360,8 +391,7 @@ record_analysis_report <- function(report, state, output_csv, preview_limit = 10
 
 analysis_preview_df <- function(state) {
   if (length(state$preview_rows) == 0L) return(empty_report())
-  df <- do.call(rbind, state$preview_rows)
-  rownames(df) <- NULL
+  df <- rbind_parsed_rows(state$preview_rows)
   df
 }
 
@@ -398,6 +428,7 @@ run_vcf_stream_with_fallback <- function(stream_fun, vcf_path, chunk_size, pass_
 }
 
 #' Analyze complete VCF - all rows, chunked, results written to CSV on disk.
+#' @noRd
 analyze_complete_vcf <- function(
     vcf_path,
     mode = c("full", "rapid"),
@@ -413,7 +444,7 @@ analyze_complete_vcf <- function(
     pedigree_context = NULL,
     session_id = NA_character_,
     profile_id = DEFAULT_PROFILE_ID,
-    write_audit = TRUE,
+    write_audit = FALSE,
     gene_filter = character(),
     progress_fn = NULL) {
 
@@ -443,10 +474,7 @@ analyze_complete_vcf <- function(
       if (nrow(chunk_df) == 0L) return(invisible(NULL))
     }
 
-    if (!is.null(refs)) {
-      chunk_df <- dedupe_variants_by_key(annotate_variants(chunk_df, refs))
-    }
-
+    # Annotate once inside score_variants_table via refs (no double annotate).
     report <- run_acmg_pro_chunk(
       variants_df = chunk_df,
       mode = mode,
@@ -454,7 +482,7 @@ analyze_complete_vcf <- function(
       manual_by_variant = manual_by_variant,
       clinical_context = clinical_context,
       pedigree_context = pedigree_context,
-      refs = NULL,
+      refs = refs,
       session_id = session_id,
       profile_id = profile_id,
       run_metadata = run_metadata,

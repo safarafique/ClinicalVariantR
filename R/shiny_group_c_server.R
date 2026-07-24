@@ -1,4 +1,5 @@
 #' Group C - gene panel analysis tab.
+#' @noRd
 
 register_group_c_server <- function(ctx) {
 

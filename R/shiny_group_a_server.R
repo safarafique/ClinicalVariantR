@@ -1,4 +1,5 @@
 #' Group A - full clinical + pedigree analysis tab.
+#' @noRd
 
 register_group_a_server <- function(ctx) {
 

@@ -1,4 +1,5 @@
 #' Expert review checklist UI and filtered report exports.
+#' @noRd
 
 parse_criteria_met <- function(x) {
   if (is.null(x) || is.na(x) || !nzchar(trimws(as.character(x)))) return(character())
@@ -112,6 +113,7 @@ expert_review_checklist_static_ui <- function(show_curation = FALSE) {
 }
 
 #' Prominent handoff banner: CSV export is the best input for expert review.
+#' @noRd
 expert_csv_handoff_ui <- function() {
   div(
     class = "alert alert-success border mb-3",

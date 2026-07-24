@@ -2,6 +2,7 @@
 #'
 #' @param evidence List with counts: PVS, PS, PM, PP, BA, BS, BP
 #' @return Character classification tier.
+#' @noRd
 safe_int <- function(x, default = 0L) {
   if (is.null(x) || length(x) == 0L) return(default)
   raw <- trimws(as.character(x)[1L])
@@ -63,6 +64,7 @@ combine_acmg_evidence <- function(evidence) {
 `%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
 
 #' Coerce annotation fields to a single character value (avoids if()/&& length errors).
+#' @noRd
 scalar_chr <- function(x, default = NA_character_) {
   if (is.null(x) || length(x) == 0L) return(default)
   if (is.list(x) && !is.data.frame(x)) x <- x[[1L]]
@@ -102,6 +104,7 @@ scalar_lgl <- function(x, default = FALSE) {
 }
 
 #' Ensure variant scoring receives exactly one row with scalar columns.
+#' @noRd
 normalize_variant_row_input <- function(row) {
   row <- as.data.frame(row, stringsAsFactors = FALSE)
   if (nrow(row) < 1L) stop("Empty variant row.")
@@ -118,6 +121,7 @@ normalize_variant_row_input <- function(row) {
 }
 
 #' Summarize met criteria into strength counts.
+#' @noRd
 summarize_evidence <- function(criteria_df) {
   met <- criteria_df[!is.na(criteria_df$met) & criteria_df$met, , drop = FALSE]
   strengths <- met$strength

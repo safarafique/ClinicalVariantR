@@ -1,4 +1,5 @@
 #' Load configurable ACMG thresholds, criteria metadata, and disease profiles.
+#' @noRd
 
 CONFIG_PATHS <- list(
   thresholds = file.path("config", "acmg_thresholds.csv"),

@@ -1,4 +1,5 @@
 #' Structured ACMG evidence tables and confidence scoring.
+#' @noRd
 
 EVIDENCE_CRITERIA <- FULL_ACMG_CRITERIA
 

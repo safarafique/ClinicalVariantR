@@ -6,6 +6,8 @@ register_group_c_server <- function(ctx) {
 
   output <- ctx$output
 
+  session <- ctx$session
+
   authorized <- ctx$authorized
 
   vcf_preview_c <- ctx$vcf_preview_c

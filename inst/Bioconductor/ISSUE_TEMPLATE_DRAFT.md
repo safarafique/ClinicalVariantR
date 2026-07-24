@@ -33,7 +33,7 @@ support for large call sets and structured criterion-level evidence export.
 ## Checklist before clicking Submit
 
 - [ ] Default branch is the package source (`DESCRIPTION` at root).  
-- [ ] Version is `0.99.z`.  
+- [ ] Version is `0.99.3` (bump `0.99.z` for each rebuild).  
 - [ ] `R CMD check` and `BiocCheck` cleaned or notes justified in the issue.  
 - [ ] Maintainer in `DESCRIPTION` matches the GitHub account that will accept policies.  
 - [ ] SSH keys ready for later Bioconductor git access: https://bioconductor.org/developers.html  

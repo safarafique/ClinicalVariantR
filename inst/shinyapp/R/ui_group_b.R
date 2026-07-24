@@ -1,4 +1,5 @@
 #' Group B - automated prediction tab UI.
+#' @noRd
 group_b_nav_panel <- function() {
   bslib::nav_panel(
     title = "Group B - Automated Prediction",
@@ -33,7 +34,7 @@ group_b_nav_panel <- function() {
               checkboxInput("pass_only_b", "Load passing-filter rows only (PASS or .)", FALSE),
               numericInput("min_qual_b", "Minimum QUAL", value = 0, min = 0, step = 1),
               checkboxInput("use_bcftools_b", "Use bcftools (Ubuntu/WSL - faster)", bcftools_available()),
-              checkboxInput("skip_audit_b", "Skip audit log (faster analysis)", FALSE),
+              checkboxInput("skip_audit_b", "Skip audit log (faster analysis)", TRUE),
               numericInput("chunk_size_b", "Chunk size (variants per batch)", value = 10000, min = 1000, step = 1000),
               helpText(textOutput("engine_status_b", inline = TRUE)),
               p(class = "text-muted small",

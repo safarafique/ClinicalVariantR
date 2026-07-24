@@ -1,7 +1,7 @@
 Package: ClinicalVariantR
 Title: Clinical Variant Interpretation Using ACMG/AMP Germline Criteria
-Version: 0.99.2
-Date: 2026-07-20
+Version: 0.99.3
+Date: 2026-07-22
 Authors@R: c(
     person(
         given = "Safa",
@@ -22,7 +22,7 @@ Authors@R: c(
         email = "farooq.sbb@pu.edu.pk",
         role = "aut"
     )
-)
+    )
 Maintainer: Safa Rafique <safa.sandhu@gmail.com>
 Description: ClinicalVariantR is an interactive Shiny platform for
     evidence-based germline variant classification under ACMG/AMP 2015
@@ -38,7 +38,7 @@ biocViews: Software, VariantAnnotation, Genetics, Sequencing,
 Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 8.0.0
 VignetteBuilder: knitr
 Depends:
     R (>= 4.6.0)

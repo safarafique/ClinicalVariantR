@@ -4,6 +4,7 @@
 #'   PS1 - same amino acid change as established pathogenic variant
 #'   PM5 - missense at residue with different established pathogenic missense
 #'   PM1 - missense in curated critical domain / hotspot gene panel
+#' @noRd
 
 CLINVAR_PROTEIN_DB_PATH <- file.path("data", "reference", "clinvar_pathogenic_protein.tsv")
 PM1_HOTSPOT_PANEL_PATH <- file.path("data", "gene_panels", "pm1_hotspot_genes.csv")
@@ -88,6 +89,7 @@ empty_clinvar_protein_db <- function() {
 }
 
 #' Align ClinVar / CSQ protein tables to a shared column set before rbind.
+#' @noRd
 align_clinvar_protein_tables <- function(...) {
   dfs <- list(...)
   out <- lapply(dfs, function(df) {

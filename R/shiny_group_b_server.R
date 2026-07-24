@@ -1,4 +1,5 @@
 #' Group B - automated VCF-only prediction tab.
+#' @noRd
 register_group_b_server <- function(ctx) {
   input <- ctx$input
   output <- ctx$output

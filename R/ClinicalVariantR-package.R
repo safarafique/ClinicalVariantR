@@ -20,8 +20,17 @@
 #'
 #' @seealso \code{\link{ClinicalVariantR}}, \code{\link{ClinicalVariantRApp}}
 #'
-#' @import shiny
+#' Imports are selective (\code{@importFrom}) so shiny / DT / jsonlite do not
+#' clash on \code{renderDataTable}, \code{dataTableOutput}, or \code{validate}.
+#' Shiny UI/server code lives under \code{inst/shinyapp/} and is not loaded into
+#' the package namespace.
+#'
+#' @importFrom shiny shinyAppDir
 #' @importFrom bslib bs_theme page_navbar
+#' @importFrom DT datatable renderDT DTOutput formatStyle styleEqual formatRound
+#' @importFrom jsonlite fromJSON toJSON
+#' @importFrom data.table fread as.data.table fifelse set
+#' @importFrom readr read_csv
 #' @importFrom VariantAnnotation scanVcfHeader
 #' @importFrom methods is
 #' @importFrom digest digest
@@ -31,6 +40,14 @@
 #'
 #' @keywords internal
 "_PACKAGE"
+
+.onAttach <- function(libname, pkgname) {
+    packageStartupMessage(
+        "ClinicalVariantR ", as.character(utils::packageVersion("ClinicalVariantR")),
+        "\nLaunch: shiny::runApp(ClinicalVariantR())",
+        "\nInstall once with BiocManager (dependencies = TRUE), then library(ClinicalVariantR)."
+    )
+}
 
 # Shiny app symbols assigned in inst/shinyapp/global.R and cross-file helpers.
 utils::globalVariables(c(
@@ -43,5 +60,6 @@ utils::globalVariables(c(
     "PDF_EXPORT_COLUMNS",
     "REFERENCE_PATHS",
     "REPORT_COLUMNS",
-    "VARIANT_DETAIL_COLUMNS"
+    "VARIANT_DETAIL_COLUMNS",
+    "session"
 ))

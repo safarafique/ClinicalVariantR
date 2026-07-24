@@ -1,4 +1,5 @@
 #' Audit Log tab UI.
+#' @noRd
 audit_nav_panel <- function() {
   bslib::nav_panel(
     title = "Audit Log",

@@ -1,6 +1,6 @@
 APP_TITLE <- "ClinicalVariantR"
-APP_VERSION <- "2.7.0"
-ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v2.7.0"
+APP_VERSION <- "0.99.3"
+ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v0.99.3"
 ACMG_GUIDELINE_VERSION <- "ACMG/AMP 2015 + ClinGen refinements"
 
 ACMG_CLASSIFICATIONS <- c(
@@ -45,20 +45,6 @@ AUTOMATED_ACMG_CRITERIA <- c(
 
 CONTEXT_ASSISTED_CRITERIA <- c("PS2", "PP1", "PP4")
 MANUAL_ONLY_CRITERIA <- c("PS3", "PM3", "PM6", "BS3", "BS4", "BP2", "BP5")
-
-APP_VERSION <- "2.7.0"
-ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v2.7.0"
-ACMG_GUIDELINE_VERSION <- "ACMG/AMP 2015 + ClinGen refinements"
-
-ACMG_CLASSIFICATIONS <- c(
-  "Pathogenic", "Likely Pathogenic", "VUS", "Likely Benign", "Benign"
-)
-
-REFERENCE_PATHS <- list(
-  gnomad_v41 = file.path("data", "reference", "gnomad_v41_placeholder.tsv"),
-  clinvar    = file.path("data", "reference", "clinvar_placeholder.tsv"),
-  revel      = file.path("data", "reference", "revel_placeholder.tsv")
-)
 
 AUDIT_LOG_PATH <- file.path("logs", "analysis_log.csv")
 

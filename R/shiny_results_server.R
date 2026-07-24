@@ -1,4 +1,5 @@
 #' Classification summary, status, results tables, evidence, repro, and downloads.
+#' @noRd
 register_results_server <- function(ctx) {
   input <- ctx$input
   output <- ctx$output

@@ -1,5 +1,5 @@
 ---
-title: "ClinicalVariantR: ACMG/AMP Germline Variant Classification"
+title: "Introduction to ClinicalVariantR"
 author:
   - name: Safa Rafique
     affiliation: University of the Punjab
@@ -47,9 +47,10 @@ VCF files (VEP `CSQ`, SnpEff `ANN`, or ANNOVAR-style INFO fields).
 | Section | Purpose |
 |------------------------------------|------------------------------------|
 | [How the Shiny app is organised](#how-the-shiny-app-is-organised) | Workflow overview figure |
-| [Installation](#installation) | Bioconductor, GitHub, and local install |
+| [Installation](#installation) | Bioconductor (submitted) vs GitHub (not yet) vs local |
 | [Run latest code for analysis](#run-latest-code) | Avoid stale installs; reinstall / source launch |
-| [Launch the Shiny application](#launch-the-shiny-application) | Start the app (`ClinicalVariantR()` + `shiny::runApp()`) |
+| [Launch the Shiny application](#launch-the-shiny-application) | Start the app + [app steps](#app-steps) |
+| [Evaluated package checks](#evaluated-package-checks) | Constructors, samples, parser demos |
 | [Step-by-step Shiny walkthrough](#step-by-step-shiny-walkthrough) | Home and Group A / B / C actions |
 | [VCF annotation requirements](#vcf-annotation-requirements) | CSQ / ANN / ANNOVAR expectations |
 | [Sample inputs](#sample-inputs) | Bundled example files |
@@ -136,98 +137,111 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 
 Follow the [Bioconductor installation
 instructions](https://contributions.bioconductor.org/docs.html#installation)
-and the [official install guide](https://bioconductor.org/install/) to
-ensure your R version matches a supported Bioconductor release (e.g.
-Bioconductor 3.22 for R 4.6). ClinicalVariantR requires **R ≥ 4.6.0**.
+and the [official install guide](https://bioconductor.org/install/) so your
+R version matches a supported Bioconductor release (e.g. Bioconductor 3.22
+for R 4.6). ClinicalVariantR requires **R ≥ 4.6.0**.
 
-## From Bioconductor (recommended when available)
+Always install with **`dependencies = TRUE`** so Imports (shiny, bslib, DT,
+data.table, readr, jsonlite, VariantAnnotation, …) are resolved once. The
+app does **not** install packages at launch.
 
-Install `ClinicalVariantR` and runtime dependencies with `BiocManager`:
+Pick the path that matches the package status:
 
-```{r install-bioc, eval=FALSE}
-if (!requireNamespace("BiocManager", quietly = TRUE))
+| Status | Use this install |
+|--------|------------------|
+| **Accepted / available on Bioconductor** | Section [A — Bioconductor](#install-bioconductor) |
+| **Not yet on Bioconductor** (current GitHub release) | Section [B — GitHub](#install-github) |
+| **Local development clone** | Section [C — Local clone](#install-local) |
+
+If Windows reports that the package is in use, use **Session → Restart R**
+before reinstalling or updating.
+
+## A — Bioconductor (when the package is submitted and available) {#install-bioconductor}
+
+Use this after ClinicalVariantR is listed on Bioconductor (or when
+reinstalling / updating from the Bioconductor build):
+
+```r
+# Session -> Restart R if ClinicalVariantR is already loaded
+
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
+}
 
 BiocManager::install("ClinicalVariantR", dependencies = TRUE)
-```
 
-Verify the installation:
-
-```{r verify-bioc, eval=FALSE}
 library(ClinicalVariantR)
-packageVersion("ClinicalVariantR")
+packageVersion("ClinicalVariantR")  # expect 0.99.3
 ```
 
-When installed from Bioconductor, dependencies are resolved at **install
-time**; `ClinicalVariantR()` does not download packages at launch.
+To **reinstall / recall** the Bioconductor build after an update:
 
-## From GitHub (available before Bioconductor release)
+```r
+# Session -> Restart R first
+BiocManager::install("ClinicalVariantR", force = TRUE, dependencies = TRUE)
+library(ClinicalVariantR)
+```
 
-Until the package is on Bioconductor, install from
-[GitHub](https://github.com/safarafique/ClinicalVariantR).
+## B — GitHub (when not yet on Bioconductor) {#install-github}
 
-```{r install-github, eval=FALSE}
+Until the package is on Bioconductor, install (or reinstall) from
+[GitHub](https://github.com/safarafique/ClinicalVariantR):
+
+```r
+# Session -> Restart R if ClinicalVariantR is already loaded
 options(timeout = 3600)
 
-if (!requireNamespace("BiocManager", quietly = TRUE))
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
+}
 options(repos = BiocManager::repositories())
 
-if (!requireNamespace("remotes", quietly = TRUE))
+if (!requireNamespace("remotes", quietly = TRUE)) {
     install.packages("remotes")
+}
+
 remotes::install_github(
-  "safarafique/ClinicalVariantR",
-  ref = "main",
-  dependencies = TRUE,
-  INSTALL_opts = "--no-staged-install"
+    "safarafique/ClinicalVariantR",
+    ref = "main",
+    dependencies = TRUE,
+    force = TRUE,
+    INSTALL_opts = "--no-staged-install"
 )
+
+library(ClinicalVariantR)
+packageVersion("ClinicalVariantR")  # expect 0.99.3
 ```
 
-## From a local clone (development)
+## C — Local clone (developers) {#install-local}
 
-If `ClinicalVariantR` is already loaded, use **Session → Restart R** first.
-Otherwise Windows may warn `package 'ClinicalVariantR' is in use and will
-not be installed`.
-
-```{r install-local, eval=FALSE}
-# Session -> Restart R, then:
-
-if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
-remotes::install_local("E:/ACGM/ClinicalVariantR", force = TRUE, upgrade = "never")
+```r
+# Session -> Restart R first
+if (!requireNamespace("remotes", quietly = TRUE)) {
+    install.packages("remotes")
+}
+remotes::install_local(
+    "E:/ACGM/ClinicalVariantR",
+    force = TRUE,
+    upgrade = "never",
+    dependencies = TRUE
+)
+library(ClinicalVariantR)
 ```
 
-**Quick start without reinstalling:** see
-[Run latest code for analysis](#run-latest-code).
+Or launch the source tree without reinstalling (see
+[Run latest code for analysis](#run-latest-code)).
 
 # Run latest code for analysis {#run-latest-code}
 
-If you installed some time ago, reinstall or launch from the latest
-sources so the bundled Shiny app under `inst/shinyapp/` is present:
+If you installed some time ago, reinstall with section A or B above so
+`inst/shinyapp/` is current, or launch from a local clone:
 
-```{r run-latest-local, eval=FALSE}
+```r
 # Local clone — no reinstall
 shiny::runApp("E:/ACGM/ClinicalVariantR", launch.browser = TRUE)
 ```
 
-```{r run-latest-reinstall, eval=FALSE}
-# Session -> Restart R first if the package is already loaded
-if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
-remotes::install_local("E:/ACGM/ClinicalVariantR", force = TRUE, upgrade = "never")
-
-library(ClinicalVariantR)
-app <- ClinicalVariantR()
-shiny::runApp(app, launch.browser = TRUE)
-```
-
-```{r run-latest-github, eval=FALSE}
-if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
-remotes::install_github(
-  "safarafique/ClinicalVariantR",
-  ref = "main",
-  force = TRUE,
-  dependencies = TRUE,
-  INSTALL_opts = "--no-staged-install"
-)
+```r
 library(ClinicalVariantR)
 app <- ClinicalVariantR()
 shiny::runApp(app, launch.browser = TRUE)
@@ -239,11 +253,9 @@ Bioconductor Shiny apps return an app object from the package; users
 start the server with `shiny::runApp()` ([Bioconductor Shiny
 guide](https://contributions.bioconductor.org/shiny.html#documentation)).
 
-**Recommended local path (after Restart R):**
+After install (Bioconductor **or** GitHub):
 
-```{r launch-local, eval=FALSE}
-if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
-remotes::install_local("E:/ACGM/ClinicalVariantR", force = TRUE, upgrade = "never")
+```r
 library(ClinicalVariantR)
 app <- ClinicalVariantR()
 shiny::runApp(app, launch.browser = TRUE)
@@ -254,28 +266,70 @@ browser by itself. `shiny::runApp(app, launch.browser = TRUE)` starts the
 server and opens your default browser. `ClinicalVariantRApp()` is an alias
 of `ClinicalVariantR()`.
 
-```{r launch, eval=FALSE}
-app <- ClinicalVariantR::ClinicalVariantR()
-shiny::runApp(app, launch.browser = TRUE)
+## App steps at a glance {#app-steps}
+
+After the browser opens:
+
+1. **Home** — read the three workflow cards and pick a mode.
+2. **Group B (recommended first run)** — upload annotated VCF → wait for
+   readiness → **Run Analysis** → download CSV.
+3. **Group C** — upload VCF → paste gene symbols → **Run Analysis** →
+   confirm panel-restricted results.
+4. **Group A** — upload VCF + clinical CSV + pedigree CSV → optional
+   curator toggles → **Run Analysis** → review 28-criteria evidence →
+   export.
+5. **Explorer / Audit** — after any successful run, browse evidence and
+   session metadata.
+
+| Step | Tab | Inputs | Action |
+|------|-----|--------|--------|
+| 1 | Home | — | Choose Group A, B, or C |
+| 2 | Group B | Annotated VCF | Validate → Run → download |
+| 3 | Group C | VCF + gene list | Validate → Run → filtered table |
+| 4 | Group A | VCF + clinical + pedigree | Validate → Run → curator / export |
+| 5 | Explorer / Audit | Prior run results | Review evidence and logs |
+
+Detailed click-by-click instructions are in
+[Step-by-step Shiny walkthrough](#step-by-step-shiny-walkthrough).
+
+## Evaluated package checks {#evaluated-package-checks}
+
+The chunks below run during vignette builds. They do **not** open a browser.
+
+```{r load-pkg}
+library(ClinicalVariantR)
+packageVersion("ClinicalVariantR")
 ```
 
-The browser opens on the **Home** screen. Choose **Group A**, **Group B**,
-or **Group C** to begin analysis.
-
-## Sanity check (evaluated in this vignette)
-
-This chunk only confirms the constructors exist. It does **not** open a
-browser during vignette builds.
-
 ```{r launch-check}
-if (requireNamespace("ClinicalVariantR", quietly = TRUE)) {
-  stopifnot(is.function(ClinicalVariantR::ClinicalVariantR))
-  stopifnot(is.function(ClinicalVariantR::ClinicalVariantRApp))
-  app <- ClinicalVariantR::ClinicalVariantR()
-  inherits(app, "shiny.appobj")
-} else {
-  "# Install ClinicalVariantR to evaluate the launch check"
-}
+stopifnot(is.function(ClinicalVariantR))
+stopifnot(is.function(ClinicalVariantRApp))
+app <- ClinicalVariantR()
+stopifnot(inherits(app, "shiny.appobj"))
+class(app)
+```
+
+```{r criteria-constants}
+length(ClinicalVariantR:::AUTOMATED_ACMG_CRITERIA)
+ClinicalVariantR:::AUTOMATED_ACMG_CRITERIA
+ClinicalVariantR:::ACMG_CLASSIFICATIONS
+```
+
+```{r gene-filter-demo}
+ClinicalVariantR:::parse_gene_filter("TCF4, MECP2; EGR2\nBCR-ABL")
+```
+
+```{r evidence-combine-demo}
+ClinicalVariantR:::combine_acmg_evidence(list(
+  PVS = 1L, PS = 0L, PM = 1L, PP = 1L,
+  BA = FALSE, BS = 0L, BP = 0L
+))
+ClinicalVariantR:::normalize_acmg_class("Likely_pathogenic")
+```
+
+```{r vcf-requirements}
+ClinicalVariantR:::vcf_app_requirements("rapid")
+ClinicalVariantR:::vcf_app_requirements("full")
 ```
 
 # Step-by-step Shiny walkthrough {#step-by-step-shiny-walkthrough}
@@ -302,10 +356,6 @@ and confirm the **success check** before exporting results.
 **Success check:** The selected Group tab opens with upload controls on the
 left and validation / results panels on the right.
 
-```{r home-screenshot, echo=FALSE, eval=file.exists("images/home.png"), fig.cap="Home: three workflow cards (Group A, B, C).", out.width="100%"}
-knitr::include_graphics("images/home.png")
-```
-
 ## Group B — Automated Prediction (start here)
 
 **Navbar:** `Group B — Automated Prediction`
@@ -331,10 +381,6 @@ ACMG/AMP rules only.
 Likely Pathogenic / VUS / Likely Benign / Benign categories; CSV download
 works.
 
-```{r groupb-screenshot, echo=FALSE, eval=file.exists("images/group_b.png"), fig.cap="Group B: upload VCF, readiness check, Run Analysis, and results.", out.width="100%"}
-knitr::include_graphics("images/group_b.png")
-```
-
 ## Group C — Gene Panel Prediction
 
 **Navbar:** `Group C — Gene Panel Prediction`
@@ -355,10 +401,6 @@ knitr::include_graphics("images/group_b.png")
 4. Verify that results are limited to the nominated gene set.
 
 **Success check:** Only nominated genes appear in the filtered result table.
-
-```{r groupc-screenshot, echo=FALSE, eval=file.exists("images/group_c.png"), fig.cap="Group C: VCF plus gene list and panel-restricted results.", out.width="100%"}
-knitr::include_graphics("images/group_c.png")
-```
 
 ## Group A — Clinical Prediction
 
@@ -384,10 +426,6 @@ curator evidence (28-criteria reporting).
 
 **Success check:** All three inputs validate; classification and evidence
 panels populate; curator overrides update the selected variant.
-
-```{r groupa-screenshot, echo=FALSE, eval=file.exists("images/group_a.png"), fig.cap="Group A: VCF + clinical + pedigree inputs and curator evidence.", out.width="100%"}
-knitr::include_graphics("images/group_a.png")
-```
 
 ## Explorer and Audit (after a run)
 
@@ -433,24 +471,36 @@ Installed packages ship samples under `inst/extdata/samples/` and
 `data/samples/` tree (ignored by the package build).
 
 ```{r locate-samples}
-sample_paths <- c(
-  system.file("extdata", "samples", "example_variants.vcf", package = "ClinicalVariantR"),
-  system.file("extdata", "samples", "example_clinical_logs.csv", package = "ClinicalVariantR"),
-  system.file("extdata", "samples", "example_pedigree.csv", package = "ClinicalVariantR"),
-  system.file(
-    "shinyapp", "data", "samples", "example_variants.vcf",
-    package = "ClinicalVariantR"
-  ),
-  file.path("data", "samples", "example_variants.vcf"),
-  file.path("inst", "extdata", "samples", "example_variants.vcf")
+extdata_samples <- system.file("extdata", "samples", package = "ClinicalVariantR")
+sample_files <- c(
+  "example_variants.vcf",
+  "example_clinical_logs.csv",
+  "example_pedigree.csv"
 )
-sample_paths <- unique(sample_paths[nzchar(sample_paths)])
-found <- sample_paths[file.exists(sample_paths)]
+sample_paths <- file.path(extdata_samples, sample_files)
 data.frame(
-  resource = basename(found),
-  path = found,
-  exists = rep(TRUE, length(found))
+  resource = sample_files,
+  path = sample_paths,
+  exists = file.exists(sample_paths)
 )
+```
+
+```{r preview-example-vcf}
+vcf_path <- system.file(
+  "extdata", "samples", "example_variants.vcf",
+  package = "ClinicalVariantR"
+)
+stopifnot(nzchar(vcf_path), file.exists(vcf_path))
+writeLines(readLines(vcf_path, n = 8L))
+preview <- ClinicalVariantR:::preview_vcf(vcf_path, max_rows = 5L)
+preview$total_variants
+preview$preview
+```
+
+```{r parse-vcf-line}
+hdr <- c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO")
+line <- "chr9\t133738352\t.\tG\tA\t.\tPASS\tGENE=ABL1;CSQ=stop_gained;AF=0.00045;REVEL=0.91"
+ClinicalVariantR:::parse_vcf_line(line, hdr)
 ```
 
 | File | Use for |
@@ -463,7 +513,7 @@ data.frame(
 
 | Problem | Solution |
 |------------------------------------|------------------------------------|
-| **`package is in use and will not be installed`** | **Session → Restart R**, then `remotes::install_local(..., force = TRUE)`. |
+| **`package is in use and will not be installed`** | **Session → Restart R**, then reinstall from the clone or GitHub. |
 | **Unable to locate `global.R` / `ui.R` / `server.R`** | Reinstall after restart so `inst/shinyapp/` is installed; or `shiny::runApp("E:/ACGM/ClinicalVariantR")`. |
 | **Browser does not open** | Copy the `http://127.0.0.1:xxxx` URL from the R console. |
 | **VCF not ready / missing CSQ or ANN** | Re-annotate with VEP or SnpEff before upload. |
@@ -471,17 +521,12 @@ data.frame(
 | **Group C empty results** | Gene symbols must intersect annotated gene names in the VCF. |
 | **Locked DLL files (Windows)** | Restart R (`Ctrl+Shift+F10`) before installing or launching. |
 | **Large VCF slow on Windows** | Prefer Ubuntu/WSL with bcftools enabled in the analysis options. |
-| **Corrupt lazy-load database** | Reinstall with `INSTALL_opts = "--no-staged-install"`. |
+| **Missing Imports (shiny, DT, …)** | Reinstall ClinicalVariantR with `dependencies = TRUE`. |
+| **Corrupt lazy-load database** | Restart R, then reinstall with no-staged-install options. |
 
-```{r windows-fix, eval=FALSE}
-# Session -> Restart R, then:
-if (!requireNamespace("remotes", quietly = TRUE))
-    install.packages("remotes")
-remotes::install_local(
-  "E:/ACGM/ClinicalVariantR",
-  force = TRUE,
-  upgrade = "never"
-)
+Interactive launch (copy into an R console; not evaluated here):
+
+```r
 library(ClinicalVariantR)
 shiny::runApp(ClinicalVariantR(), launch.browser = TRUE)
 ```

@@ -1,4 +1,5 @@
 #' Group C - gene panel prediction tab UI.
+#' @noRd
 group_c_nav_panel <- function() {
   bslib::nav_panel(
     title = "Group C - Gene Panel Prediction",
@@ -30,7 +31,7 @@ group_c_nav_panel <- function() {
               checkboxInput("pass_only_c", "Load passing-filter rows only (PASS or .)", FALSE),
               numericInput("min_qual_c", "Minimum QUAL", value = 0, min = 0, step = 1),
               checkboxInput("use_bcftools_c", "Use bcftools (Ubuntu/WSL - faster)", bcftools_available()),
-              checkboxInput("skip_audit_c", "Skip audit log (faster analysis)", FALSE),
+              checkboxInput("skip_audit_c", "Skip audit log (faster analysis)", TRUE),
               numericInput("chunk_size_c", "Chunk size (variants per batch)", value = 10000, min = 1000, step = 1000),
               helpText(textOutput("engine_status_c", inline = TRUE)),
               p(class = "text-muted small",

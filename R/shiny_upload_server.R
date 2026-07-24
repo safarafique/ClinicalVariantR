@@ -1,4 +1,5 @@
 #' VCF upload, validation, and deferred secure storage.
+#' @noRd
 register_upload_server <- function(ctx) {
   session <- ctx$session
   input <- ctx$input

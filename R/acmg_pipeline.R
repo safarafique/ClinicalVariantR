@@ -1,6 +1,7 @@
 #' Registry of all 28 ACMG/AMP criteria (Richards et al., 2015).
 #'
 #' implementation: automated | manual | not_implemented
+#' @noRd
 acmg_criteria_registry <- function() {
   data.frame(
     criterion = c(

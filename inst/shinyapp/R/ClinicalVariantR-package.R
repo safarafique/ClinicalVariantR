@@ -22,8 +22,15 @@
 #'
 #' @seealso \code{\link{ClinicalVariantR}}, \code{\link{ClinicalVariantRApp}}
 #'
-#' @import shiny
+#' Imports are selective (\code{@importFrom}) so shiny / DT / jsonlite do not
+#' clash on \code{renderDataTable}, \code{dataTableOutput}, or \code{validate}.
+#'
+#' @importFrom shiny shinyAppDir
 #' @importFrom bslib bs_theme page_navbar
+#' @importFrom DT datatable renderDT DTOutput formatStyle styleEqual formatRound
+#' @importFrom jsonlite fromJSON toJSON
+#' @importFrom data.table fread as.data.table fifelse set
+#' @importFrom readr read_csv
 #' @importFrom VariantAnnotation scanVcfHeader
 #' @importFrom methods is
 #' @importFrom digest digest

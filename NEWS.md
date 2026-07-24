@@ -1,3 +1,15 @@
+# ClinicalVariantR 0.99.3 (2026-07-22)
+
+* NAMESPACE: use selective `@importFrom` only (no wholesale `import(shiny)`,
+  `import(DT)`, or `import(jsonlite)`) so loading no longer warns about
+  replacing `renderDataTable`, `dataTableOutput`, or `validate`.
+* `.Rbuildignore`: exclude duplicate `R/shiny_*` / `R/ui_*` helpers; the app
+  runs from `inst/shinyapp/` and attaches only shiny + bslib at launch.
+* Align app/engine version strings (`APP_VERSION`, `ACMG_PRO_ENGINE`) with
+  package `DESCRIPTION` version **0.99.3**.
+* Vignettes: Bioconductor vs GitHub install/reinstall paths and app step summary.
+* Check NOTES: ignore `LICENSE.md`; ship only `ClinicalVariantR*.Rmd` vignettes.
+
 # ClinicalVariantR 0.99.2 (2026-07-20)
 
 * Fix analysis crash on variants with pathogenic VEP `CLIN_SIG` in CSQ:

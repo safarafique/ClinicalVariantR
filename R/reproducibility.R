@@ -1,4 +1,5 @@
 #' Reproducibility metadata for ClinicalVariantR runs.
+#' @noRd
 
 file_checksum_md5 <- function(path) {
   if (!file.exists(path)) return(NA_character_)
