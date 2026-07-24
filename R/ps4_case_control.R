@@ -5,6 +5,7 @@
 #'     demonstrating enrichment in affected vs controls.
 #'   - GWAS Catalog associations are NEVER auto-awarded as PS4.
 #'     They are stored separately as supplementary evidence for curator review.
+#' @noRd
 
 PS4_CASE_CONTROL_DB_PATH <- file.path("data", "reference", "ps4_case_control_enrichment.tsv")
 GWAS_SUPPLEMENTARY_DB_PATH <- file.path("data", "reference", "gwas_supplementary_evidence.tsv")

@@ -2,12 +2,16 @@
 ^\.Rproj\.user$
 ^\.Rhistory$
 ^\.cursorignore$
-^data$
-^config$
-^www$
-^scripts$
-^logs$
-^standalone$
+^\.gitignore$
+# Development trees (non-R assets ship via inst/extdata and inst/shinyapp).
+# Use trailing "/" so paths like data/foo.tsv match; "^data$" only matches the dir name.
+^data/
+^config/
+^www/
+^scripts/
+^logs/
+^results/
+^standalone/
 ^ClinicalVariantR$
 ^ClinicalVariantR\.Rcheck$
 ^ClinicalVariantR\.BiocCheck$
@@ -15,11 +19,23 @@
 ^GExPipe\.Rmd$
 ^CODEBASE_MAP\.md$
 ^BIOCONDUCTOR\.md$
+^LICENSE\.md$
+# Legacy vignette sources (renamed to ClinicalVariantR*.Rmd).
+^vignettes/ACMGamp\.Rmd$
+^vignettes/ACMGamp-run-and-test\.Rmd$
 ^app\.R$
 ^global\.R$
 ^global_cli\.R$
 ^server\.R$
 ^ui\.R$
-^R/shiny$
-^inst/Bioconductor$
-^vignettes/images$
+^R/shiny/
+# Shiny UI/server helpers ship via inst/shinyapp/ (sourced at app runtime).
+# Excluding them from the package namespace avoids shiny/DT/jsonlite import clashes.
+^R/shiny_
+^R/ui_
+^R/expert_review_export\.R$
+^tools/
+^inst/Bioconductor/
+^vignettes/images/
+^renv/library$
+^renv/staging$

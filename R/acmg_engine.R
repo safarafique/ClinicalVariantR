@@ -1,4 +1,5 @@
-#' ClinicalVariantR Pro engine - structured evidence + streaming integration.
+#' ClinicalVariantR engine: structured evidence and streaming integration.
+#' @noRd
 
 acmg_pro_to_report <- function(
     scored_df,
@@ -67,7 +68,7 @@ run_acmg_pro_chunk <- function(
     session_id = NA_character_,
     profile_id = DEFAULT_PROFILE_ID,
     run_metadata = NULL,
-    write_audit = TRUE) {
+    write_audit = FALSE) {
 
   mode <- match.arg(mode)
   if (nrow(variants_df) == 0) return(empty_report())

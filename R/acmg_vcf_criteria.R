@@ -2,6 +2,7 @@
 #'
 #' Supports population AF, SnpEff ANN / VEP CSQ consequence, in silico scores,
 #' ClinVar fields, and Group A clinical/pedigree context (28-criteria reporting).
+#' @noRd
 
 DEFAULT_ACMG_THRESHOLDS <- list(
   ba1_af = 0.05,

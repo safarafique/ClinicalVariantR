@@ -4,6 +4,7 @@
 #'   PS1 - same amino acid change as established pathogenic variant
 #'   PM5 - missense at residue with different established pathogenic missense
 #'   PM1 - missense in curated critical domain / hotspot gene panel
+#' @noRd
 
 CLINVAR_PROTEIN_DB_PATH <- file.path("data", "reference", "clinvar_pathogenic_protein.tsv")
 PM1_HOTSPOT_PANEL_PATH <- file.path("data", "gene_panels", "pm1_hotspot_genes.csv")
@@ -74,17 +75,45 @@ is_pathogenic_significance <- function(x) {
     !grepl("conflict|benign|uncertain|vus", x, ignore.case = TRUE)
 }
 
+CLINVAR_PROTEIN_COLS <- c(
+  "gene", "protein_position", "ref_aa", "alt_aa", "hgvs_p", "clinical_significance"
+)
+
+empty_clinvar_protein_db <- function() {
+  data.frame(
+    gene = character(), protein_position = integer(),
+    ref_aa = character(), alt_aa = character(),
+    hgvs_p = character(), clinical_significance = character(),
+    stringsAsFactors = FALSE
+  )
+}
+
+#' Align ClinVar / CSQ protein tables to a shared column set before rbind.
+#' @noRd
+align_clinvar_protein_tables <- function(...) {
+  dfs <- list(...)
+  out <- lapply(dfs, function(df) {
+    if (is.null(df) || !is.data.frame(df)) df <- empty_clinvar_protein_db()
+    for (col in CLINVAR_PROTEIN_COLS) {
+      if (!col %in% names(df)) {
+        df[[col]] <- if (identical(col, "protein_position")) {
+          rep(NA_integer_, nrow(df))
+        } else {
+          rep(NA_character_, nrow(df))
+        }
+      }
+    }
+    df[, CLINVAR_PROTEIN_COLS, drop = FALSE]
+  })
+  do.call(rbind, out)
+}
+
 load_clinvar_protein_db <- function(path = CLINVAR_PROTEIN_DB_PATH) {
   if (!is.null(.clinvar_protein_cache$db) && identical(attr(.clinvar_protein_cache$db, "path"), path)) {
     return(.clinvar_protein_cache$db)
   }
   if (!file.exists(path)) {
-    db <- data.frame(
-      gene = character(), protein_position = integer(),
-      ref_aa = character(), alt_aa = character(),
-      hgvs_p = character(), clinical_significance = character(),
-      stringsAsFactors = FALSE
-    )
+    db <- empty_clinvar_protein_db()
     attr(db, "path") <- path
     .clinvar_protein_cache$db <- db
     return(db)
@@ -100,7 +129,9 @@ load_clinvar_protein_db <- function(path = CLINVAR_PROTEIN_DB_PATH) {
   db$ref_aa <- vapply(db$ref_aa, normalize_aa_letter, character(1L))
   db$alt_aa <- vapply(db$alt_aa, normalize_aa_letter, character(1L))
   if (!"hgvs_p" %in% names(db)) db$hgvs_p <- NA_character_
-  db <- db[is_pathogenic_significance(db$clinical_significance), , drop = FALSE]
+  keep <- vapply(db$clinical_significance, is_pathogenic_significance, logical(1L))
+  db <- db[keep, , drop = FALSE]
+  db <- align_clinvar_protein_tables(db)
   attr(db, "path") <- path
   .clinvar_protein_cache$db <- db
   db
@@ -161,11 +192,14 @@ score_ps1_pm5_pm1_criteria <- function(
   consequence <- scalar_chr(consequence, default = "")
 
   if (is.null(clinvar_db)) clinvar_db <- load_clinvar_protein_db()
-  if (!is.null(csq_catalog) && nrow(csq_catalog) > 0L) {
-    clinvar_db <- rbind(clinvar_db, csq_catalog)
+  if (!is.null(csq_catalog) && is.data.frame(csq_catalog) && nrow(csq_catalog) > 0L) {
+    # CSQ catalog omits optional columns such as `source` present in the TSV DB.
+    clinvar_db <- align_clinvar_protein_tables(clinvar_db, csq_catalog)
     clinvar_db <- clinvar_db[!duplicated(
       paste(clinvar_db$gene, clinvar_db$protein_position, clinvar_db$alt_aa, sep = ":")
     ), , drop = FALSE]
+  } else {
+    clinvar_db <- align_clinvar_protein_tables(clinvar_db)
   }
 
   change <- parse_protein_change(hgvs_p, amino_acids, protein_position)

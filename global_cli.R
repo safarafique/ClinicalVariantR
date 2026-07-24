@@ -40,8 +40,8 @@ if (!requireNamespace("data.table", quietly = TRUE)) {
 }
 
 APP_TITLE <- "ClinicalVariantR"
-APP_VERSION <- "2.7.0"
-ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v2.7.0"
+APP_VERSION <- "0.99.3"
+ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v0.99.3"
 ACMG_GUIDELINE_VERSION <- "ACMG/AMP 2015 + ClinGen refinements"
 
 CONFIG_PATHS <- list(

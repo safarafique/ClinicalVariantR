@@ -167,6 +167,7 @@ filter_report_by_classifications <- function(report_df, selected) {
 }
 
 #' Map DT summary-table row selection to ACMG class.
+#' @noRd
 resolve_classification_from_row_selection <- function(row_selected, summary_df) {
   if (is.null(row_selected) || length(row_selected) == 0) return(NULL)
   row_num <- as.integer(row_selected[1])
@@ -187,10 +188,11 @@ resolve_classification_from_row_selection <- function(row_selected, summary_df) 
 
 load_full_analysis_report <- function(csv_path, preview_fallback = NULL) {
   if (!is.null(csv_path) && nzchar(csv_path) && file.exists(csv_path)) {
-    df <- tryCatch(
-      utils::read.csv(csv_path, stringsAsFactors = FALSE, check.names = FALSE),
-      error = function(e) NULL
-    )
+    df <- tryCatch({
+      out <- data.table::fread(csv_path, showProgress = FALSE)
+      data.table::setDF(out)
+      out
+    }, error = function(e) NULL)
     if (!is.null(df) && nrow(df) > 0) return(df)
   }
   preview_fallback
@@ -297,6 +299,17 @@ format_analysis_notification <- function(result) {
     result$engine
   )
   paste0(msg, " Click a classification in the summary table to view variant details.")
+}
+
+#' Play a short browser chime when analysis finishes successfully.
+#' @noRd
+play_analysis_complete_sound <- function(session = shiny::getDefaultReactiveDomain()) {
+  if (is.null(session)) return(invisible(FALSE))
+  try(
+    session$sendCustomMessage("clinicalvariantrCompleteSound", list(play = TRUE)),
+    silent = TRUE
+  )
+  invisible(TRUE)
 }
 
 category_selection_hint_ui <- function(selected_category, report_df) {
@@ -612,6 +625,7 @@ export_evidence_summary_pdf <- function(
 }
 
 #' Write the Evidence Explorer results table to a paginated landscape PDF.
+#' @noRd
 export_evidence_report_pdf <- function(
     report_df,
     file,

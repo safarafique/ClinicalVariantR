@@ -1,4 +1,5 @@
 #' Evidence explorer tab - full report browse, PDF/CSV export.
+#' @noRd
 register_explorer_server <- function(ctx) {
   input <- ctx$input
   output <- ctx$output

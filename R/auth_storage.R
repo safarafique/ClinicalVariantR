@@ -1,4 +1,5 @@
 #' Authentication and encrypted storage for clinical PHI uploads.
+#' @noRd
 
 AUTH_USERS_PATH <- file.path("config", "auth_users.csv")
 SECURE_UPLOAD_DIR <- file.path("logs", "secure_uploads")

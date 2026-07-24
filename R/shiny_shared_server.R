@@ -1,4 +1,5 @@
 #' Shared UI helpers and lightweight outputs used across pipeline tabs.
+#' @noRd
 register_shared_server <- function(ctx) {
   input <- ctx$input
   output <- ctx$output

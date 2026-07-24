@@ -1,4 +1,5 @@
 #' Streaming VCF analysis runner (shared by Groups A/B/C).
+#' @noRd
 register_analysis_server <- function(ctx) {
   input <- ctx$input
   session_id <- ctx$session_id

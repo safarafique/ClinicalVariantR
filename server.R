@@ -1,4 +1,4 @@
-# ClinicalVariantR — thin server entry (logic lives in R/shiny/*_server.R)
+# ClinicalVariantR thin server entry (logic lives in R/shiny/*_server.R)
 
 server <- function(input, output, session) {
   ctx <- init_shiny_context(input, output, session)

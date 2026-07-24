@@ -45,6 +45,7 @@ build_audit_entries_from_report <- function(report, session_id = NA_character_) 
 }
 
 #' Append audit rows without re-reading the full log file (O(1) per batch).
+#' @noRd
 append_audit_log <- function(entries, path = AUDIT_LOG_PATH) {
   if (is.null(entries) || nrow(entries) == 0) return(invisible(path))
   ensure_audit_log(path)

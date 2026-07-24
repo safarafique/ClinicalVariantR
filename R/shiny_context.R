@@ -1,4 +1,5 @@
 #' Create shared Shiny session context (reactive values + handles).
+#' @noRd
 init_shiny_context <- function(input, output, session) {
   session_id <- paste0("SES-", substr(as.character(session$token), 1, 8))
 

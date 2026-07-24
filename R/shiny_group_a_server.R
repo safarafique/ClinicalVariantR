@@ -1,4 +1,5 @@
 #' Group A - full clinical + pedigree analysis tab.
+#' @noRd
 
 register_group_a_server <- function(ctx) {
 
@@ -551,6 +552,8 @@ register_group_a_server <- function(ctx) {
           type = "message", duration = 10
 
         )
+
+        play_analysis_complete_sound(session)
 
       })
 

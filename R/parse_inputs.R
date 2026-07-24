@@ -1,5 +1,6 @@
 #' Parse uploaded VCF into a variant data.frame (small files / legacy).
 #' For complete large VCF analysis use analyze_complete_vcf() instead.
+#' @noRd
 parse_vcf_upload <- function(vcf_path, max_rows = Inf) {
   parse_vcf_fallback(vcf_path, max_rows = max_rows)
 }
@@ -10,29 +11,33 @@ parse_vcf_fallback <- function(vcf_path, max_rows = Inf) {
 
   header_cols <- NULL
   batch <- list()
+  buffer_n <- if (exists("VCF_LINE_BUFFER", inherits = TRUE)) VCF_LINE_BUFFER else 50000L
 
   repeat {
-    line <- readLines(con, n = 1L, warn = FALSE)
-    if (length(line) == 0) break
-    if (grepl("^#CHROM\t", line)) {
-      header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
-      next
-    }
-    if (grepl("^#", line)) next
-    rows_df <- parse_vcf_line(line, header_cols)
-    if (!is.null(rows_df)) {
-      if (is.data.frame(rows_df)) {
-        for (i in seq_len(nrow(rows_df))) {
-          row <- rows_df[i, , drop = FALSE]
-          row$qual <- NULL
-          row$filter <- NULL
-          batch[[length(batch) + 1L]] <- row
-        }
-      } else {
-        rows_df$qual <- NULL
-        rows_df$filter <- NULL
-        batch[[length(batch) + 1L]] <- rows_df
+    lines <- readLines(con, n = buffer_n, warn = FALSE)
+    if (length(lines) == 0L) break
+    for (line in lines) {
+      if (grepl("^#CHROM\t", line)) {
+        header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
+        next
       }
+      if (grepl("^#", line)) next
+      rows_df <- parse_vcf_line(line, header_cols)
+      if (!is.null(rows_df)) {
+        if (is.data.frame(rows_df)) {
+          for (i in seq_len(nrow(rows_df))) {
+            row <- rows_df[i, , drop = FALSE]
+            row$qual <- NULL
+            row$filter <- NULL
+            batch[[length(batch) + 1L]] <- row
+          }
+        } else {
+          rows_df$qual <- NULL
+          rows_df$filter <- NULL
+          batch[[length(batch) + 1L]] <- rows_df
+        }
+      }
+      if (length(batch) >= max_rows) break
     }
     if (length(batch) >= max_rows) break
   }
@@ -45,13 +50,19 @@ parse_vcf_fallback <- function(vcf_path, max_rows = Inf) {
     ))
   }
 
-  df <- do.call(rbind, batch)
-  rownames(df) <- NULL
+  df <- if (exists("rbind_parsed_rows", mode = "function")) {
+    rbind_parsed_rows(batch)
+  } else {
+    out <- do.call(rbind, batch)
+    rownames(out) <- NULL
+    out
+  }
   if (!"sample_genotypes" %in% names(df)) df$sample_genotypes <- "{}"
   df
 }
 
 #' Build a lightweight VCF preview (header + first N variant rows).
+#' @noRd
 preview_vcf <- function(vcf_path, max_rows = 50L, max_header_lines = 100000L) {
   if (!file.exists(vcf_path)) {
     stop("VCF file not found.")
@@ -65,31 +76,38 @@ preview_vcf <- function(vcf_path, max_rows = 50L, max_header_lines = 100000L) {
   total_variants <- 0L
   has_more <- FALSE
   line_count <- 0L
+  buffer_n <- if (exists("VCF_LINE_BUFFER", inherits = TRUE)) VCF_LINE_BUFFER else 50000L
+  done <- FALSE
 
   repeat {
-    line <- readLines(con, n = 1L, warn = FALSE)
-    if (length(line) == 0) break
-    line_count <- line_count + 1L
+    if (done) break
+    lines <- readLines(con, n = buffer_n, warn = FALSE)
+    if (length(lines) == 0L) break
 
-    if (is.null(header_cols) && line_count > max_header_lines) {
-      stop(sprintf(
-        "Invalid VCF: no #CHROM header found within the first %s lines.",
-        format(max_header_lines, big.mark = ",")
-      ))
-    }
+    for (line in lines) {
+      line_count <- line_count + 1L
 
-    if (grepl("^#CHROM\t", line)) {
-      header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
-      next
-    }
-    if (grepl("^#", line)) next
+      if (is.null(header_cols) && line_count > max_header_lines) {
+        stop(sprintf(
+          "Invalid VCF: no #CHROM header found within the first %s lines.",
+          format(max_header_lines, big.mark = ",")
+        ))
+      }
 
-    total_variants <- total_variants + 1L
-    if (length(preview_lines) < max_rows) {
-      preview_lines[length(preview_lines) + 1L] <- line
-    } else {
-      has_more <- TRUE
-      break
+      if (grepl("^#CHROM\t", line)) {
+        header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
+        next
+      }
+      if (grepl("^#", line)) next
+
+      total_variants <- total_variants + 1L
+      if (length(preview_lines) < max_rows) {
+        preview_lines[length(preview_lines) + 1L] <- line
+      } else {
+        has_more <- TRUE
+        done <- TRUE
+        break
+      }
     }
   }
 
@@ -166,6 +184,7 @@ preview_vcf <- function(vcf_path, max_rows = 50L, max_header_lines = 100000L) {
 }
 
 #' Parse clinical logs CSV for Group A manual criteria context.
+#' @noRd
 parse_clinical_logs <- function(path) {
   df <- readr::read_csv(path, show_col_types = FALSE)
   required <- c("sample_id", "phenotype", "cml_phase", "tki_response")
@@ -181,6 +200,7 @@ parse_clinical_logs <- function(path) {
 }
 
 #' Parse pedigree CSV for segregation / de novo context.
+#' @noRd
 parse_pedigree <- function(path) {
   df <- readr::read_csv(path, show_col_types = FALSE)
   required <- c("sample_id", "relation", "affected_status")

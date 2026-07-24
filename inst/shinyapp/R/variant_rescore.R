@@ -1,4 +1,5 @@
-#' Parse one variant from VCF and re-run ClinicalVariantR Pro scoring (prediction curation).
+#' Parse one variant from VCF and re-run ClinicalVariantR scoring (prediction curation).
+#' @noRd
 
 parse_single_variant_from_vcf <- function(vcf_path, chrom, pos, ref, alt, pass_only = FALSE) {
   if (!file.exists(vcf_path)) stop("VCF not found: ", vcf_path)
@@ -7,22 +8,25 @@ parse_single_variant_from_vcf <- function(vcf_path, chrom, pos, ref, alt, pass_o
   on.exit(close(con), add = TRUE)
 
   header_cols <- NULL
+  buffer_n <- if (exists("VCF_LINE_BUFFER", inherits = TRUE)) VCF_LINE_BUFFER else 50000L
   repeat {
-    line <- readLines(con, n = 1L, warn = FALSE)
-    if (length(line) == 0L) break
-    if (grepl("^#CHROM\t", line)) {
-      header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
-      next
-    }
-    if (grepl("^#", line)) next
-    parts <- strsplit(line, "\t", fixed = TRUE)[[1L]]
-    if (length(parts) < 8L) next
-    if (isTRUE(pass_only) && !(parts[[7L]] %in% c("PASS", "."))) next
+    lines <- readLines(con, n = buffer_n, warn = FALSE)
+    if (length(lines) == 0L) break
+    for (line in lines) {
+      if (grepl("^#CHROM\t", line)) {
+        header_cols <- strsplit(sub("^#", "", line), "\t")[[1]]
+        next
+      }
+      if (grepl("^#", line)) next
+      parts <- strsplit(line, "\t", fixed = TRUE)[[1L]]
+      if (length(parts) < 8L) next
+      if (isTRUE(pass_only) && !(parts[[7L]] %in% c("PASS", "."))) next
 
-    parsed <- parse_vcf_line(line, header_cols)
-    if (is.null(parsed)) next
-    hit <- match_variant_rows(parsed, chrom, pos, ref, alt)
-    if (nrow(hit) >= 1L) return(hit[1L, , drop = FALSE])
+      parsed <- parse_vcf_line(line, header_cols)
+      if (is.null(parsed)) next
+      hit <- match_variant_rows(parsed, chrom, pos, ref, alt)
+      if (nrow(hit) >= 1L) return(hit[1L, , drop = FALSE])
+    }
   }
   NULL
 }
@@ -39,16 +43,13 @@ rescore_variant_with_manual <- function(
   if (is.null(variant_row) || nrow(variant_row) == 0L) {
     stop("Variant row missing for re-score.")
   }
-  if (!is.null(refs)) {
-    variant_row <- dedupe_variants_by_key(annotate_variants(variant_row, refs))
-  }
   scored <- score_variants_table(
     variant_row,
     manual_inputs = normalize_manual_inputs(manual_inputs),
     clinical_context = clinical_context,
     pedigree_context = pedigree_context,
     profile_id = profile_id,
-    refs = NULL,
+    refs = refs,
     evidence_scope = evidence_scope
   )
   if (nrow(scored) < 1L) stop("Re-score produced no output.")

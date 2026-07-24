@@ -1,4 +1,5 @@
 #' Common fusion / alias symbols mapped to HGNC gene symbols for panel search.
+#' @noRd
 GENE_SYMBOL_ALIASES <- c(
   "BCR-ABL" = "ABL1,BCR",
   "BCR::ABL1" = "ABL1,BCR",
@@ -26,6 +27,7 @@ expand_gene_aliases <- function(genes) {
 }
 
 #' Parse user-entered gene symbols (comma, semicolon, space, or newline separated).
+#' @noRd
 parse_gene_filter <- function(text) {
   if (is.null(text) || length(text) == 0L) return(character())
   text <- paste(as.character(text), collapse = "\n")
@@ -57,6 +59,7 @@ variant_row_matches_genes <- function(variants_df, row_idx, genes_norm) {
 }
 
 #' After filtering, set primary gene column to the panel symbol that matched.
+#' @noRd
 prioritize_panel_gene_annotation <- function(variants_df, genes) {
   if (is.null(variants_df) || nrow(variants_df) == 0L) return(variants_df)
   genes <- parse_gene_filter(genes)
@@ -73,6 +76,7 @@ prioritize_panel_gene_annotation <- function(variants_df, genes) {
 
 #' Keep variant rows whose SYMBOL/gene matches the requested gene list (case-insensitive).
 #' Matches any gene in VEP CSQ / SnpEff ANN / ANNOVAR annotation, not only the primary transcript.
+#' @noRd
 filter_variants_by_genes <- function(variants_df, genes) {
   if (is.null(variants_df) || nrow(variants_df) == 0L) return(variants_df)
   genes <- parse_gene_filter(genes)
@@ -86,6 +90,7 @@ filter_variants_by_genes <- function(variants_df, genes) {
 }
 
 #' Count variants in a VCF that overlap requested gene symbols (full file scan).
+#' @noRd
 count_vcf_variants_by_genes <- function(vcf_path, genes, pass_only = FALSE) {
   genes <- parse_gene_filter(genes)
   if (length(genes) == 0L || !file.exists(vcf_path)) {
@@ -99,19 +104,22 @@ count_vcf_variants_by_genes <- function(vcf_path, genes, pass_only = FALSE) {
   on.exit(close(con), add = TRUE)
 
   total <- 0L
+  buffer_n <- if (exists("VCF_LINE_BUFFER", inherits = TRUE)) VCF_LINE_BUFFER else 50000L
   repeat {
-    line <- readLines(con, n = 1L, warn = FALSE)
-    if (length(line) == 0L) break
-    if (grepl("^#", line)) next
-    parts <- strsplit(line, "\t", fixed = TRUE)[[1L]]
-    if (length(parts) < 8L) next
-    if (isTRUE(pass_only) && !identical(parts[[7L]], "PASS")) next
-    info_genes <- toupper(extract_all_annotation_genes(parts[[8L]]))
-    if (length(info_genes) == 0L) next
-    hit <- intersect(info_genes, genes_norm)
-    if (length(hit) == 0L) next
-    total <- total + 1L
-    for (g in hit) per_gene[[g]] <- per_gene[[g]] + 1L
+    lines <- readLines(con, n = buffer_n, warn = FALSE)
+    if (length(lines) == 0L) break
+    for (line in lines) {
+      if (grepl("^#", line)) next
+      parts <- strsplit(line, "\t", fixed = TRUE)[[1L]]
+      if (length(parts) < 8L) next
+      if (isTRUE(pass_only) && !(parts[[7L]] %in% c("PASS", "."))) next
+      info_genes <- toupper(extract_all_annotation_genes(parts[[8L]]))
+      if (length(info_genes) == 0L) next
+      hit <- intersect(info_genes, genes_norm)
+      if (length(hit) == 0L) next
+      total <- total + 1L
+      for (g in hit) per_gene[[g]] <- per_gene[[g]] + 1L
+    }
   }
 
   matched_genes <- genes[vapply(genes, function(g) per_gene[[toupper(g)]] > 0L, logical(1))]

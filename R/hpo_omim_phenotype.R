@@ -1,4 +1,5 @@
 #' HPO and OMIM integration for PP4 and phenotype-driven prediction.
+#' @noRd
 
 HPO_GENE_MAP_PATH <- file.path("data", "reference", "hpo_gene_associations.tsv")
 OMIM_GENE_MAP_PATH <- file.path("data", "reference", "omim_gene_map.tsv")

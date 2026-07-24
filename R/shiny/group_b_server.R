@@ -33,7 +33,7 @@ register_group_b_server <- function(ctx) {
     !is.null(v) && isTRUE(v$can_analyze)
   })
 
-  # Keep static button label/state in sync (do NOT recreate button in renderUI - clicks get lost).
+  # Keep static button label/state in sync (do NOT recreate button in renderUI; clicks get lost).
   observe({
     ready <- can_run_b()
     running <- isTRUE(run_b_running())
@@ -235,6 +235,7 @@ register_group_b_server <- function(ctx) {
           message = sprintf("Analysis complete: %s variant(s) processed.", format(n, big.mark = ","))
         ))
         showNotification(format_analysis_notification(result), type = "message", duration = 10)
+        play_analysis_complete_sound(session)
       })
     }, error = function(e) {
       report_b_data(NULL)

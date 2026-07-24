@@ -24,7 +24,7 @@ group_a_nav_panel <- function() {
               checkboxInput("pass_only_a", "Load passing-filter rows only (PASS or .)", FALSE),
               numericInput("min_qual_a", "Minimum QUAL", value = 0, min = 0, step = 1),
               checkboxInput("use_bcftools_a", "Use bcftools (Ubuntu/WSL - faster)", bcftools_available()),
-              checkboxInput("skip_audit_a", "Skip audit log (faster analysis)", FALSE),
+              checkboxInput("skip_audit_a", "Skip audit log (faster analysis)", TRUE),
               numericInput("chunk_size_a", "Chunk size (variants per batch)", value = 10000, min = 1000, step = 1000),
               helpText(textOutput("engine_status_a", inline = TRUE)),
               p(class = "text-muted small",

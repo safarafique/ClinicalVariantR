@@ -1,4 +1,5 @@
 #' Unified VCF parsing for VEP CSQ, SnpEff ANN, and ANNOVAR-style INFO.
+#' @noRd
 
 VEP_CSQ_COLUMN_NAMES <- c(
   "Allele", "Consequence", "IMPACT", "SYMBOL", "Gene", "Feature_type", "Feature", "BIOTYPE",
@@ -122,6 +123,7 @@ csq_consequence_priority <- function(consequence) {
 }
 
 #' Match VEP CSQ Allele field to VCF ref/alt (handles insertions and deletions).
+#' @noRd
 csq_allele_matches_vcf <- function(csq_allele, ref = NA_character_, alt = NA_character_) {
   csq_allele <- scalar_chr(csq_allele, default = "")
   ref <- scalar_chr(ref, default = "")
@@ -556,6 +558,7 @@ parse_variant_from_vcf_fields <- function(chrom, pos, ref, alt, qual = NA_real_,
 }
 
 #' Build PS1/PM5 lookup rows from VEP CSQ CLIN_SIG pathogenic entries in the same VCF record.
+#' @noRd
 parse_csq_pathogenic_catalog <- function(csq_string, ref = NA_character_, alt = NA_character_) {
   empty <- data.frame(
     gene = character(), protein_position = integer(),

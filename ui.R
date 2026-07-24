@@ -1,6 +1,9 @@
-# ClinicalVariantR — thin UI entry (panels in R/shiny/ui/*_ui.R)
+# ClinicalVariantR thin UI entry (panels in R/shiny/ui/*_ui.R)
 ui <- tagList(
-  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
+    tags$script(src = "complete_chime.js")
+  ),
   bslib::page_navbar(
   title = tagList(icon("dna"), APP_TITLE),
   theme = clinical_theme,

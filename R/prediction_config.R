@@ -1,4 +1,5 @@
-#' ClinicalVariantR clinical prediction mode - stricter rules and report metadata.
+#' ClinicalVariantR clinical prediction mode: stricter rules and report metadata.
+#' @noRd
 
 PREDICTION_MODE <- TRUE
 
@@ -86,6 +87,7 @@ build_prediction_limitations <- function(scores, row = NULL) {
 }
 
 #' Re-check VUS after automated scoring; upgrade when pathogenic evidence is strong and unconflicted.
+#' @noRd
 apply_prediction_classification_refinement <- function(scores, evidence) {
   if (!is_prediction_mode()) return(scores)
   cls <- scalar_chr(scores$classification %||% "", default = "VUS")

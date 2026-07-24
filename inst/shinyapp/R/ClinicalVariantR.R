@@ -89,7 +89,6 @@ ClinicalVariantRApp <- function(...) {
         )
     }
 
-    Sys.setenv(CLINICALVARIANTR_APP_ROOT = app_dir)
     shiny::shinyAppDir(app_dir)
 }
 

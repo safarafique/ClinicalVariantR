@@ -1,4 +1,5 @@
 #' Group C - gene panel analysis tab.
+#' @noRd
 
 register_group_c_server <- function(ctx) {
 
@@ -461,6 +462,8 @@ register_group_c_server <- function(ctx) {
           showNotification(msg, type = if (path_n > 0L) "warning" else "message", duration = 10)
 
         }
+
+        play_analysis_complete_sound(session)
 
       })
 

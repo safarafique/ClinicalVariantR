@@ -18,7 +18,7 @@ Official guides:
 
 | Item | Path | Status |
 |------|------|--------|
-| Package metadata | `DESCRIPTION` | ✅ `Version: 0.99.0`, `biocViews`, MIT |
+| Package metadata | `DESCRIPTION` | ✅ `Version: 0.99.3`, `biocViews`, MIT |
 | Namespace | `NAMESPACE` | ✅ minimal exports (`ClinicalVariantR`, `ClinicalVariantRApp`) |
 | License | `LICENSE`, `LICENSE.md` | ✅ MIT |
 | News | `NEWS.md` | ✅ |
@@ -46,7 +46,7 @@ Your default branch must satisfy:
 2. `DESCRIPTION` + `vignettes/` present  
 3. Fields: `Package`, `Version`, `biocViews`  
 4. **Package name == GitHub repository name** (case-sensitive) → repo is `ClinicalVariantR` ✅  
-5. Version **`x.99.y`** → `0.99.0` ✅  
+5. Version **`x.99.y`** → `0.99.3` ✅  
 6. **No `Remotes:`** / **No `Additional_repositories`** ✅  
 7. No file **> 5 MB**  
 8. No Git LFS  
@@ -85,10 +85,10 @@ See `PACKAGE_CONVERSION.md` for a step-by-step move plan.
 ```r
 # From a parent directory of the package source:
 R CMD build ClinicalVariantR
-R CMD check ClinicalVariantR_0.99.0.tar.gz
+R CMD check ClinicalVariantR_0.99.3.tar.gz
 # Bioconductor-specific:
 BiocCheck::BiocCheckGitClone("ClinicalVariantR")
-BiocCheck::BiocCheck("ClinicalVariantR_0.99.0.tar.gz", `new-package` = TRUE)
+BiocCheck::BiocCheck("ClinicalVariantR_0.99.3.tar.gz", `new-package` = TRUE)
 ```
 
 Expectations: **no ERROR / WARNING**; justify any NOTE.
@@ -129,7 +129,7 @@ Also:
 3. Fix any precheck failures.  
 4. Comment `/accept-policies`.  
 5. Link / push to Bioconductor staging as instructed.  
-6. Bump `0.99.z` for each rebuild after fixes.  
+6. Bump `0.99.z` for each rebuild after fixes (current: **0.99.3**).  
 7. Respond point-by-point to the assigned reviewer.
 
 Draft text: `ISSUE_TEMPLATE_DRAFT.md`.

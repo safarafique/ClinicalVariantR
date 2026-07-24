@@ -1,4 +1,5 @@
 #' Group B - automated VCF-only prediction tab.
+#' @noRd
 register_group_b_server <- function(ctx) {
   input <- ctx$input
   output <- ctx$output
@@ -235,6 +236,7 @@ register_group_b_server <- function(ctx) {
           message = sprintf("Analysis complete: %s variant(s) processed.", format(n, big.mark = ","))
         ))
         showNotification(format_analysis_notification(result), type = "message", duration = 10)
+        play_analysis_complete_sound(session)
       })
     }, error = function(e) {
       report_b_data(NULL)

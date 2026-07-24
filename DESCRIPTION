@@ -1,7 +1,7 @@
 Package: ClinicalVariantR
-Title: ACMG/AMP Germline Variant Interpretation from Annotated VCF Files
-Version: 0.99.1
-Date: 2026-07-17
+Title: Clinical Variant Interpretation Using ACMG/AMP Germline Criteria
+Version: 0.99.3
+Date: 2026-07-22
 Authors@R: c(
     person(
         given = "Safa",
@@ -23,25 +23,22 @@ Authors@R: c(
         role = "aut"
     )
     )
-Author: Safa Rafique [aut, cre] (ORCID: 0000-0003-2646-8106),
-    Naeem Mahmood [aut],
-    Muhammad Farooq Sabar [aut]
 Maintainer: Safa Rafique <safa.sandhu@gmail.com>
-Description: ClinicalVariantR is an interactive Shiny platform for evidence-based
-    germline variant classification under ACMG/AMP 2015 guidelines. It
-    accepts VEP-, SnpEff-, or ANNOVAR-annotated VCF files, applies automated
-    and curator-guided ACMG criteria, supports streaming analysis of large
-    call sets, and exports structured per-criterion evidence with
-    reproducibility metadata.
+Description: ClinicalVariantR is an interactive Shiny platform for
+    evidence-based germline variant classification under ACMG/AMP 2015
+    guidelines. It accepts VEP-, SnpEff-, or ANNOVAR-annotated VCF files,
+    applies automated and curator-guided ACMG criteria, supports streaming
+    analysis of large call sets, and exports structured per-criterion
+    evidence with reproducibility metadata.
 License: MIT + file LICENSE
 URL: https://github.com/safarafique/ClinicalVariantR
 BugReports: https://github.com/safarafique/ClinicalVariantR/issues
-biocViews: Software, VariantAnnotation, Genetics, Sequencing, Classification,
-    Visualization, GUI
+biocViews: Software, VariantAnnotation, Genetics, Sequencing,
+    Visualization, GUI, Classification
 Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 8.0.0
 VignetteBuilder: knitr
 Depends:
     R (>= 4.6.0)
@@ -50,14 +47,14 @@ Imports:
     bslib,
     DT,
     data.table,
+    digest,
     readr,
     jsonlite,
-    digest,
-    openssl,
-    VariantAnnotation,
     methods,
+    openssl,
     stats,
-    utils
+    utils,
+    VariantAnnotation
 Suggests:
     BiocStyle,
     knitr,
