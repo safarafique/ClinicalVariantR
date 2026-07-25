@@ -10,7 +10,6 @@
     "shiny",
     "bslib",
     "DT",
-    "crosstalk",
     "data.table",
     "digest",
     "readr",

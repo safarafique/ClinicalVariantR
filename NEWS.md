@@ -9,6 +9,10 @@
   package `DESCRIPTION` version **0.99.3**.
 * Vignettes: Bioconductor vs GitHub install/reinstall paths and app step summary.
 * Check NOTES: ignore `LICENSE.md`; ship only `ClinicalVariantR*.Rmd` vignettes.
+* Remove unused `crosstalk` dependency; keep dependency bootstrap only under
+  `scripts/` (not shipped in the Bioconductor tarball).
+* Fix package Rd wording that broke PDF manual generation; keep `DESCRIPTION`
+  free of blank lines between fields.
 
 # ClinicalVariantR 0.99.2 (2026-07-20)
 

@@ -46,7 +46,6 @@ Imports:
     shiny (>= 1.8.0),
     bslib,
     DT,
-    crosstalk,
     data.table,
     digest,
     readr,
@@ -57,7 +56,6 @@ Imports:
     utils,
     VariantAnnotation
 Suggests:
-    BiocManager,
     BiocStyle,
     knitr,
     rmarkdown,

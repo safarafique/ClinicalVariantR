@@ -1,29 +1,24 @@
 # Global configuration and module loading for ClinicalVariantR
 #
 # Development / source-tree launch: missing CRAN/Bioconductor packages can be
-# installed automatically via scripts/bootstrap_deps.R (or R/bootstrap_deps.R).
-# Disable with: Sys.setenv(CLINICALVARIANTR_NO_AUTO_INSTALL = "1")
+# installed automatically via scripts/bootstrap_deps.R (build-ignored; not in
+# the Bioconductor tarball). Disable with:
+#   Sys.setenv(CLINICALVARIANTR_NO_AUTO_INSTALL = "1")
 #
 # After BiocManager/remotes install with dependencies = TRUE:
 #   library(ClinicalVariantR)
 #   shiny::runApp(ClinicalVariantR())
-# Do not ship install.packages() inside the Bioconductor package tarball.
 
-bootstrap_candidates <- c(
-  file.path("scripts", "bootstrap_deps.R"),
-  file.path("R", "bootstrap_deps.R"),
-  file.path("inst", "shinyapp", "R", "bootstrap_deps.R")
-)
-bootstrap_path <- bootstrap_candidates[file.exists(bootstrap_candidates)][1]
-if (!is.na(bootstrap_path) && nzchar(bootstrap_path)) {
+bootstrap_path <- file.path("scripts", "bootstrap_deps.R")
+if (file.exists(bootstrap_path)) {
   source(bootstrap_path, local = FALSE)
   clinicalvariantr_ensure_dependencies(auto_install = TRUE)
 } else {
-  warning("bootstrap_deps.R not found; skipping automatic dependency install.", call. = FALSE)
+  warning("scripts/bootstrap_deps.R not found; skipping automatic dependency install.", call. = FALSE)
 }
 
 .clinicalvariantr_require_deps <- function() {
-  deps <- c("shiny", "bslib", "DT", "crosstalk", "data.table", "readr", "jsonlite", "openssl", "digest")
+  deps <- c("shiny", "bslib", "DT", "data.table", "readr", "jsonlite", "openssl", "digest")
   missing <- deps[!vapply(deps, requireNamespace, quietly = TRUE, FUN.VALUE = logical(1))]
   if (length(missing) > 0L) {
     stop(

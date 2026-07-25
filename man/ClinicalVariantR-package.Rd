@@ -22,10 +22,10 @@ if (interactive()) {
 See the package vignette for workflows, input requirements, and Bioconductor
 packaging notes.
 
-Imports use selective importFrom directives so shiny, DT, and jsonlite do
-not clash on shared names (renderDataTable, dataTableOutput, validate).
-Shiny UI/server code lives under \code{inst/shinyapp/} and is not loaded into
-the package namespace.
+Namespace imports are selective (never whole-package imports) so shiny, DT,
+and jsonlite do not clash on shared names (renderDataTable, dataTableOutput,
+validate). Shiny UI/server code lives under \code{inst/shinyapp/} and is not
+loaded into the package namespace.
 }
 \seealso{
 \code{\link{ClinicalVariantR}}, \code{\link{ClinicalVariantRApp}}

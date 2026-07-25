@@ -34,9 +34,15 @@
 ^R/shiny_
 ^R/ui_
 ^R/expert_review_export\.R$
-# Local-only dependency bootstrap (install.packages); never ship in Bioconductor tarball.
-^R/bootstrap_deps\.R$
+# Local helper / generated manuals (never ship in Bioconductor tarball).
 ^tools/
+^ClinicalVariantR-manual\.pdf$
+^.*-manual\.pdf$
+^\.Rd2pdf
+^Rd2\.(pdf|log|tex|idx|ilg|ind)$
+^check_run\.txt$
+^rd2pdf_run\.txt$
+^.*_run\.txt$
 ^inst/Bioconductor/
 ^vignettes/images/
 ^renv/library$

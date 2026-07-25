@@ -6,7 +6,7 @@
 #   Rscript scripts/install_app_deps.R
 
 .clinicalvariantr_require_deps <- function() {
-  deps <- c("shiny", "bslib", "DT", "crosstalk", "data.table", "readr", "jsonlite", "openssl", "digest")
+  deps <- c("shiny", "bslib", "DT", "data.table", "readr", "jsonlite", "openssl", "digest")
   missing <- deps[!vapply(deps, requireNamespace, quietly = TRUE, FUN.VALUE = logical(1))]
   if (length(missing) > 0L) {
     stop(
