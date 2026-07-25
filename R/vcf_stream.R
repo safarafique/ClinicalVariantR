@@ -253,7 +253,22 @@ bcftools_available <- function() {
   nzchar(Sys.which("bcftools"))
 }
 
+#' Build a single bcftools -i expression (only one -i/-e is allowed).
+#' @noRd
+bcftools_filter_expression <- function(pass_only = FALSE, min_qual = 0) {
+  parts <- character()
+  if (isTRUE(pass_only)) {
+    parts <- c(parts, '(FILTER="PASS" || FILTER=".")')
+  }
+  if (isTRUE(min_qual > 0)) {
+    parts <- c(parts, sprintf("QUAL>=%s", min_qual))
+  }
+  if (length(parts) == 0L) return(NULL)
+  paste(parts, collapse = " && ")
+}
+
 #' Run bcftools query on Ubuntu/WSL/Linux for faster VCF field extraction.
+#' Uses a single `bcftools query` (no view|query pipe) to avoid stdin/type errors.
 #' @noRd
 bcftools_stream_chunks <- function(
     vcf_path,
@@ -268,33 +283,23 @@ bcftools_stream_chunks <- function(
     stop("bcftools not found on PATH.")
   }
 
-  query_fmt <- paste(
-    "%CHROM\\t%POS\\t%REF\\t%ALT\\t%QUAL\\t%FILTER\\t%INFO\\n",
-    sep = ""
-  )
-
+  # bcftools format escapes: pass literal \t and \n through the shell.
+  query_fmt <- "%CHROM\\t%POS\\t%REF\\t%ALT\\t%QUAL\\t%FILTER\\t%INFO\\n"
   bcftools_cmd <- Sys.which("bcftools")
-  if (pass_only || min_qual > 0) {
-    view_args <- c("view")
-    if (pass_only) view_args <- c(view_args, "-i", shQuote('FILTER="PASS" || FILTER="."'))
-    if (min_qual > 0) view_args <- c(view_args, "-i", sprintf("QUAL>=%s", min_qual))
-    view_args <- c(view_args, shQuote(vcf_path))
-    query_args <- c("query", "-f", shQuote(query_fmt))
+  filt <- bcftools_filter_expression(pass_only = pass_only, min_qual = min_qual)
 
-    cmd <- paste(
-      shQuote(bcftools_cmd), paste(view_args, collapse = " "),
-      "|",
-      shQuote(bcftools_cmd), paste(query_args, collapse = " "),
-      sep = " "
-    )
-  } else {
-    cmd <- paste(
-      shQuote(bcftools_cmd), "query", "-f", shQuote(query_fmt), shQuote(vcf_path),
-      sep = " "
-    )
+  cmd_parts <- c(shQuote(bcftools_cmd), "query", "-f", shQuote(query_fmt))
+  if (!is.null(filt)) {
+    cmd_parts <- c(cmd_parts, "-i", shQuote(filt))
   }
+  cmd_parts <- c(cmd_parts, shQuote(vcf_path))
+  cmd <- paste(cmd_parts, collapse = " ")
 
-  pipe <- pipe(cmd, "r")
+  err_file <- tempfile("bcftools_err_")
+  on.exit(unlink(err_file), add = TRUE)
+  # Capture stderr so silent pipe failures become hard errors and trigger fallback.
+  pipe_cmd <- paste(cmd, "2>", shQuote(err_file))
+  pipe <- pipe(pipe_cmd, "r")
   on.exit(close(pipe), add = TRUE)
 
   stream_state <- new.env(parent = emptyenv())
@@ -317,6 +322,9 @@ bcftools_stream_chunks <- function(
     if (length(lines) == 0L) break
 
     for (line in lines) {
+      # Ignore accidental stderr leakage into the pipe
+      if (!nzchar(line) || startsWith(line, "Error:") || startsWith(line, "Failed ")) next
+
       read_total <- read_total + 1L
       if (kept_total >= max_variants) next
 
@@ -348,6 +356,25 @@ bcftools_stream_chunks <- function(
     }
   }
   flush_batch()
+
+  err_lines <- if (file.exists(err_file)) {
+    tryCatch(readLines(err_file, warn = FALSE), error = function(e) character())
+  } else {
+    character()
+  }
+  err_text <- paste(err_lines, collapse = "\n")
+  if (nzchar(err_text) &&
+      grepl("unknown file type|only one -i|Failed|Error:", err_text, ignore.case = TRUE)) {
+    # Surface bcftools failures so run_vcf_stream_with_fallback can use R streaming.
+    stop(err_text, call. = FALSE)
+  }
+  if (read_total == 0L) {
+    message(
+      "bcftools query returned 0 rows with current filters",
+      if (nzchar(err_text)) paste0(" (", err_text, ")") else "",
+      "."
+    )
+  }
 
   list(rows_read = read_total, rows_analyzed = kept_total, rows_skipped = 0L, chunks = stream_state$chunk_id)
 }
@@ -389,6 +416,17 @@ record_analysis_report <- function(report, state, output_csv, preview_limit = 10
   invisible(NULL)
 }
 
+empty_report <- function() {
+  if (exists("REPORT_COLUMNS", inherits = TRUE)) {
+    cols <- get("REPORT_COLUMNS", inherits = TRUE)
+  } else {
+    cols <- character()
+  }
+  df <- as.data.frame(matrix(ncol = max(length(cols), 0L), nrow = 0))
+  if (length(cols) > 0L) names(df) <- cols
+  df
+}
+
 analysis_preview_df <- function(state) {
   if (length(state$preview_rows) == 0L) return(empty_report())
   df <- rbind_parsed_rows(state$preview_rows)
@@ -414,7 +452,7 @@ run_vcf_stream_with_fallback <- function(stream_fun, vcf_path, chunk_size, pass_
     error = function(e) {
       if (!identical(stream_fun, bcftools_stream_chunks)) stop(e)
       message("bcftools failed, falling back to R streaming: ", conditionMessage(e))
-      stream_vcf_chunks(
+      out <- stream_vcf_chunks(
         vcf_path = vcf_path,
         chunk_size = chunk_size,
         pass_only = pass_only,
@@ -423,6 +461,8 @@ run_vcf_stream_with_fallback <- function(stream_fun, vcf_path, chunk_size, pass_
         processor = processor,
         progress_fn = progress_fn
       )
+      attr(out, "fallback") <- TRUE
+      out
     }
   )
 }

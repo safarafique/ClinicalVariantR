@@ -39,6 +39,8 @@
 ^ClinicalVariantR-manual\.pdf$
 ^.*-manual\.pdf$
 ^\.Rd2pdf
+^\.\.pdf$
+^\.pdf$
 ^Rd2\.(pdf|log|tex|idx|ilg|ind)$
 ^check_run\.txt$
 ^rd2pdf_run\.txt$
@@ -47,3 +49,12 @@
 ^vignettes/images/
 ^renv/library$
 ^renv/staging$
+# Large local test data / working dirs at repo root (never ship; keep < 5MB rule).
+# Anchored to root so inst/extdata/samples/*.vcf still ship.
+^[^/]+\.vcf$
+^[^/]+\.vcf\.gz$
+^out/
+^=50$
+^\.RData$
+^\.RDataTmp
+^GExPipe.*$

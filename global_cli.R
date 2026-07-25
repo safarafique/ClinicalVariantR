@@ -115,6 +115,7 @@ cli_module_files <- c(
   "R/reproducibility.R",
   "R/acmg_engine.R",
   "R/variant_rescore.R",
+  "R/acmg_pipeline.R",
   "R/vcf_stream.R",
   "R/benchmark.R",
   "R/intervar_compare.R",

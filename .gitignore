@@ -20,6 +20,8 @@ ClinicalVariantR.BiocCheck/
 *-manual.pdf
 ClinicalVariantR-manual.pdf
 .Rd2pdf*/
+..pdf
+.pdf
 Rd2.pdf
 Rd2.log
 Rd2.tex
@@ -48,3 +50,11 @@ vignettes/*_files/
 Meta/
 doc/
 .Rproj.user
+
+# Large local test data at repo root (Bioconductor: no file > 5MB).
+# Root-anchored so inst/extdata/samples/*.vcf remain tracked.
+/*.vcf
+/*.vcf.gz
+/out/
+/=50
+.RDataTmp*

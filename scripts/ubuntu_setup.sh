@@ -7,7 +7,7 @@ set -euo pipefail
 echo "=== CML Variant Interpreter — Ubuntu dependencies ==="
 
 sudo apt-get update
-sudo apt-get install -y bcftools tabix bgzip samtools
+sudo apt-get install -y bcftools tabix samtools
 
 echo ""
 echo "bcftools version:"

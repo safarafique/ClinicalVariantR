@@ -329,10 +329,13 @@ test_acmg_logic_engine <- function() {
   )
 }
 
-empty_report <- function() {
-  df <- as.data.frame(matrix(ncol = length(REPORT_COLUMNS), nrow = 0))
-  names(df) <- REPORT_COLUMNS
-  df
+# Prefer vcf_stream::empty_report when already defined (CLI load order).
+if (!exists("empty_report", mode = "function", inherits = FALSE)) {
+  empty_report <- function() {
+    df <- as.data.frame(matrix(ncol = length(REPORT_COLUMNS), nrow = 0))
+    names(df) <- REPORT_COLUMNS
+    df
+  }
 }
 
 coalesce_num <- function(...) {
