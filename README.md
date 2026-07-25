@@ -81,13 +81,36 @@ Features include VCF requirement validation (green/red readiness), variant previ
 
 ### Install and open the app
 
+First launch from this clone auto-installs missing R packages (CRAN + Bioconductor), then opens the app:
+
 ```r
-install.packages(c("shiny", "bslib", "DT", "data.table", "readr", "remotes"))
-# Session -> Restart R if ClinicalVariantR is already loaded
-remotes::install_local("E:/ACGM/ClinicalVariantR", force = TRUE, upgrade = "never")
+shiny::runApp("E:/ACGM/ClinicalVariantR", launch.browser = TRUE)
+```
+
+Or install dependencies once, then launch:
+
+```r
+# Optional one-shot install (same as first-run auto-install):
+# Rscript scripts/install_app_deps.R
+shiny::runApp("E:/ACGM/ClinicalVariantR", launch.browser = TRUE)
+```
+
+Package install path:
+
+```r
+install.packages("remotes")
+remotes::install_local("E:/ACGM/ClinicalVariantR", force = TRUE, upgrade = "never", dependencies = TRUE)
 library(ClinicalVariantR)
 app <- ClinicalVariantR()
 if (interactive()) shiny::runApp(app, launch.browser = TRUE)
+```
+
+To install dependencies once from a clone (not used by the Bioconductor
+package tarball):
+
+```r
+# Rscript scripts/install_app_deps.R
+# Or: source("scripts/bootstrap_deps.R"); clinicalvariantr_ensure_dependencies()
 ```
 
 ### Run from a local clone (no reinstall)

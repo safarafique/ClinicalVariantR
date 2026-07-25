@@ -1,19 +1,35 @@
 # Global configuration and module loading for ClinicalVariantR
 #
-# Runtime dependencies are declared in DESCRIPTION Imports. After installing
-# ClinicalVariantR with dependencies = TRUE, users only need:
+# Development / source-tree launch: missing CRAN/Bioconductor packages can be
+# installed automatically via scripts/bootstrap_deps.R (or R/bootstrap_deps.R).
+# Disable with: Sys.setenv(CLINICALVARIANTR_NO_AUTO_INSTALL = "1")
+#
+# After BiocManager/remotes install with dependencies = TRUE:
 #   library(ClinicalVariantR)
 #   shiny::runApp(ClinicalVariantR())
-# Do not install packages from app code (forbidden for Bioconductor packages).
+# Do not ship install.packages() inside the Bioconductor package tarball.
+
+bootstrap_candidates <- c(
+  file.path("scripts", "bootstrap_deps.R"),
+  file.path("R", "bootstrap_deps.R"),
+  file.path("inst", "shinyapp", "R", "bootstrap_deps.R")
+)
+bootstrap_path <- bootstrap_candidates[file.exists(bootstrap_candidates)][1]
+if (!is.na(bootstrap_path) && nzchar(bootstrap_path)) {
+  source(bootstrap_path, local = FALSE)
+  clinicalvariantr_ensure_dependencies(auto_install = TRUE)
+} else {
+  warning("bootstrap_deps.R not found; skipping automatic dependency install.", call. = FALSE)
+}
 
 .clinicalvariantr_require_deps <- function() {
-  deps <- c("shiny", "bslib", "DT", "data.table", "readr", "jsonlite")
+  deps <- c("shiny", "bslib", "DT", "crosstalk", "data.table", "readr", "jsonlite", "openssl", "digest")
   missing <- deps[!vapply(deps, requireNamespace, quietly = TRUE, FUN.VALUE = logical(1))]
   if (length(missing) > 0L) {
     stop(
       "Missing required package(s): ", paste(missing, collapse = ", "), ".\n",
-      "Reinstall ClinicalVariantR with dependencies = TRUE ",
-      "(BiocManager from Bioconductor, or remotes from GitHub/local clone).",
+      "Install with:\n  Rscript scripts/install_app_deps.R\n",
+      "Or in R:\n  source(\"scripts/bootstrap_deps.R\"); clinicalvariantr_ensure_dependencies()",
       call. = FALSE
     )
   }
@@ -28,6 +44,7 @@
 }
 
 .clinicalvariantr_require_deps()
+
 
 # VariantAnnotation is an Import; confirm availability (fallback parser if absent).
 .va_available <- requireNamespace("VariantAnnotation", quietly = TRUE)

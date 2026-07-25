@@ -34,6 +34,8 @@
 ^R/shiny_
 ^R/ui_
 ^R/expert_review_export\.R$
+# Local-only dependency bootstrap (install.packages); never ship in Bioconductor tarball.
+^R/bootstrap_deps\.R$
 ^tools/
 ^inst/Bioconductor/
 ^vignettes/images/

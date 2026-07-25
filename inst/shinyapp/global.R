@@ -1,19 +1,18 @@
 # Global configuration and module loading for ClinicalVariantR
 #
-# Runtime dependencies are declared in DESCRIPTION Imports. After installing
-# ClinicalVariantR with dependencies = TRUE, users only need:
-#   library(ClinicalVariantR)
-#   shiny::runApp(ClinicalVariantR())
-# Do not install packages from app code (forbidden for Bioconductor packages).
+# Installed Bioconductor / package launches must NOT call install.packages().
+# Missing Imports are reported with an install hint only.
+# For a one-shot local install from a clone, run:
+#   Rscript scripts/install_app_deps.R
 
 .clinicalvariantr_require_deps <- function() {
-  deps <- c("shiny", "bslib", "DT", "data.table", "readr", "jsonlite")
+  deps <- c("shiny", "bslib", "DT", "crosstalk", "data.table", "readr", "jsonlite", "openssl", "digest")
   missing <- deps[!vapply(deps, requireNamespace, quietly = TRUE, FUN.VALUE = logical(1))]
   if (length(missing) > 0L) {
     stop(
       "Missing required package(s): ", paste(missing, collapse = ", "), ".\n",
-      "Reinstall ClinicalVariantR with dependencies = TRUE ",
-      "(BiocManager from Bioconductor, or remotes from GitHub/local clone).",
+      "Reinstall ClinicalVariantR with dependencies = TRUE, or from a clone run:\n",
+      "  Rscript scripts/install_app_deps.R",
       call. = FALSE
     )
   }

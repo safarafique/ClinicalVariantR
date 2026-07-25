@@ -18,12 +18,12 @@
 #' See the package vignette for workflows, input requirements, and Bioconductor
 #' packaging notes.
 #'
-#' @seealso \code{\link{ClinicalVariantR}}, \code{\link{ClinicalVariantRApp}}
-#'
-#' Imports are selective (\code{@importFrom}) so shiny / DT / jsonlite do not
-#' clash on \code{renderDataTable}, \code{dataTableOutput}, or \code{validate}.
+#' Imports use selective importFrom directives so shiny, DT, and jsonlite do
+#' not clash on shared names (renderDataTable, dataTableOutput, validate).
 #' Shiny UI/server code lives under \code{inst/shinyapp/} and is not loaded into
 #' the package namespace.
+#'
+#' @seealso \code{\link{ClinicalVariantR}}, \code{\link{ClinicalVariantRApp}}
 #'
 #' @importFrom shiny shinyAppDir
 #' @importFrom bslib bs_theme page_navbar
