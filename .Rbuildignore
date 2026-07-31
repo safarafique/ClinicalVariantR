@@ -47,6 +47,10 @@
 ^.*_run\.txt$
 ^inst/Bioconductor/
 ^vignettes/images/
+^vignettes/.*\.html$
+^vignettes/.*\.R$
+^vignettes/.*_cache/
+^vignettes/.*_files/
 ^renv/library$
 ^renv/staging$
 # Large local test data / working dirs at repo root (never ship; keep < 5MB rule).

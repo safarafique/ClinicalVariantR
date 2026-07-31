@@ -154,7 +154,6 @@ register_group_b_server <- function(ctx) {
 
   # Critical: ignoreInit so startup does not fire a fake run; ignoreNULL so clicks always register.
   observeEvent(input$run_b, {
-    message(sprintf("[Group B] Run clicked at %s", format(Sys.time(), "%H:%M:%S")))
     run_b_feedback(list(type = "info", message = "Run clicked - checking input..."))
 
     if (isTRUE(run_b_running())) {
@@ -247,7 +246,6 @@ register_group_b_server <- function(ctx) {
       analysis_run_b(FALSE)
       run_b_feedback(list(type = "error", message = paste("Analysis failed:", conditionMessage(e))))
       showNotification(paste("Analysis failed:", conditionMessage(e)), type = "error", duration = NULL)
-      message("[Group B] Analysis error: ", conditionMessage(e))
     }, finally = {
       run_b_running(FALSE)
     })

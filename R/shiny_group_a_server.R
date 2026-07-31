@@ -457,9 +457,9 @@ register_group_a_server <- function(ctx) {
 
       write_report_csv(full, report_a_csv())
 
-      cat <- selected_category_a()
+      category <- selected_category_a()
 
-      report_a_data(full[full$classification == cat, , drop = FALSE])
+      report_a_data(full[full$classification == category, , drop = FALSE])
 
       showNotification(paste("Reclassified", vid, "->", new_report$classification[1]), type = "message")
 

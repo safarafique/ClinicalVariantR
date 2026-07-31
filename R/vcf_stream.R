@@ -369,11 +369,14 @@ bcftools_stream_chunks <- function(
     stop(err_text, call. = FALSE)
   }
   if (read_total == 0L) {
-    message(
-      "bcftools query returned 0 rows with current filters",
-      if (nzchar(err_text)) paste0(" (", err_text, ")") else "",
-      "."
-    )
+    if (nzchar(err_text)) {
+      message(sprintf(
+        "bcftools query returned 0 rows with current filters (%s).",
+        err_text
+      ))
+    } else {
+      message("bcftools query returned 0 rows with current filters.")
+    }
   }
 
   list(rows_read = read_total, rows_analyzed = kept_total, rows_skipped = 0L, chunks = stream_state$chunk_id)

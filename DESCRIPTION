@@ -26,10 +26,10 @@ Authors@R: c(
 Maintainer: Safa Rafique <safa.sandhu@gmail.com>
 Description: ClinicalVariantR is an interactive Shiny platform for
     evidence-based germline variant classification under ACMG/AMP 2015
-    guidelines. It accepts VEP-, SnpEff-, or ANNOVAR-annotated VCF files,
-    applies automated and curator-guided ACMG criteria, supports streaming
-    analysis of large call sets, and exports structured per-criterion
-    evidence with reproducibility metadata.
+    guidelines. It accepts VEP-, SnpEff-, or ANNOVAR-annotated VCF files and
+    applies automated plus curator-guided ACMG criteria. The package supports
+    streaming analysis of large call sets and exports structured
+    per-criterion evidence with reproducibility metadata for clinical review.
 License: MIT + file LICENSE
 URL: https://github.com/safarafique/ClinicalVariantR
 BugReports: https://github.com/safarafique/ClinicalVariantR/issues

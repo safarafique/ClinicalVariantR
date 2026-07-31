@@ -13,6 +13,8 @@
   `scripts/` (not shipped in the Bioconductor tarball).
 * Fix package Rd wording that broke PDF manual generation; keep `DESCRIPTION`
   free of blank lines between fields.
+* BiocCheck: drop `inst/CITATION` until a preprint/publication DOI exists;
+  expand `Description` to three sentences; avoid `paste` in a condition message.
 
 # ClinicalVariantR 0.99.2 (2026-07-20)
 
