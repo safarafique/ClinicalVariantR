@@ -390,7 +390,114 @@ new_complete_analysis_state <- function() {
   state$classification_counts <- list()
   state$rows_classified <- 0L
   state$rows_gene_skipped <- 0L
+  state$rows_seen <- 0L
+  state$total_variants <- NA_integer_
   state
+}
+
+#' Instant variant total when a bcftools index exists.
+#' Never does a full-file scan (that delayed analysis start).
+#' Optional env CLINICALVARIANTR_PRECOUNT=1 enables slow full count.
+#' @noRd
+count_vcf_variants_fast <- function(vcf_path, pass_only = FALSE, min_qual = 0) {
+  if (!isTRUE(pass_only) && !(isTRUE(min_qual > 0)) && bcftools_available()) {
+    has_index <- file.exists(paste0(vcf_path, ".tbi")) || file.exists(paste0(vcf_path, ".csi"))
+    if (isTRUE(has_index)) {
+      out <- tryCatch(
+        system2("bcftools", c("index", "-n", vcf_path), stdout = TRUE, stderr = FALSE),
+        error = function(e) character()
+      )
+      n <- suppressWarnings(as.integer(trimws(out[1])))
+      if (!is.na(n) && n >= 0L) {
+        return(list(total = n, analyzed = n, skipped = 0L, method = "bcftools-index"))
+      }
+    }
+  }
+
+  # Opt-in full scan only (slow on large VCFs).
+  if (identical(Sys.getenv("CLINICALVARIANTR_PRECOUNT", unset = ""), "1")) {
+    counts <- count_vcf_variants(vcf_path, pass_only = pass_only, min_qual = min_qual)
+    counts$method <- "stream"
+    return(counts)
+  }
+
+  list(total = NA_integer_, analyzed = NA_integer_, skipped = 0L, method = "deferred")
+}
+
+#' Quick estimate from a small sample + file size (plain VCF only; skip for .gz).
+#' @noRd
+estimate_vcf_variants_quick <- function(vcf_path, sample_lines = 20000L) {
+  if (grepl("\\.gz$", vcf_path, ignore.case = TRUE)) return(NA_integer_)
+  sz <- suppressWarnings(as.numeric(file.info(vcf_path)$size))
+  if (is.na(sz) || sz < 1) return(NA_integer_)
+
+  con <- tryCatch(open_vcf_connection(vcf_path), error = function(e) NULL)
+  if (is.null(con)) return(NA_integer_)
+  on.exit(try(close(con), silent = TRUE), add = TRUE)
+
+  sample_n <- 0L
+  bytes_approx <- 0L
+  in_variants <- FALSE
+  target <- as.integer(sample_lines)
+
+  repeat {
+    lines <- readLines(con, n = min(5000L, max(1L, target - sample_n)), warn = FALSE)
+    if (length(lines) == 0L) break
+    for (line in lines) {
+      bytes_approx <- bytes_approx + nchar(line, type = "bytes") + 1L
+      if (!in_variants) {
+        if (startsWith(line, "#CHROM")) {
+          in_variants <- TRUE
+          next
+        }
+        if (startsWith(line, "#")) next
+        in_variants <- TRUE
+      }
+      if (!startsWith(line, "#")) sample_n <- sample_n + 1L
+      if (sample_n >= target) break
+    }
+    if (sample_n >= target) break
+    if (bytes_approx > 8e6) break
+  }
+
+  if (sample_n < 50L || bytes_approx < 1000L) return(NA_integer_)
+  as.integer(max(sample_n, round(as.numeric(sample_n) * (sz / bytes_approx))))
+}
+
+#' Push percent-complete to Shiny progress (value 0..1 + detail text).
+#' @noRd
+emit_analysis_progress <- function(progress_fn, done, total, extra = NULL) {
+  if (is.null(progress_fn)) return(invisible(NULL))
+  done <- as.integer(done %||% 0L)
+  total <- as.integer(total %||% NA_integer_)
+  if (!is.na(total) && total > 0L) {
+    pct <- max(0, min(0.99, done / total))
+    pct_i <- as.integer(round(100 * done / total))
+    if (pct_i > 99L && done < total) pct_i <- 99L
+    detail <- sprintf(
+      "%d%% complete — %s / %s variants",
+      pct_i,
+      format(done, big.mark = ","),
+      format(total, big.mark = ",")
+    )
+    if (!is.null(extra) && nzchar(extra)) detail <- paste0(detail, " | ", extra)
+    progress_fn(
+      value = pct,
+      message = sprintf("Running... %d%%", pct_i),
+      detail = detail
+    )
+  } else {
+    # No pre-count: soft progress so analysis can start immediately.
+    soft <- min(0.95, 1 - 1 / (1 + done / 50000))
+    detail <- sprintf("%s variants processed", format(done, big.mark = ","))
+    if (!is.null(extra) && nzchar(extra)) detail <- paste0(detail, " | ", extra)
+    progress_fn(
+      value = soft,
+      message = sprintf("Running... %s processed", format(done, big.mark = ",")),
+      detail = detail
+    )
+  }
+  invisible(NULL)
 }
 
 record_analysis_report <- function(report, state, output_csv, preview_limit = 1000L) {
@@ -470,7 +577,11 @@ run_vcf_stream_with_fallback <- function(stream_fun, vcf_path, chunk_size, pass_
   )
 }
 
+# Parallel helpers live in R/parallel_pipeline.R (sourced before this file).
+# detect_system_ram_gb / resolve_* / score_chunk_jobs / performance_tuning_ui
+
 #' Analyze complete VCF - all rows, chunked, results written to CSV on disk.
+#' Parallelizes ACMG scoring across up to parallel_chunks batches (default 5).
 #' @noRd
 analyze_complete_vcf <- function(
     vcf_path,
@@ -478,7 +589,8 @@ analyze_complete_vcf <- function(
     output_csv = NULL,
     pass_only = FALSE,
     min_qual = 0,
-    chunk_size = 10000L,
+    chunk_size = NULL,
+    parallel_chunks = 5L,
     use_bcftools = TRUE,
     refs = NULL,
     manual_inputs = list(),
@@ -492,10 +604,13 @@ analyze_complete_vcf <- function(
     progress_fn = NULL) {
 
   mode <- match.arg(mode)
+  parallel_chunks <- resolve_parallel_chunks(parallel_chunks)
+  auto_chunk <- is.null(chunk_size)
   if (is.null(output_csv)) {
     output_csv <- file.path("logs", paste0("report_", session_id, "_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv"))
   }
   dir.create(dirname(output_csv), recursive = TRUE, showWarnings = FALSE)
+  failed_chunks_log <- sub("\\.csv$", ".failed_chunks.csv", output_csv)
 
   run_metadata <- build_run_metadata(
     vcf_path = vcf_path,
@@ -507,19 +622,69 @@ analyze_complete_vcf <- function(
   write_run_metadata_json(run_metadata, metadata_path)
 
   analysis_state <- new_complete_analysis_state()
+  analysis_state$n_chunks_ok <- 0L
+  analysis_state$n_chunks_failed <- 0L
   gene_filter <- parse_gene_filter(gene_filter)
+  chunk_buffer <- new.env(parent = emptyenv())
+  chunk_buffer$jobs <- list()
 
-  process_chunk <- function(chunk_df, chunk_id) {
-    if (length(gene_filter) > 0L) {
-      n_before <- nrow(chunk_df)
-      chunk_df <- filter_variants_by_genes(chunk_df, gene_filter)
-      analysis_state$rows_gene_skipped <- analysis_state$rows_gene_skipped + (n_before - nrow(chunk_df))
-      if (nrow(chunk_df) == 0L) return(invisible(NULL))
+  if (!is.null(progress_fn)) {
+    progress_fn(value = 0.01, message = "Running...", detail = NULL)
+  }
+  counts <- tryCatch(
+    count_vcf_variants_fast(vcf_path, pass_only = pass_only, min_qual = min_qual),
+    error = function(e) list(total = NA_integer_, analyzed = NA_integer_, skipped = 0L, method = "failed")
+  )
+  total_variants <- suppressWarnings(as.integer(counts$analyzed %||% NA_integer_))
+  if (is.na(total_variants) || total_variants < 1L) {
+    total_variants <- suppressWarnings(as.integer(counts$total %||% NA_integer_))
+  }
+  if ((is.na(total_variants) || total_variants < 1L) &&
+      !grepl("\\.gz$", vcf_path, ignore.case = TRUE)) {
+    est <- tryCatch(estimate_vcf_variants_quick(vcf_path), error = function(e) NA_integer_)
+    if (!is.na(est) && est > 0L) {
+      total_variants <- est
+      counts$method <- "estimate"
     }
+  }
+  analysis_state$total_variants <- total_variants
 
-    # Annotate once inside score_variants_table via refs (no double annotate).
-    report <- run_acmg_pro_chunk(
-      variants_df = chunk_df,
+  chunk_size <- resolve_chunk_size(
+    chunk_size = if (auto_chunk) NULL else chunk_size,
+    parallel_chunks = parallel_chunks,
+    auto = auto_chunk,
+    n_variants = total_variants
+  )
+  message(sprintf(
+    "ClinicalVariantR performance: parallel_chunks=%d, chunk_size=%s, cores=%d (RAM ~%s GB)",
+    parallel_chunks,
+    format(chunk_size, big.mark = ","),
+    detect_usable_cores(),
+    {
+      ram <- detect_system_ram_gb()
+      if (is.na(ram)) "unknown" else as.character(round(ram, 1))
+    }
+  ))
+
+  if (!is.null(progress_fn)) {
+    if (!is.na(total_variants) && total_variants > 0L) {
+      progress_fn(
+        value = 0.02,
+        message = "Running...",
+        detail = sprintf("0%% — 0 / %s variants", format(total_variants, big.mark = ","))
+      )
+    } else {
+      progress_fn(value = 0.02, message = "Running...", detail = NULL)
+    }
+  }
+
+  flush_chunk_buffer <- function() {
+    jobs <- chunk_buffer$jobs
+    if (length(jobs) == 0L) return(invisible(NULL))
+    chunk_buffer$jobs <- list()
+
+    scored <- score_chunk_jobs(
+      jobs = jobs,
       mode = mode,
       manual_inputs = manual_inputs,
       manual_by_variant = manual_by_variant,
@@ -529,12 +694,75 @@ analyze_complete_vcf <- function(
       session_id = session_id,
       profile_id = profile_id,
       run_metadata = run_metadata,
-      write_audit = write_audit
+      workers = parallel_chunks,
+      failed_log = failed_chunks_log
     )
-    record_analysis_report(report, analysis_state, output_csv)
+    analysis_state$n_chunks_ok <- analysis_state$n_chunks_ok + scored$n_ok
+    analysis_state$n_chunks_failed <- analysis_state$n_chunks_failed + scored$n_failed
 
-    if (!is.null(progress_fn)) {
-      progress_fn(detail = sprintf("Chunk %d classified (%d variants)", chunk_id, nrow(chunk_df)))
+    for (res in scored$results) {
+      if (!isTRUE(res$ok)) next
+      report <- res$report
+      if (is.null(report) || !is.data.frame(report) || nrow(report) == 0L) next
+      if (isTRUE(write_audit)) {
+        audit_batch <- build_audit_entries_from_report(report, session_id = session_id)
+        append_audit_log(audit_batch)
+      }
+      record_analysis_report(report, analysis_state, output_csv)
+    }
+
+    emit_analysis_progress(
+      progress_fn,
+      done = analysis_state$rows_seen,
+      total = analysis_state$total_variants,
+      extra = sprintf(
+        "wave ok=%d fail=%d (%d-way parallel)",
+        scored$n_ok, scored$n_failed, parallel_chunks
+      )
+    )
+    invisible(NULL)
+  }
+
+  process_chunk <- function(chunk_df, chunk_id) {
+    n_before <- nrow(chunk_df)
+    analysis_state$rows_seen <- analysis_state$rows_seen + n_before
+
+    if (length(gene_filter) > 0L) {
+      chunk_df <- filter_variants_by_genes(chunk_df, gene_filter)
+      analysis_state$rows_gene_skipped <- analysis_state$rows_gene_skipped + (n_before - nrow(chunk_df))
+      if (nrow(chunk_df) == 0L) {
+        emit_analysis_progress(
+          progress_fn,
+          done = analysis_state$rows_seen,
+          total = analysis_state$total_variants,
+          extra = sprintf("chunk %d (no panel genes in batch)", chunk_id)
+        )
+        return(invisible(NULL))
+      }
+    }
+
+    chunk_buffer$jobs[[length(chunk_buffer$jobs) + 1L]] <- list(df = chunk_df, id = chunk_id)
+    if (length(chunk_buffer$jobs) >= parallel_chunks) flush_chunk_buffer()
+    invisible(NULL)
+  }
+
+  # Stream may call progress_fn(read, kept, skipped); map that to %.
+  stream_progress_fn <- function(read_total = NULL, kept_total = NULL, skipped_total = NULL,
+                                 value = NULL, detail = NULL, message = NULL, ...) {
+    if (!is.null(value) || !is.null(detail) || !is.null(message)) {
+      if (!is.null(progress_fn)) {
+        progress_fn(value = value, detail = detail, message = message, ...)
+      }
+      return(invisible(NULL))
+    }
+    if (!is.null(read_total) && !is.na(analysis_state$total_variants) && analysis_state$total_variants > 0L) {
+      done <- max(analysis_state$rows_seen, as.integer(read_total))
+      emit_analysis_progress(
+        progress_fn,
+        done = done,
+        total = analysis_state$total_variants,
+        extra = "streaming"
+      )
     }
     invisible(NULL)
   }
@@ -548,8 +776,20 @@ analyze_complete_vcf <- function(
     pass_only = pass_only,
     min_qual = min_qual,
     processor = process_chunk,
-    progress_fn = progress_fn
+    progress_fn = stream_progress_fn
   )
+  flush_chunk_buffer()
+
+  if (!is.null(progress_fn)) {
+    progress_fn(
+      value = 1,
+      message = "Analysis complete — 100%",
+      detail = sprintf(
+        "100%% complete — %s variants processed",
+        format(analysis_state$rows_seen %||% stats$rows_analyzed %||% 0L, big.mark = ",")
+      )
+    )
+  }
 
   engine <- if (isTRUE(use_bcftools) && bcftools_available()) {
     paste0("bcftools+stream+", ACMG_PRO_ENGINE)
@@ -557,6 +797,9 @@ analyze_complete_vcf <- function(
     paste0("R-stream+", ACMG_PRO_ENGINE)
   }
   if (!is.null(attr(stats, "fallback"))) engine <- "R-stream (bcftools fallback)"
+  if (parallel_chunks > 1L) {
+    engine <- paste0(engine, "+parallel", parallel_chunks)
+  }
 
   preview_df <- analysis_preview_df(analysis_state)
 
@@ -573,6 +816,12 @@ analyze_complete_vcf <- function(
     rows_classified = analysis_state$rows_classified,
     rows_displayed = nrow(preview_df),
     rows_gene_skipped = analysis_state$rows_gene_skipped,
-    gene_filter = gene_filter
+    gene_filter = gene_filter,
+    parallel_chunks = parallel_chunks,
+    chunk_size = chunk_size,
+    total_variants = analysis_state$total_variants,
+    n_chunks_ok = analysis_state$n_chunks_ok %||% 0L,
+    n_chunks_failed = analysis_state$n_chunks_failed %||% 0L,
+    failed_chunks_log = if (isTRUE((analysis_state$n_chunks_failed %||% 0L) > 0L)) failed_chunks_log else NULL
   )
 }

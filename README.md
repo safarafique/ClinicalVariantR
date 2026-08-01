@@ -1,6 +1,6 @@
 # ClinicalVariantR — Variant Prediction Platform
 
-**Version:** `0.99.3` (Bioconductor `x.99.y` devel)
+**Version:** `0.99.4` (Bioconductor `x.99.y` devel)
 
 **ClinicalVariantR** is an R Shiny application for ACMG/AMP evidence-based germline variant **prediction** with per-variant curator workflow.
 
@@ -16,7 +16,7 @@ Package metadata and submission guides live under `inst/Bioconductor/`:
 | [`inst/Bioconductor/PACKAGE_CONVERSION.md`](inst/Bioconductor/PACKAGE_CONVERSION.md) | Convert Shiny-app layout → Bioconductor package |
 | [`inst/Bioconductor/ISSUE_TEMPLATE_DRAFT.md`](inst/Bioconductor/ISSUE_TEMPLATE_DRAFT.md) | Draft for BiocContributions issue |
 
-Core package files: `DESCRIPTION` (version `0.99.3`), `NAMESPACE`, `LICENSE`, `NEWS.md`, `man/`, `vignettes/ClinicalVariantR.Rmd`, `tests/`, `inst/CITATION`.
+Core package files: `DESCRIPTION` (version `0.99.4`), `NAMESPACE`, `LICENSE`, `NEWS.md`, `man/`, `vignettes/ClinicalVariantR.Rmd`, `tests/`.
 
 Install and launch (Bioconductor Shiny style — return app, user runs it).
 On Windows, **restart R first** if the package is already loaded:

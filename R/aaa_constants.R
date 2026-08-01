@@ -1,6 +1,6 @@
 APP_TITLE <- "ClinicalVariantR"
-APP_VERSION <- "0.99.3"
-ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v0.99.3"
+APP_VERSION <- "0.99.4"
+ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v0.99.4"
 ACMG_GUIDELINE_VERSION <- "ACMG/AMP 2015 + ClinGen refinements"
 
 ACMG_CLASSIFICATIONS <- c(

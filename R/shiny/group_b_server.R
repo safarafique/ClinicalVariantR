@@ -33,7 +33,7 @@ register_group_b_server <- function(ctx) {
     !is.null(v) && isTRUE(v$can_analyze)
   })
 
-  # Keep static button label/state in sync (do NOT recreate button in renderUI; clicks get lost).
+  # Keep static button label/state in sync (do NOT recreate button in renderUI - clicks get lost).
   observe({
     ready <- can_run_b()
     running <- isTRUE(run_b_running())
@@ -208,7 +208,7 @@ register_group_b_server <- function(ctx) {
 
     tryCatch({
       withProgress(message = "Running complete Group B analysis...", value = 0, {
-        incProgress(0.05, detail = "Starting streaming pipeline")
+        incProgress(0.02, detail = "Starting analysis...")
         out <- run_complete_analysis(vcf_path, mode = "rapid", suffix = "b")
         result <- out$result
 

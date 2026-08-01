@@ -207,8 +207,8 @@ register_group_b_server <- function(ctx) {
     showNotification("Starting Group B analysis...", type = "message", duration = 4)
 
     tryCatch({
-      withProgress(message = "Running complete Group B analysis...", value = 0, {
-        incProgress(0.05, detail = "Starting streaming pipeline")
+      withProgress(message = "Running Group B analysis...", value = 0, {
+        incProgress(0.02, detail = "Running...")
         out <- run_complete_analysis(vcf_path, mode = "rapid", suffix = "b")
         result <- out$result
 

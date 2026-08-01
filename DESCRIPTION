@@ -1,7 +1,7 @@
 Package: ClinicalVariantR
 Title: Clinical Variant Interpretation Using ACMG/AMP Germline Criteria
-Version: 0.99.3
-Date: 2026-07-22
+Version: 0.99.4
+Date: 2026-08-01
 Authors@R: c(
     person(
         given = "Safa",

@@ -370,7 +370,7 @@ register_group_c_server <- function(ctx) {
 
       withProgress(message = paste("Running Group C gene panel:", format_gene_filter_label(genes)), value = 0, {
 
-        incProgress(0.05, detail = "Filtering by gene symbols")
+        incProgress(0.02, detail = "Running...")
 
         out <- run_complete_analysis(
 

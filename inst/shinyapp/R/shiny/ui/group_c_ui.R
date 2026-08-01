@@ -31,7 +31,7 @@ group_c_nav_panel <- function() {
               numericInput("min_qual_c", "Minimum QUAL", value = 0, min = 0, step = 1),
               checkboxInput("use_bcftools_c", "Use bcftools (Ubuntu/WSL - faster)", bcftools_available()),
               checkboxInput("skip_audit_c", "Skip audit log (faster analysis)", TRUE),
-              numericInput("chunk_size_c", "Chunk size (variants per batch)", value = 10000, min = 1000, step = 1000),
+              performance_tuning_ui("c"),
               helpText(textOutput("engine_status_c", inline = TRUE)),
               p(class = "text-muted small",
                 "Runs the same automated ACMG criteria as Group B, limited to your gene list."),

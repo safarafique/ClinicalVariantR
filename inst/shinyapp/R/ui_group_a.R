@@ -1,5 +1,4 @@
 #' Group A - clinical prediction tab UI.
-#' @noRd
 group_a_nav_panel <- function() {
   bslib::nav_panel(
     title = "Group A - Clinical Prediction",
@@ -26,7 +25,7 @@ group_a_nav_panel <- function() {
               numericInput("min_qual_a", "Minimum QUAL", value = 0, min = 0, step = 1),
               checkboxInput("use_bcftools_a", "Use bcftools (Ubuntu/WSL - faster)", bcftools_available()),
               checkboxInput("skip_audit_a", "Skip audit log (faster analysis)", TRUE),
-              numericInput("chunk_size_a", "Chunk size (variants per batch)", value = 10000, min = 1000, step = 1000),
+              performance_tuning_ui("a"),
               helpText(textOutput("engine_status_a", inline = TRUE)),
               p(class = "text-muted small",
                 "Prediction mode uses stricter PVS1 and ClinVar rules. ",

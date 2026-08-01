@@ -17,9 +17,14 @@ AUTOMATED_ACMG_CRITERIA <- c(
 CONTEXT_ASSISTED_CRITERIA <- c("PS2", "PP1", "PP4")
 MANUAL_ONLY_CRITERIA <- c("PS3", "PM3", "PM6", "BS3", "BS4", "BP2", "BP5")
 
+# Parallel chunk scoring (VCF stream). Cap at 5 workers; chunk size auto-scales
+# with RAM/CPU/dataset size. Override: CLINICALVARIANTR_PARALLEL_CHUNKS / _CHUNK_SIZE.
+DEFAULT_PARALLEL_CHUNKS <- 5L
+MAX_PARALLEL_CHUNKS <- 5L
+
 APP_TITLE <- "ClinicalVariantR"
-APP_VERSION <- "0.99.3"
-ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v0.99.3"
+APP_VERSION <- "0.99.4"
+ACMG_PRO_ENGINE <- "ClinicalVariantR-Prediction-v0.99.4"
 ACMG_GUIDELINE_VERSION <- "ACMG/AMP 2015 + ClinGen refinements"
 
 ACMG_CLASSIFICATIONS <- c(

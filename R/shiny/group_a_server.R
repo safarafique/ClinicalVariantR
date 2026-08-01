@@ -490,7 +490,7 @@ register_group_a_server <- function(ctx) {
 
       withProgress(message = "Running complete Group A analysis...", value = 0, {
 
-        incProgress(0.05, detail = "Starting streaming pipeline")
+        incProgress(0.02, detail = "Starting analysis...")
 
         out <- run_complete_analysis(input$vcf_a$datapath, mode = "full", suffix = "a")
 

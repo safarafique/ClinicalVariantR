@@ -1,3 +1,17 @@
+# ClinicalVariantR 0.99.4 (2026-08-01)
+
+* Parallel VCF scoring: up to 5 chunks concurrently (`parallel::mclapply` on
+  Linux/WSL; PSOCK on Windows), with per-chunk error isolation and failed-chunk
+  logging. I/O stays sequential; CSV writes stay on the main process.
+* Auto chunk size from system RAM/CPU (and optional dataset size); configurable
+  via UI or `CLINICALVARIANTR_CHUNK_SIZE` / `CLINICALVARIANTR_PARALLEL_CHUNKS`.
+* Progress bar shows percent complete / variants processed; startup messaging
+  simplified to "Running...".
+* Fast analysis start: skip full VCF pre-count (use index or quick estimate).
+* Add `R/parallel_pipeline.R` and `scripts/benchmark_parallel_chunks.R`.
+* BiocCheck cleanup carried forward: avoid `cat` variable name, drop debug
+  `message`/`sprintf` noise, CITATION/DESCRIPTION notes as needed.
+
 # ClinicalVariantR 0.99.3 (2026-07-22)
 
 * NAMESPACE: use selective `@importFrom` only (no wholesale `import(shiny)`,

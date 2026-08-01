@@ -102,7 +102,7 @@ Do not put business logic in `app.R`.
 
 - First Bioconductor submission: `0.99.0`.  
 - Each rebuild during review: bump to `0.99.1`, `0.99.2`, `0.99.3`, …  
-- **Current package version:** `0.99.3`.  
+- **Current package version:** `0.99.4`.  
 - After acceptance on devel: Bioconductor will set release versioning.
 
 ### I. Repository hygiene
@@ -113,7 +113,7 @@ benchmark raw dumps, and lab notes to another branch (e.g. `devtools`).
 ### J. Acceptance criterion before opening the issue
 
 ```text
-[ ] DESCRIPTION Version 0.99.3 + biocViews
+[ ] DESCRIPTION Version 0.99.4 + biocViews
 [ ] system.file paths work after install
 [ ] ClinicalVariantR() returns shiny.appobj; vignette builds
 [ ] R CMD build / check clean

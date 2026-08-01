@@ -1,5 +1,4 @@
 #' Group B - automated prediction tab UI.
-#' @noRd
 group_b_nav_panel <- function() {
   bslib::nav_panel(
     title = "Group B - Automated Prediction",
@@ -35,10 +34,10 @@ group_b_nav_panel <- function() {
               numericInput("min_qual_b", "Minimum QUAL", value = 0, min = 0, step = 1),
               checkboxInput("use_bcftools_b", "Use bcftools (Ubuntu/WSL - faster)", bcftools_available()),
               checkboxInput("skip_audit_b", "Skip audit log (faster analysis)", TRUE),
-              numericInput("chunk_size_b", "Chunk size (variants per batch)", value = 10000, min = 1000, step = 1000),
+              performance_tuning_ui("b"),
               helpText(textOutput("engine_status_b", inline = TRUE)),
               p(class = "text-muted small",
-                "Runs ClinicalVariantR Pro automated criteria from VEP CSQ or SnpEff ANN fields."),
+                "Runs ClinicalVariantR automated criteria from VEP CSQ or SnpEff ANN fields."),
               p(class = "text-muted small",
                 tags$strong("Prediction v2.7:"),
                 " sensitivity rules upgrade strong VUS to Likely Pathogenic when PVS1/PM/PP evidence supports it.",
